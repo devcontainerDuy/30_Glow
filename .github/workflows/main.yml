@@ -16,12 +16,12 @@ jobs:
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
         with:
-          php-version: '8.2'
+          php-version: "8.2"
 
       - name: Install Composer dependencies
         run: |
           composer install --no-scripts --no-progress --no-suggest
-        continue-on-error: false  # Capture errors, but continue to allow for the error notification
+        continue-on-error: false # Capture errors, but continue to allow for the error notification
 
       - name: Update Composer dependencies
         run: |
@@ -30,6 +30,10 @@ jobs:
 
       - name: Dump autoload files
         run: composer dump-autoload --optimize
+        continue-on-error: false
+
+      - name: Remove storage link
+        run: php artisan storage:unlink
         continue-on-error: false
 
       - name: Generate storage link
@@ -72,7 +76,7 @@ jobs:
           echo "QUEUE_CONNECTION=database" >> .env
           echo "SESSION_DRIVER=file" >> .env
           echo "SESSION_LIFETIME=360" >> .env
-          
+
       - name: Install NPM dependencies
         run: npm install
         continue-on-error: false
@@ -95,11 +99,11 @@ jobs:
           password: ${{ secrets.PASSWORD }}
           server-dir: /
           exclude: |
-              .git*
-              .gitignore
-              .htaccess
-              node_modules/
-              vendor/
+            .git*
+            .gitignore
+            .htaccess
+            node_modules/
+            vendor/
 
       - name: Check for deployment errors
         id: check_error
@@ -124,11 +128,11 @@ jobs:
           github-token: ${{ secrets.TOKEN }}
           discord-webhook: ${{ secrets.WEBHOOK }}
           username: "GitHub Bot Actions"
-          avatar-url: 'https://cdn-icons-png.flaticon.com/512/4712/4712086.png'
+          avatar-url: "https://cdn-icons-png.flaticon.com/512/4712/4712086.png"
           title: "Deploy Status: ${{ job.status }}"
           description: |
             Build and deploy to GitHub Pages: ${{ job.status }}.
             Error output (if any): ${{ env.error_output }}
-          color-success: '#4287f5'
-          color-failure: '#eb4034'
-          color-cancelled: '#42daf5'
+          color-success: "#4287f5"
+          color-failure: "#eb4034"
+          color-cancelled: "#42daf5"
