@@ -3,6 +3,7 @@ import Layout from "../Layouts/Index";
 import { Helmet } from "react-helmet";
 import {
     Badge,
+    Button,
     Card,
     Col,
     Container,
@@ -22,6 +23,7 @@ import {
     Pie,
     Cell,
 } from "recharts";
+import { toast } from "react-toastify";
 
 function Home() {
     const data = [
@@ -64,6 +66,8 @@ function Home() {
             </text>
         );
     };
+
+    const notify = () => toast("Đây là 1 thông báo để test !");
     return (
         <>
             <Helmet>
@@ -73,7 +77,9 @@ function Home() {
             <Layout>
                 <Container fluid>
                     <h1>Home</h1>
-
+                    <div className="mb-5">
+                        <Button onClick={notify}>Notify !</Button>
+                    </div>
                     <Row className="g-4">
                         {/* Thẻ tổng quan */}
                         <Col xs={12} md={6} lg={3}>

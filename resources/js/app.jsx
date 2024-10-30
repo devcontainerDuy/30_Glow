@@ -3,6 +3,7 @@ import "../css/app.css";
 import "notyf/notyf.min.css";
 import "bootstrap/dist/css/bootstrap.min.css";
 import "bootstrap-icons/font/bootstrap-icons.css";
+import "react-toastify/dist/ReactToastify.css";
 import { createInertiaApp } from "@inertiajs/react";
 import { createRoot } from "react-dom/client";
 import { ProSidebarProvider } from "react-pro-sidebar";

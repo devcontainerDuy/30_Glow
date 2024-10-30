@@ -30,6 +30,7 @@ import ContentPasteOutlinedIcon from "@mui/icons-material/ContentPasteOutlined";
 import ClassOutlinedIcon from "@mui/icons-material/ClassOutlined";
 import ProfileDropdown from "../Components/ProfileDropdown";
 import PermMediaOutlinedIcon from "@mui/icons-material/PermMediaOutlined";
+import { ToastContainer } from "react-toastify";
 
 function Layout({ children }) {
     const [user, setUser] = useState(null);
@@ -82,6 +83,10 @@ function Layout({ children }) {
 
     return (
         <>
+            {/* Alert notification */}
+            <ToastContainer autoClose={3000} />
+            {/* Alert notification */}
+
             <div id="app" style={({ height: "100vh" }, { display: "flex" })}>
                 <Sidebar style={{ height: "100vh" }}>
                     <Menu>
