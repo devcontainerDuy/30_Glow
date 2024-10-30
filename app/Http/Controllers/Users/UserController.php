@@ -1,0 +1,117 @@
+<?php
+
+namespace App\Http\Controllers\Users;
+
+use App\Models\Role;
+use App\Models\User;
+use Inertia\Inertia;
+use Illuminate\Http\Request;
+use App\Http\Controllers\Controller;
+use App\Http\Requests\User\UserRequest;
+use App\Mail\createUser;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Str;
+
+class UserController extends Controller
+{
+
+    public function __construct()
+    {
+        $this->model = User::class;
+    }
+
+    /**
+     * Display a listing of the resource.
+     */
+    public function index()
+    {
+        $this->crumbs = [
+            ['name' => 'Tài khoản', 'url' => '/admin/users'],
+            ['name' => 'Danh sách tài khoản', 'url' => '/admin/users'],
+        ];
+        $this->data = $this->model::with('roles')->get();
+        $this->instance = Role::select('id', 'name')->get();
+        return Inertia::render('Users/Index', [
+            'users' => $this->data,
+            'role' => $this->instance,
+            'crumbs' => $this->crumbs
+        ]);
+    }
+
+    /**
+     * Show the form for creating a new resource.
+     */
+    public function create()
+    {
+        //
+    }
+
+    /**
+     * Store a newly created resource in storage.
+     */
+    public function store(UserRequest $request)
+    {
+        $this->data = $request->validated();
+
+        $password = Str::random(10);
+        $this->data['password'] = Hash::make($password);
+
+        $this->instance = $this->model::create($this->data);
+        if ($this->instance) {
+            $dataMail = [
+                'name' => $request->input('name'),
+                'email' => $request->input('email'),
+                'password' => $password,
+            ];
+            $this->data = $this->model::with('roles')->get();
+            Mail::to($request->input('email'))->send(new createUser($dataMail));
+            return response()->json(['check' => true, 'msg' => 'Tạo tài khoản thành công!', 'data' => $this->data], 201);
+        }
+        return response()->json(['check' => false, 'msg' => 'Tạo tài khoản thất bại!'], status: 400);
+    }
+
+    /**
+     * Display the specified resource.
+     */
+    public function show(string $id)
+    {
+        //
+    }
+
+    /**
+     * Show the form for editing the specified resource.
+     */
+    public function edit(string $id)
+    {
+        //
+    }
+
+    /**
+     * Update the specified resource in storage.
+     */
+    public function update(UserRequest $request, string $id)
+    {
+
+        $this->data = $request->validated();
+        $this->instance = $this->model::findOrFail($id)->update($this->data);
+        if ($this->instance) {
+            $this->data = $this->model::with('roles')->get();
+            return response()->json(['check' => true, 'msg' => 'Cập nhật thành công!', 'data' => $this->data], 200);
+        }
+        return response()->json(['check' => false, 'msg' => 'Cập nhật thất bại!'], 400);
+    }
+
+    /**
+     * Remove the specified resource from storage.
+     */
+    public function destroy(string $id)
+    {
+        $this->instance = $this->model::findOrFail($id)->delete();
+        if ($this->instance) {
+            $this->data = $this->model::with('roles')->get();
+            return response()->json(['check' => true, 'msg' => 'Xoá thành công!', 'data' => $this->data], 200);
+        }
+        return response()->json(['check' => false, 'msg' => 'Xoá thất bại!'], 400);
+    }
+}
