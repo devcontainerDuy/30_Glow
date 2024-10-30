@@ -75,8 +75,8 @@ class SlidesController extends Controller
         $desktopFilename = time() . '_' . $desktopImage->getClientOriginalName();
         $mobileFilename = time() . '_' . $mobileImage->getClientOriginalName();
 
-        Storage::putFileAs('public/slides/desktop', $desktopImage, $desktopFilename);
-        Storage::putFileAs('public/slides/mobile', $mobileImage, $mobileFilename);
+        Storage::putFileAs('/public/slides/desktop', $desktopImage, $desktopFilename);
+        Storage::putFileAs('/public/slides/mobile', $mobileImage, $mobileFilename);
 
         $this->instance = $this->model::create([
             'name' => $data['name'],
@@ -84,8 +84,6 @@ class SlidesController extends Controller
             'status' => $data['status'],
             'desktop' => $desktopFilename,
             'mobile' => $mobileFilename,
-            'created_at' => now(),
-            'updated_at' => now(),
         ]);
     }
 
@@ -134,8 +132,8 @@ class SlidesController extends Controller
         }
 
         // Xóa các file ảnh liên quan nếu chúng tồn tại
-        $desktopPath = 'public/slides/desktop/' . $this->instance->desktop;
-        $mobilePath = 'public/slides/mobile/' . $this->instance->mobile;
+        $desktopPath = '/public/slides/desktop/' . $this->instance->desktop;
+        $mobilePath = '/public/slides/mobile/' . $this->instance->mobile;
         if (Storage::exists($desktopPath)) {
             Storage::delete($desktopPath);
         }
@@ -166,8 +164,8 @@ class SlidesController extends Controller
     {
         $this->data = $this->model::active()->select('id', 'name', 'slug', 'status', 'url', 'desktop', 'mobile')->where('slug', $slug)->firstOrFail();
 
-        $this->data->desktop = asset('storage/slides/desktop/' . $this->data->desktop);
-        $this->data->mobile = asset('storage/slides/mobile/' . $this->data->mobile);
+        $this->data->desktop = asset('/storage/slides/desktop/' . $this->data->desktop);
+        $this->data->mobile = asset('/storage/slides/mobile/' . $this->data->mobile);
 
         if (!$this->data) {
             return response()->json(['check' => false, 'message' => 'Không tìm thấy slide'], 404);
