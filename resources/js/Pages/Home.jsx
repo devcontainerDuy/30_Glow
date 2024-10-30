@@ -1,6 +1,7 @@
 import React from "react";
 import Layout from "../Layouts/Index";
 import { Helmet } from "react-helmet";
+import { toast } from "react-toastify";
 import {
     Badge,
     Button,
@@ -23,7 +24,6 @@ import {
     Pie,
     Cell,
 } from "recharts";
-import { toast } from "react-toastify";
 
 function Home() {
     const data = [

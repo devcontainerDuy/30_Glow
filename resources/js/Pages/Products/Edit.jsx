@@ -18,6 +18,7 @@ import CKEditor from "@/Containers/CKEditor";
 import { Dropzone, FileMosaic } from "@dropzone-ui/react";
 import BreadcrumbComponent from "@/Components/BreadcrumbComponent";
 import { router } from "@inertiajs/react";
+import { toast } from "react-toastify";
 
 function Edit({ products, crumbs, categories, brands }) {
     const [category, setCategory] = useState([]);
@@ -77,26 +78,17 @@ function Edit({ products, crumbs, categories, brands }) {
                 image: files[0].file,
             })
             .then((res) => {
-                if (res.data.check == true) {
-                    window.notyf.open({
-                        type: "success",
-                        message: res.data.msg,
-                    });
+                if (res.data.check === true) {
+                    toast.success(res.data.message);
                     router.visit("/admin/products/" + products?.id, {
                         method: "get",
                     });
                 } else {
-                    window.notyf.open({
-                        type: "error",
-                        message: res.data.msg,
-                    });
+                    toast.warning(res.data.message);
                 }
             })
             .catch((error) => {
-                window.notyf.open({
-                    type: "error",
-                    message: error.response.data.msg,
-                });
+                toast.error(error.response.data.message);
             })
             .finally(() => setLoading(false));
     };
@@ -116,19 +108,15 @@ function Edit({ products, crumbs, categories, brands }) {
                 window.axios
                     .delete("/admin/products/" + id)
                     .then((res) => {
-                        if (res.data.check) {
-                            window.notyf.open({
-                                type: "success",
-                                message: res.data.msg,
-                            });
+                        if (res.data.check === true) {
+                            toast.success(res.data.message);
                             setData(res.data.data);
+                        } else {
+                            toast.warning(res.data.message);
                         }
                     })
                     .catch((error) => {
-                        window.notyf.open({
-                            type: "error",
-                            message: error.response.data.msg,
-                        });
+                        toast.error(error.response.data.message);
                     });
             }
         });
@@ -143,17 +131,14 @@ function Edit({ products, crumbs, categories, brands }) {
             })
             .then((res) => {
                 if (res.data.check == true) {
-                    window.notyf.open({
-                        type: "success",
-                        message: res.data.msg,
-                    });
+                    toast.success(res.data.message);
                     router.visit("/admin/products/" + products?.id, {
                         method: "get",
                     });
                 } else {
                     window.notyf.open({
                         type: "error",
-                        message: res.data.msg,
+                        message: res.data.message,
                     });
                 }
             })

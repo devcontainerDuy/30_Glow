@@ -55,9 +55,9 @@ class RoleController extends Controller
 
         if ($this->instance) {
             $this->data = $this->model::with('permissions')->get();
-            return response()->json(['check' => true, 'msg' => 'Thêm vai trò thành công!', 'data' => $this->data], 201);
+            return response()->json(['check' => true, 'message' => 'Thêm vai trò thành công!', 'data' => $this->data], 201);
         }
-        return response()->json(['check' => false, 'msg' => 'Thêm vai trò thất bại!'], 400);
+        return response()->json(['check' => false, 'message' => 'Thêm vai trò thất bại!'], 400);
     }
 
     /**
@@ -89,9 +89,9 @@ class RoleController extends Controller
         $this->instance = $this->model::findOrFail($id)->update($this->data);
         if ($this->instance) {
             $this->data = $this->model::with('permissions')->get();
-            return response()->json(['check' => true, 'msg' => 'Cập nhật thành công!', 'data' => $this->data], 200);
+            return response()->json(['check' => true, 'message' => 'Cập nhật thành công!', 'data' => $this->data], 200);
         }
-        return response()->json(['check' => false, 'msg' => 'Cập nhật thất bại!'], 400);
+        return response()->json(['check' => false, 'message' => 'Cập nhật thất bại!'], 400);
     }
 
     public function role_permission(Request $request, string $id)
@@ -100,7 +100,7 @@ class RoleController extends Controller
         $this->instance = $this->model::findOrFail($id);
         $this->instance->syncPermissions($this->data['permissions']);
         $this->data = $this->model::with('permissions')->get();
-        return response()->json(['check' => true, 'msg' => 'Cập nhật thành công!', 'data' => $this->data], 200);
+        return response()->json(['check' => true, 'message' => 'Cập nhật thành công!', 'data' => $this->data], 200);
     }
 
     /**
@@ -112,8 +112,8 @@ class RoleController extends Controller
         $this->instance = $this->instance->delete();
         if ($this->instance) {
             $this->data = $this->model::with('permissions')->get();
-            return response()->json(['check' => true, 'msg' => 'Xóa thành công!', 'data' => $this->data], 200);
+            return response()->json(['check' => true, 'message' => 'Xóa thành công!', 'data' => $this->data], 200);
         }
-        return response()->json(['check' => false, 'msg' => 'Xóa thất bại!'], 400);
+        return response()->json(['check' => false, 'message' => 'Xóa thất bại!'], 400);
     }
 }

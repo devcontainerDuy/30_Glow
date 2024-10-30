@@ -31,9 +31,9 @@ class CategoriesController extends Controller
         $this->instance = $this->model::create($this->data);
         if ($this->instance) {
             $this->data = $this->model::all();
-            return response()->json(['check' => true, 'msg' => 'Tạo thành công!', 'data' => $this->data], 201);
+            return response()->json(['check' => true, 'message' => 'Tạo thành công!', 'data' => $this->data], 201);
         }
-        return response()->json(['check' => false, 'msg' => 'Tạo thất bại!'], status: 400);
+        return response()->json(['check' => false, 'message' => 'Tạo thất bại!'], status: 400);
     }
 
     public function update(CategoriesRequest $request, $id)
@@ -43,9 +43,9 @@ class CategoriesController extends Controller
         $this->instance = $this->model::findOrFail($id)->update($this->data);
         if ($this->instance) {
             $this->data = $this->model::all();
-            return response()->json(['check' => true, 'msg' => 'Cập nhật thành công!', 'data' => $this->data], 200);
+            return response()->json(['check' => true, 'message' => 'Cập nhật thành công!', 'data' => $this->data], 200);
         }
-        return response()->json(['check' => false, 'msg' => 'Cập nhật thất bại!'], 400);
+        return response()->json(['check' => false, 'message' => 'Cập nhật thất bại!'], 400);
     }
 
     public function destroy($id)
@@ -53,9 +53,9 @@ class CategoriesController extends Controller
         $this->instance = $this->model::findOrFail($id)->delete();
         if ($this->instance) {
             $this->data = $this->model::all();
-            return response()->json(['check' => true, 'msg' => 'Xoá thành công!', 'data' => $this->data], 200);
+            return response()->json(['check' => true, 'message' => 'Xoá thành công!', 'data' => $this->data], 200);
         }
-        return response()->json(['check' => false, 'msg' => 'Xoá thất bại!'], 400);
+        return response()->json(['check' => false, 'message' => 'Xoá thất bại!'], 400);
     }
 
     /**
@@ -65,7 +65,6 @@ class CategoriesController extends Controller
     {
         $this->data = $this->model::with("parent")->active()->select('id', 'name', 'slug', 'id_parent', 'status')->whereHas('products')->orderBy('id', 'asc')->get();
         return response()->json($this->data);
-
     }
 
     public function apiShow($slug)
@@ -76,6 +75,5 @@ class CategoriesController extends Controller
             return response()->json(['check' => false, 'message' => 'Không tìm thấy phân loại sản phẩm'], 404);
         }
         return response()->json($this->data);
-
     }
 }

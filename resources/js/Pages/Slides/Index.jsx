@@ -8,6 +8,7 @@ import Swal from "sweetalert2";
 import { Dropzone, FileMosaic } from "@dropzone-ui/react";
 import BreadcrumbComponent from "@/Components/BreadcrumbComponent";
 import { Helmet } from "react-helmet";
+import { toast } from "react-toastify";
 
 function Index({ slides, crumbs }) {
     const [data, setData] = useState([]);
@@ -69,22 +70,16 @@ function Index({ slides, crumbs }) {
                 headers: { "Content-Type": "multipart/form-data" },
             })
             .then((res) => {
-                if (res.data.check) {
-                    window.notyf.open({
-                        type: "success",
-                        message: res.data.msg,
-                    });
+                if (res.data.check === true) {
+                    toast.success(res.data.message);
                     setData(res.data.data);
                     handleClose();
                 } else {
-                    window.notyf.open({ type: "error", message: res.data.msg });
+                    toast.warning(res.data.message);
                 }
             })
             .catch((error) => {
-                window.notyf.open({
-                    type: "error",
-                    message: error.response?.data?.msg || "Có lỗi xảy ra!",
-                });
+                toast.error(error.response.data.message);
             })
             .finally(() => setLoading(false));
     };
@@ -101,21 +96,15 @@ function Index({ slides, crumbs }) {
             window.axios
                 .put(`/admin/slides/${id}`, { [field]: value })
                 .then((res) => {
-                    if (res.data.check) {
-                        window.notyf.open({
-                            type: "success",
-                            message: res.data.msg,
-                        });
+                    if (res.data.check === true) {
+                        toast.success(res.data.message);
                         setData(res.data.data); // Cập nhật dữ liệu
+                    } else {
+                        toast.warning(res.data.message);
                     }
                 })
                 .catch((error) => {
-                    const errorMessage =
-                        error.response?.data?.msg || "Có lỗi xảy ra!";
-                    window.notyf.open({
-                        type: "error",
-                        message: errorMessage,
-                    });
+                    toast.error(error.response.data.message);
                 });
         } else {
             setEditingCells((prev) => {
@@ -123,10 +112,7 @@ function Index({ slides, crumbs }) {
                 delete newEditingCells[id + "-" + field];
                 return newEditingCells;
             });
-            window.notyf.open({
-                type: "warning",
-                message: "Không chỉnh sửa.",
-            });
+            toast.info("Không có định sửa.");
         }
     };
 

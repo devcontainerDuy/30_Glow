@@ -53,12 +53,12 @@ class SitemapController extends Controller
 
         if ($this->instance) {
             $this->data = $this->model::all();
-            return response()->json(['check' => true, 'msg' => 'Tạo thành công!', 'data' => $this->data], 201);
+            return response()->json(['check' => true, 'message' => 'Tạo thành công!', 'data' => $this->data], 201);
         }
-        return response()->json(['check' => false, 'msg' => 'Tạo thất bại!'], 400);
+        return response()->json(['check' => false, 'message' => 'Tạo thất bại!'], 400);
     }
 
-    
+
     /**
      * Display the specified resource.
      */
@@ -84,9 +84,9 @@ class SitemapController extends Controller
         $this->instance = $this->model::findOrFail($id)->update($this->data);
         if ($this->instance) {
             $this->data = $this->model::all();
-            return response()->json(['check' => true, 'msg' => 'Cập nhật thành công!', 'data' => $this->data], 200);
+            return response()->json(['check' => true, 'message' => 'Cập nhật thành công!', 'data' => $this->data], 200);
         }
-        return response()->json(['check' => false, 'msg' => 'Cập nhật thất bại!'], 400);
+        return response()->json(['check' => false, 'message' => 'Cập nhật thất bại!'], 400);
     }
 
     /**
@@ -97,8 +97,8 @@ class SitemapController extends Controller
         $this->instance = $this->model::findOrFail($id)->delete();
         if ($this->instance) {
             $this->data = $this->model::all();
-            return response()->json(['check' => true, 'msg' => 'Xoá thành công!', 'data' => $this->data], 200);
+            return response()->json(['check' => true, 'message' => 'Xoá thành công!', 'data' => $this->data], 200);
         }
-        return response()->json(['check' => false, 'msg' => 'Xoá thất bại!'], 400);
+        return response()->json(['check' => false, 'message' => 'Xoá thất bại!'], 400);
     }
 }

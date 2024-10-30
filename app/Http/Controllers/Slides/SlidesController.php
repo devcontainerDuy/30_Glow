@@ -57,7 +57,7 @@ class SlidesController extends Controller
         $desktopImages = $request->file('desktop');
         $mobileImages = $request->file('mobile');
         if (count($desktopImages) !== count($mobileImages)) {
-            return response()->json(['check' => false, 'msg' => 'Hãy thêm số lượng ảnh bằng nhau!'], 400);
+            return response()->json(['check' => false, 'message' => 'Hãy thêm số lượng ảnh bằng nhau!'], 400);
         }
         // Lưu từng cặp slide
         for ($i = 0; $i < count($desktopImages); $i++) {
@@ -66,9 +66,9 @@ class SlidesController extends Controller
 
         if ($this->instance) {
             $this->data = Slides::all();
-            return response()->json(['check' => true, 'msg' => 'Slides đã được thêm thành công!', 'data' => $this->data], 201);
+            return response()->json(['check' => true, 'message' => 'Slides đã được thêm thành công!', 'data' => $this->data], 201);
         }
-        return response()->json(['check' => false, 'msg' => 'Thêm vai trò thất bại!'], 400);
+        return response()->json(['check' => false, 'message' => 'Thêm vai trò thất bại!'], 400);
     }
 
     private function saveSlide($data, $desktopImage, $mobileImage)
@@ -116,11 +116,11 @@ class SlidesController extends Controller
         $this->instance = $this->model::findOrFail($id)->update($this->data);
         if ($this->instance) {
             $this->data = $this->model::all();
-            return response()->json(['check' => true, 'msg' => 'Cập nhật thành công!', 'data' => $this->data], 200);
+            return response()->json(['check' => true, 'message' => 'Cập nhật thành công!', 'data' => $this->data], 200);
         }
 
         // Nếu cập nhật thất bại
-        return response()->json(['check' => false, 'msg' => 'Cập nhật thất bại!'], 400);
+        return response()->json(['check' => false, 'message' => 'Cập nhật thất bại!'], 400);
     }
 
 
@@ -131,7 +131,7 @@ class SlidesController extends Controller
     {
         $this->instance = $this->model::findOrFail($id);
         if (!$this->instance) {
-            return response()->json(['check' => false, 'msg' => 'Slide không tồn tại.'], 404);
+            return response()->json(['check' => false, 'message' => 'Slide không tồn tại.'], 404);
         }
 
         // Xóa các file ảnh liên quan nếu chúng tồn tại
@@ -146,7 +146,7 @@ class SlidesController extends Controller
         $this->instance->delete();
 
         $this->data = $this->model::all();
-        return response()->json(['check' => true, 'msg' => 'Slide đã được xóa thành công!', 'data' => $this->data], 200);
+        return response()->json(['check' => true, 'message' => 'Slide đã được xóa thành công!', 'data' => $this->data], 200);
     }
 
     /**
@@ -161,7 +161,6 @@ class SlidesController extends Controller
             return $item;
         });
         return response()->json($this->data);
-
     }
 
     public function apiShow($slug)
@@ -175,6 +174,5 @@ class SlidesController extends Controller
             return response()->json(['check' => false, 'message' => 'Không tìm thấy slide'], 404);
         }
         return response()->json($this->data);
-
     }
 }

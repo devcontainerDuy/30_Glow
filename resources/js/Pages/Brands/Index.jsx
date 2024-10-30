@@ -7,6 +7,7 @@ import { DataGrid, GridToolbar } from "@mui/x-data-grid";
 import Swal from "sweetalert2";
 import BreadcrumbComponent from "@/Components/BreadcrumbComponent";
 import { Helmet } from "react-helmet";
+import { toast } from "react-toastify";
 
 function Index({ brands, crumbs }) {
     const [data, setData] = useState([]);
@@ -31,15 +32,12 @@ function Index({ brands, crumbs }) {
                 name: name,
             })
             .then((res) => {
-                if (res.data.check) {
-                    window.notyf.open({
-                        type: "success",
-                        message: res.data.msg,
-                    });
+                if (res.data.check === true) {
+                    toast.success(res.data.message);
                     setData(res.data.data);
                     handleClose();
                 } else {
-                    window.notyf.open({ type: "error", message: res.data.msg });
+                    toast.warning(res.data.message);
                 }
             })
             .catch((error) => {
@@ -63,12 +61,11 @@ function Index({ brands, crumbs }) {
                     [field]: value,
                 })
                 .then((res) => {
-                    if (res.data.check == true) {
-                        window.notyf.open({
-                            type: "success",
-                            message: res.data.msg,
-                        });
+                    if (res.data.check === true) {
+                        toast.success(res.data.message);
                         setData(res.data.data);
+                    } else {
+                        toast.warning(res.data.message);
                     }
                 })
                 .catch((error) => {
@@ -83,10 +80,7 @@ function Index({ brands, crumbs }) {
                 delete newEditingCells[id + "-" + field];
                 return newEditingCells;
             });
-            window.notyf.open({
-                type: "warning",
-                message: "Không chỉnh sửa.",
-            });
+            toast.info("Không có chỉnh sửa.");
         }
     };
 
@@ -105,29 +99,19 @@ function Index({ brands, crumbs }) {
                 window.axios
                     .delete(`/admin/brands/${id}`)
                     .then((res) => {
-                        if (res.data.check) {
-                            window.notyf.open({
-                                type: "success",
-                                message: res.data.msg,
-                            });
+                        if (res.data.check === true) {
+                            toast.success(res.data.message);
                             setData((prevData) =>
                                 prevData.filter(
                                     (category) => category.id !== id
                                 )
                             );
                         } else {
-                            window.notyf.open({
-                                type: "error",
-                                message: res.data.msg,
-                            });
+                            toast.warning(res.data.message);
                         }
                     })
                     .catch((error) => {
-                        window.notyf.open({
-                            type: "error",
-                            message:
-                                error.response?.data?.msg || "Đã xảy ra lỗi!",
-                        });
+                        toast.error(error.response.data.message);
                     });
             }
         });

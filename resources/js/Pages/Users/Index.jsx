@@ -13,6 +13,7 @@ import { DataGrid, GridToolbar } from "@mui/x-data-grid";
 import Swal from "sweetalert2";
 import BreadcrumbComponent from "@/Components/BreadcrumbComponent";
 import { Helmet } from "react-helmet";
+import { toast } from "react-toastify";
 
 function Index({ users, role, crumbs }) {
     const [data, setData] = useState([]);
@@ -43,25 +44,16 @@ function Index({ users, role, crumbs }) {
                 id_role: idRole,
             })
             .then((res) => {
-                if (res.data.check == true) {
-                    window.notyf.open({
-                        type: "success",
-                        message: res.data.msg,
-                    });
+                if (res.data.check === true) {
+                    toast.success(res.data.message);
                     setData(res.data.data);
                     handleClose();
                 } else {
-                    window.notyf.open({
-                        type: "error",
-                        message: res.data.msg,
-                    });
+                    toast.warning(res.data.message);
                 }
             })
             .catch((error) => {
-                window.notyf.open({
-                    type: "error",
-                    message: error.response.data.msg,
-                });
+                toast.error(error.response.data.message);
             })
             .finally(() => setLoading(false));
     };
@@ -79,19 +71,15 @@ function Index({ users, role, crumbs }) {
                     [field]: value,
                 })
                 .then((res) => {
-                    if (res.data.check == true) {
-                        window.notyf.open({
-                            type: "success",
-                            message: res.data.msg,
-                        });
+                    if (res.data.check === true) {
+                        toast.success(res.data.message);
                         setData(res.data.data);
+                    } else {
+                        toast.warning(res.data.message);
                     }
                 })
                 .catch((error) => {
-                    window.notyf.open({
-                        type: "error",
-                        message: error.response.data.msg,
-                    });
+                    toast.error(error.response.data.message);
                 });
         } else {
             setEditingCells((prev) => {
@@ -99,10 +87,7 @@ function Index({ users, role, crumbs }) {
                 delete newEditingCells[id + "-" + field];
                 return newEditingCells;
             });
-            window.notyf.open({
-                type: "warning",
-                message: "Không chỉnh sửa.",
-            });
+            toast.info("Không có chỉnh sửa.");
         }
     };
 
@@ -121,19 +106,13 @@ function Index({ users, role, crumbs }) {
                 window.axios
                     .delete("/admin/users/" + id)
                     .then((res) => {
-                        if (res.data.check == true) {
-                            window.notyf.open({
-                                type: "success",
-                                message: res.data.msg,
-                            });
+                        if (res.data.check === true) {
+                            toast.success(res.data.message);
                             setData(res.data.data);
                         }
                     })
                     .catch((error) => {
-                        window.notyf.open({
-                            type: "error",
-                            message: error.response.data.msg,
-                        });
+                        toast.error(error.response.data.message);
                     });
             }
         });

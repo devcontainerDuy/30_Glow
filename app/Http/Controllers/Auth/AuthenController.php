@@ -31,9 +31,9 @@ class AuthenController extends Controller
             Session::regenerateToken();
             $this->data = Auth::user();
             Session::put('user_session', $this->data);
-            return response()->json(['check' => true, 'msg' => 'Đăng nhập thành công!'], 200);
+            return response()->json(['check' => true, 'message' => 'Đăng nhập thành công!'], 200);
         }
-        return response()->json(['check' => false, 'msg' => 'Đăng nhập thất bại!'], 400);
+        return response()->json(['check' => false, 'message' => 'Đăng nhập thất bại!'], 400);
     }
 
     public function handleLogout()
@@ -41,6 +41,6 @@ class AuthenController extends Controller
         Auth::logout();
         Session::invalidate();
         Session::regenerateToken();
-        return response()->json(['check' => true, 'msg' => 'Đăng xuất thành công!'], 200);
+        return response()->json(['check' => true, 'message' => 'Đăng xuất thành công!'], 200);
     }
 }

@@ -9,6 +9,7 @@ import makeAnimated from "react-select/animated";
 import AsyncSelect from "react-select/async";
 import BreadcrumbComponent from "@/Components/BreadcrumbComponent";
 import { Helmet } from "react-helmet";
+import { toast } from "react-toastify";
 
 function Index({ roles, permissions, crumbs }) {
     const [data, setData] = useState([]);
@@ -42,17 +43,11 @@ function Index({ roles, permissions, crumbs }) {
                 if (res.data.check === true) {
                     setEditingId(res.data.data);
                 } else {
-                    window.notyf.open({
-                        type: "error",
-                        message: res.data.msg,
-                    });
+                    toast.warning(res.data.message);
                 }
             })
             .catch((error) => {
-                window.notyf.open({
-                    type: "error",
-                    message: error.response.data.msg,
-                });
+                toast.error(error.response.data.message);
             });
     };
 
@@ -66,24 +61,15 @@ function Index({ roles, permissions, crumbs }) {
             })
             .then((response) => {
                 if (response.data.check === true) {
-                    window.notyf.open({
-                        type: "success",
-                        message: response.data.msg,
-                    });
+                    toast.success(response.data.message);
                     setData(response.data.data);
                     handleClose();
                 } else {
-                    window.notyf.open({
-                        type: "error",
-                        message: response.data.msg,
-                    });
+                    toast.warning(response.data.message);
                 }
             })
             .catch((error) => {
-                window.notyf.open({
-                    type: "error",
-                    message: error.response.data.msg,
-                });
+                toast.error(error.response.data.message);
             })
             .finally(() => setLoading(false));
     };
@@ -101,23 +87,14 @@ function Index({ roles, permissions, crumbs }) {
                 })
                 .then((res) => {
                     if (res.data.check === true) {
-                        window.notyf.open({
-                            type: "success",
-                            message: res.data.msg,
-                        });
+                        toast.success(res.data.message);
                         setData(res.data.data);
                     } else {
-                        window.notyf.open({
-                            type: "error",
-                            message: res.data.msg,
-                        });
+                        toast.warning(res.data.message);
                     }
                 })
                 .catch((error) => {
-                    window.notyf.open({
-                        type: "error",
-                        message: error.response.data.msg,
-                    });
+                    toast.error(error.response.data.message);
                 });
         } else {
             setEditingCells((prev) => {
@@ -125,10 +102,7 @@ function Index({ roles, permissions, crumbs }) {
                 delete newEditingCells[id + "-" + field];
                 return newEditingCells;
             });
-            window.notyf.open({
-                type: "warning",
-                message: "Không chỉnh sửa.",
-            });
+            toast.info("Không có chỉnh sửa.");
         }
     };
 
@@ -140,30 +114,21 @@ function Index({ roles, permissions, crumbs }) {
             })
             .then((res) => {
                 if (res.data.check === true) {
-                    window.notyf.open({
-                        type: "success",
-                        message: res.data.msg,
-                    });
+                    toast.success(res.data.message);
                     setData(res.data.data);
                 } else {
-                    window.notyf.open({
-                        type: "error",
-                        message: res.data.msg,
-                    });
+                    toast.warning(res.data.message);
                 }
             })
             .catch((error) => {
-                window.notyf.open({
-                    type: "error",
-                    message: error.response.data.msg,
-                });
+                toast.error(error.response.data.message);
             });
     };
 
     const handleDelete = (id) => {
         Swal.fire({
-            title: "Xóa loại tài khoản?",
-            text: "Bạn chắc chắn xóa loại tài khoản này!",
+            title: "Xóa mục?",
+            text: "Bạn chắc chắn muốn xóa mục này!",
             icon: "error",
             showCancelButton: true,
             confirmButtonColor: "#3085d6",
@@ -175,24 +140,15 @@ function Index({ roles, permissions, crumbs }) {
                 window.axios
                     .delete("/admin/roles/" + id)
                     .then((res) => {
-                        if (res.data.check == true) {
-                            window.notyf.open({
-                                type: "success",
-                                message: res.data.msg,
-                            });
+                        if (res.data.check === true) {
+                            toast.success(res.data.message);
                             setData(res.data.data);
                         } else {
-                            window.notyf.open({
-                                type: "error",
-                                message: res.data.msg,
-                            });
+                            toast.warning(res.data.message);
                         }
                     })
                     .catch((error) => {
-                        window.notyf.open({
-                            type: "error",
-                            message: error.response.data.msg,
-                        });
+                        toast.error(error.response.data.message);
                     });
             }
         });

@@ -14,6 +14,7 @@ import {
 import Swal from "sweetalert2";
 import BreadcrumbComponent from "@/Components/BreadcrumbComponent";
 import { Helmet } from "react-helmet";
+import { toast } from "react-toastify";
 import { Dropzone, FileMosaic } from "@dropzone-ui/react";
 
 function Index({ galleries, products, crumbs }) {
@@ -44,12 +45,11 @@ function Index({ galleries, products, crumbs }) {
         e.preventDefault();
         setLoading(true);
 
-        const formData = new FormData(); // Tạo một đối tượng FormData
+        const formData = new FormData();
 
-        // Kiểm tra nếu có tệp trong files
         if (files.length > 0) {
             files.forEach((file) => {
-                formData.append("images[]", file.file); // Thêm tất cả các tệp vào FormData
+                formData.append("images[]", file.file);
             });
         } else {
             window.notyf.open({
@@ -60,8 +60,8 @@ function Index({ galleries, products, crumbs }) {
             return;
         }
 
-        formData.append("id_parent", productId); // Thêm id_parent vào FormData
-        formData.append("status", status); // Thêm status vào FormData
+        formData.append("id_parent", productId);
+        formData.append("status", status);
 
         window.axios
             .post("/admin/galleries", formData, {
@@ -71,24 +71,15 @@ function Index({ galleries, products, crumbs }) {
             })
             .then((response) => {
                 if (response.data.check === true) {
-                    window.notyf.open({
-                        type: "success",
-                        message: response.data.msg,
-                    });
+                    toast.success(response.data.message);
                     setData(response.data.data);
                     handleClose();
                 } else {
-                    window.notyf.open({
-                        type: "error",
-                        message: response.data.msg,
-                    });
+                    toast.warning(response.data.message);
                 }
             })
             .catch((error) => {
-                window.notyf.open({
-                    type: "error",
-                    message: error.response?.data?.msg || "Có lỗi xảy ra!",
-                });
+                toast.error(error.response.data.message);
             })
             .finally(() => setLoading(false));
     };
@@ -106,23 +97,14 @@ function Index({ galleries, products, crumbs }) {
                 })
                 .then((res) => {
                     if (res.data.check === true) {
-                        window.notyf.open({
-                            type: "success",
-                            message: res.data.msg,
-                        });
+                        toast.success(res.data.message);
                         setData(res.data.data);
                     } else {
-                        window.notyf.open({
-                            type: "error",
-                            message: res.data.msg,
-                        });
+                        toast.warning(res.data.message);
                     }
                 })
                 .catch((error) => {
-                    window.notyf.open({
-                        type: "error",
-                        message: error.response.data.msg,
-                    });
+                    toast.error(error.response.data.message);
                 });
         } else {
             setEditingCells((prev) => {
@@ -130,17 +112,14 @@ function Index({ galleries, products, crumbs }) {
                 delete newEditingCells[id + "-" + field];
                 return newEditingCells;
             });
-            window.notyf.open({
-                type: "warning",
-                message: "Không chỉnh sửa.",
-            });
+            toast.info("Không có chỉnh sửa.");
         }
     };
 
     const handleDelete = (id) => {
         Swal.fire({
-            title: "Xóa loại tài khoản?",
-            text: "Bạn chắc chắn xóa loại tài khoản này!",
+            title: "Xóa mục?",
+            text: "Bạn chắc chắn muốn xóa mục này!",
             icon: "error",
             showCancelButton: true,
             confirmButtonColor: "#3085d6",
@@ -152,24 +131,15 @@ function Index({ galleries, products, crumbs }) {
                 window.axios
                     .delete("/admin/galleries/" + id)
                     .then((res) => {
-                        if (res.data.check == true) {
-                            window.notyf.open({
-                                type: "success",
-                                message: res.data.msg,
-                            });
+                        if (res.data.check === true) {
+                            toast.success(res.data.message);
                             setData(res.data.data);
                         } else {
-                            window.notyf.open({
-                                type: "error",
-                                message: res.data.msg,
-                            });
+                            toast.warning(res.data.message);
                         }
                     })
                     .catch((error) => {
-                        window.notyf.open({
-                            type: "error",
-                            message: error.response.data.msg,
-                        });
+                        toast.error(error.response.data.message);
                     });
             }
         });

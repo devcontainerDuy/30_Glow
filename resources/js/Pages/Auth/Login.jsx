@@ -18,6 +18,7 @@ import { createTheme, ThemeProvider } from "@mui/material/styles";
 import { Link, router } from "@inertiajs/react";
 import VisibilityOutlinedIcon from "@mui/icons-material/VisibilityOutlined";
 import VisibilityOffOutlinedIcon from "@mui/icons-material/VisibilityOffOutlined";
+import { toast, ToastContainer } from "react-toastify";
 
 const defaultTheme = createTheme();
 
@@ -40,46 +41,25 @@ export default function Login() {
             })
             .then((res) => {
                 if (res.data.check === true) {
-                    window.notyf.open({
-                        type: "success",
-                        message: res.data.msg,
-                    });
+                    toast.success(res.data.message);
                     setTimeout(() => {
                         router.visit("/admin/", {
                             method: "get",
                         });
                     }, 2000);
                 } else if (res.data.check === false) {
-                    if (res.data.msg) {
-                        window.notyf.open({
-                            type: "error",
-                            message: res.data.msg,
-                        });
-                    }
+                    toast.warning(res.data.message);
                 }
             })
             .catch((err) => {
-                if (err.response.data.check === false) {
-                    window.notyf.open({
-                        type: "error",
-                        message: err.response.data.msg,
-                    });
-                } else if (err.response.data.message === "Too Many Attempts.") {
-                    window.notyf.open({
-                        type: "error",
-                        message: "Vui lòng thử lại sau.",
-                    });
-                } else {
-                    window.notyf.open({
-                        type: "error",
-                        message: err.response.data.message,
-                    });
-                }
+                toast.error(err.response.data.message);
             });
     };
 
     return (
         <ThemeProvider theme={defaultTheme}>
+            <ToastContainer autoClose={2000} />
+
             <Grid container component="main" sx={{ height: "100vh" }}>
                 <CssBaseline />
                 <Grid

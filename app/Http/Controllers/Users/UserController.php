@@ -66,9 +66,9 @@ class UserController extends Controller
             ];
             $this->data = $this->model::with('roles')->get();
             Mail::to($request->input('email'))->send(new createUser($dataMail));
-            return response()->json(['check' => true, 'msg' => 'Tạo tài khoản thành công!', 'data' => $this->data], 201);
+            return response()->json(['check' => true, 'message' => 'Tạo tài khoản thành công!', 'data' => $this->data], 201);
         }
-        return response()->json(['check' => false, 'msg' => 'Tạo tài khoản thất bại!'], status: 400);
+        return response()->json(['check' => false, 'message' => 'Tạo tài khoản thất bại!'], status: 400);
     }
 
     /**
@@ -97,9 +97,9 @@ class UserController extends Controller
         $this->instance = $this->model::findOrFail($id)->update($this->data);
         if ($this->instance) {
             $this->data = $this->model::with('roles')->get();
-            return response()->json(['check' => true, 'msg' => 'Cập nhật thành công!', 'data' => $this->data], 200);
+            return response()->json(['check' => true, 'message' => 'Cập nhật thành công!', 'data' => $this->data], 200);
         }
-        return response()->json(['check' => false, 'msg' => 'Cập nhật thất bại!'], 400);
+        return response()->json(['check' => false, 'message' => 'Cập nhật thất bại!'], 400);
     }
 
     /**
@@ -110,8 +110,8 @@ class UserController extends Controller
         $this->instance = $this->model::findOrFail($id)->delete();
         if ($this->instance) {
             $this->data = $this->model::with('roles')->get();
-            return response()->json(['check' => true, 'msg' => 'Xoá thành công!', 'data' => $this->data], 200);
+            return response()->json(['check' => true, 'message' => 'Xoá thành công!', 'data' => $this->data], 200);
         }
-        return response()->json(['check' => false, 'msg' => 'Xoá thất bại!'], 400);
+        return response()->json(['check' => false, 'message' => 'Xoá thất bại!'], 400);
     }
 }

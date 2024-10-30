@@ -76,25 +76,16 @@ function Edit({ service, collections, crumbs }) {
             })
             .then((res) => {
                 if (res.data.check == true) {
-                    window.notyf.open({
-                        type: "success",
-                        message: res.data.msg,
-                    });
+                    toast.success(res.data.message);
                     router.visit("/admin/services/" + service?.id, {
                         method: "get",
                     });
                 } else {
-                    window.notyf.open({
-                        type: "error",
-                        message: res.data.msg,
-                    });
+                    toast.warning(res.data.message);
                 }
             })
             .catch((error) => {
-                window.notyf.open({
-                    type: "error",
-                    message: error.response.data.msg,
-                });
+                toast.error(error.response.data.message);
             })
             .finally(() => setLoading(false));
     };
@@ -115,52 +106,17 @@ function Edit({ service, collections, crumbs }) {
                     .delete("/admin/products/" + id)
                     .then((res) => {
                         if (res.data.check) {
-                            window.notyf.open({
-                                type: "success",
-                                message: res.data.msg,
-                            });
+                            toast.success(res.data.message);
                             setData(res.data.data);
+                        } else {
+                            toast.warning(res.data.message);
                         }
                     })
                     .catch((error) => {
-                        window.notyf.open({
-                            type: "error",
-                            message: error.response.data.msg,
-                        });
+                        toast.error(error.response.data.message);
                     });
             }
         });
-    };
-
-    const handleStatus = (image) => {
-        console.log(image);
-        window.axios
-            .put("/admin/galleries/" + image.id + "/status", {
-                status: image.status === 0 ? 1 : 0,
-                id_parent: image.id_parent,
-            })
-            .then((res) => {
-                if (res.data.check == true) {
-                    window.notyf.open({
-                        type: "success",
-                        message: res.data.msg,
-                    });
-                    router.visit("/admin/products/" + products?.id, {
-                        method: "get",
-                    });
-                } else {
-                    window.notyf.open({
-                        type: "error",
-                        message: res.data.msg,
-                    });
-                }
-            })
-            .catch((error) => {
-                window.notyf.open({
-                    type: "error",
-                    message: error.response.data.msg,
-                });
-            });
     };
 
     const handleEditorBlur = (data) => {

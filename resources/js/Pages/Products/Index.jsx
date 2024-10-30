@@ -19,6 +19,7 @@ import CKEditor from "@/Containers/CKEditor";
 import { Dropzone, FileMosaic } from "@dropzone-ui/react";
 import BreadcrumbComponent from "@/Components/BreadcrumbComponent";
 import { router } from "@inertiajs/react";
+import { toast } from "react-toastify";
 
 function Index({ products, crumbs, categories, brands }) {
     const [data, setData] = useState([]);
@@ -80,22 +81,16 @@ function Index({ products, crumbs, categories, brands }) {
                 headers: { "Content-Type": "multipart/form-data" },
             })
             .then((res) => {
-                if (res.data.check) {
-                    window.notyf.open({
-                        type: "success",
-                        message: res.data.msg,
-                    });
+                if (res.data.check === true) {
+                    toast.success(res.data.message);
                     setData(res.data.data);
                     handleClose();
                 } else {
-                    window.notyf.open({ type: "error", message: res.data.msg });
+                    toast.warning(res.data.message);
                 }
             })
             .catch((error) => {
-                window.notyf.open({
-                    type: "error",
-                    message: error.response?.data?.msg || "An error occurred",
-                });
+                toast.error(error.response.data.message);
             })
             .finally(() => setLoading(false));
     };
@@ -113,19 +108,16 @@ function Index({ products, crumbs, categories, brands }) {
                     [field]: value,
                 })
                 .then((res) => {
-                    if (res.data.check == true) {
-                        window.notyf.open({
-                            type: "success",
-                            message: res.data.msg,
-                        });
+                    if (res.data.check) {
+                        toast.success(res.data.message);
                         setData(res.data.data);
+                        handleClose();
+                    } else {
+                        toast.warning(res.data.message);
                     }
                 })
                 .catch((error) => {
-                    window.notyf.open({
-                        type: "error",
-                        message: error.response.data.msg,
-                    });
+                    toast.error(error.response.data.message);
                 });
         } else {
             setEditingCells((prev) => {
@@ -133,17 +125,14 @@ function Index({ products, crumbs, categories, brands }) {
                 delete newEditingCells[id + "-" + field];
                 return newEditingCells;
             });
-            window.notyf.open({
-                type: "warning",
-                message: "Không chỉnh sửa.",
-            });
+            toast.info("Không có chỉnh sửa.");
         }
     };
 
     const handleDelete = (id) => {
         Swal.fire({
-            title: "Xóa tài khoản?",
-            text: "Bạn chắc chắn xóa tài khoản này!",
+            title: "Xóa mục?",
+            text: "Bạn chắc chắn muốn xóa mục này!",
             icon: "error",
             showCancelButton: true,
             confirmButtonColor: "#3085d6",
@@ -155,19 +144,15 @@ function Index({ products, crumbs, categories, brands }) {
                 window.axios
                     .delete("/admin/products/" + id)
                     .then((res) => {
-                        if (res.data.check) {
-                            window.notyf.open({
-                                type: "success",
-                                message: res.data.msg,
-                            });
+                        if (res.data.check === true) {
+                            toast.success(res.data.message);
                             setData(res.data.data);
+                        } else {
+                            toast.warning(res.data.message);
                         }
                     })
                     .catch((error) => {
-                        window.notyf.open({
-                            type: "error",
-                            message: error.response.data.msg,
-                        });
+                        toast.error(error.response.data.message);
                     });
             }
         });

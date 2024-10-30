@@ -18,6 +18,7 @@ import CKEditor from "@/Containers/CKEditor";
 import { Dropzone, FileMosaic } from "@dropzone-ui/react";
 import BreadcrumbComponent from "@/Components/BreadcrumbComponent";
 import { router } from "@inertiajs/react";
+import { toast } from "react-toastify";
 
 function Index({ services, collections, crumbs }) {
     const [data, setData] = useState([]);
@@ -79,25 +80,16 @@ function Index({ services, collections, crumbs }) {
                 }
             )
             .then((res) => {
-                if (res.data.check == true) {
-                    window.notyf.open({
-                        type: "success",
-                        message: res.data.msg,
-                    });
+                if (res.data.check === true) {
+                    toast.success(res.data.message);
                     setData(res.data.data);
                     handleClose();
                 } else {
-                    window.notyf.open({
-                        type: "error",
-                        message: res.data.msg,
-                    });
+                    toast.warning(res.data.message);
                 }
             })
             .catch((error) => {
-                window.notyf.open({
-                    type: "error",
-                    message: error.response.data.msg,
-                });
+                toast.error(error.response.data.msg);
             })
             .finally(() => setLoading(false));
     };
@@ -115,19 +107,15 @@ function Index({ services, collections, crumbs }) {
                     [field]: value,
                 })
                 .then((res) => {
-                    if (res.data.check == true) {
-                        window.notyf.open({
-                            type: "success",
-                            message: res.data.msg,
-                        });
+                    if (res.data.check === true) {
+                        toast.success(res.data.message);
                         setData(res.data.data);
+                    } else {
+                        toast.warning(res.data.message);
                     }
                 })
                 .catch((error) => {
-                    window.notyf.open({
-                        type: "error",
-                        message: error.response.data.msg,
-                    });
+                    toast.error(error.response.data.msg);
                 });
         } else {
             setEditingCells((prev) => {
@@ -135,17 +123,14 @@ function Index({ services, collections, crumbs }) {
                 delete newEditingCells[id + "-" + field];
                 return newEditingCells;
             });
-            window.notyf.open({
-                type: "warning",
-                message: "Không chỉnh sửa.",
-            });
+            toast.info("Không có chỉnh sửa.");
         }
     };
 
     const handleDelete = (id) => {
         Swal.fire({
-            title: "Xóa tài khoản?",
-            text: "Bạn chắc chắn xóa tài khoản này!",
+            title: "Xóa mục?",
+            text: "Bạn chắc chắn muốn xóa mục này!",
             icon: "error",
             showCancelButton: true,
             confirmButtonColor: "#3085d6",
@@ -158,18 +143,14 @@ function Index({ services, collections, crumbs }) {
                     .delete("/admin/services/" + id)
                     .then((res) => {
                         if (res.data.check == true) {
-                            window.notyf.open({
-                                type: "success",
-                                message: res.data.msg,
-                            });
+                            toast.success(res.data.message);
                             setData(res.data.data);
+                        } else {
+                            toast.warning(res.data.message);
                         }
                     })
                     .catch((error) => {
-                        window.notyf.open({
-                            type: "error",
-                            message: error.response.data.msg,
-                        });
+                        toast.error(error.response.data.msg);
                     });
             }
         });

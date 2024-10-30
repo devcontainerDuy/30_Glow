@@ -55,9 +55,9 @@ class ServiceController extends Controller
         $this->instance = $this->model::create($this->data);
         if ($this->instance) {
             $this->data = $this->model::with('collection')->get();
-            return response()->json(['check' => true, 'msg' => 'Thêm thành công!', 'data' => $this->data], 201);
+            return response()->json(['check' => true, 'message' => 'Thêm thành công!', 'data' => $this->data], 201);
         }
-        return response()->json(['check' => false, 'msg' => 'Thêm thất bại!'], 400);
+        return response()->json(['check' => false, 'message' => 'Thêm thất bại!'], 400);
     }
 
     /**
@@ -94,9 +94,9 @@ class ServiceController extends Controller
         $this->instance = $this->model::findOrFail($id)->update($this->data);
         if ($this->instance) {
             $this->data = $this->model::with('collection')->get();
-            return response()->json(['check' => true, 'msg' => 'Cập nhật thành công!', 'data' => $this->data], 200);
+            return response()->json(['check' => true, 'message' => 'Cập nhật thành công!', 'data' => $this->data], 200);
         }
-        return response()->json(['check' => false, 'msg' => 'Cập nhật thất bại!'], 400);
+        return response()->json(['check' => false, 'message' => 'Cập nhật thất bại!'], 400);
     }
 
     /**
@@ -107,9 +107,9 @@ class ServiceController extends Controller
         $this->instance = $this->model::findOrFail($id)->delete();
         if ($this->instance) {
             $this->data = $this->model::with('collection')->get();
-            return response()->json(['check' => true, 'msg' => 'Xóa thành công!', 'data' => $this->data], 200);
+            return response()->json(['check' => true, 'message' => 'Xóa thành công!', 'data' => $this->data], 200);
         }
-        return response()->json(['check' => false, 'msg' => 'Xóa thất bại!'], 400);
+        return response()->json(['check' => false, 'message' => 'Xóa thất bại!'], 400);
     }
 
     /**

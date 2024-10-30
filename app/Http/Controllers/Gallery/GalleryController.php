@@ -48,7 +48,7 @@ class GalleryController extends Controller
 
         // Kiểm tra dữ liệu hình ảnh
         if (!is_array($files) || empty($files)) {
-            return response()->json(['check' => false, 'msg' => 'Dữ liệu hình ảnh không hợp lệ.'], 400);
+            return response()->json(['check' => false, 'message' => 'Dữ liệu hình ảnh không hợp lệ.'], 400);
         }
         $hasMainImage = $this->model::findParent($this->data['id_parent'])->active()->exists();
         $this->instance = $this->storeImages($files);
@@ -61,7 +61,7 @@ class GalleryController extends Controller
         }
 
         $this->data = $this->model::all();
-        return response()->json(['check' => true, 'msg' => 'Thêm thành công!', 'data' => $this->data,], 201);
+        return response()->json(['check' => true, 'message' => 'Thêm thành công!', 'data' => $this->data,], 201);
     }
 
     /**
@@ -124,7 +124,7 @@ class GalleryController extends Controller
         }
 
         if (!$this->isMain($id)) {
-            return response()->json(['check' => false, 'msg' => 'Không thể bỏ trạng thái ảnh chính khi sản phẩm chỉ có 1 ảnh chính'], 400);
+            return response()->json(['check' => false, 'message' => 'Không thể bỏ trạng thái ảnh chính khi sản phẩm chỉ có 1 ảnh chính'], 400);
         }
 
         return $this->updateInstance();
@@ -152,10 +152,10 @@ class GalleryController extends Controller
 
         if ($this->instance) {
             $this->data = $this->model::all();
-            return response()->json(['check' => true, 'msg' => 'Cập nhật thành công!', 'data' => $this->data], 200);
+            return response()->json(['check' => true, 'message' => 'Cập nhật thành công!', 'data' => $this->data], 200);
         }
 
-        return response()->json(['check' => false, 'msg' => 'Cập nhật thất bại!'], 400);
+        return response()->json(['check' => false, 'message' => 'Cập nhật thất bại!'], 400);
     }
 
 
@@ -173,6 +173,6 @@ class GalleryController extends Controller
         }
         $this->instance->delete();
         $this->data = $this->model::all();
-        return response()->json(['check' => true, 'msg' => 'Xoá thành công!', 'data' => $this->data], 200);
+        return response()->json(['check' => true, 'message' => 'Xoá thành công!', 'data' => $this->data], 200);
     }
 }

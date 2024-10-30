@@ -30,7 +30,7 @@ import ContentPasteOutlinedIcon from "@mui/icons-material/ContentPasteOutlined";
 import ClassOutlinedIcon from "@mui/icons-material/ClassOutlined";
 import ProfileDropdown from "../Components/ProfileDropdown";
 import PermMediaOutlinedIcon from "@mui/icons-material/PermMediaOutlined";
-import { ToastContainer } from "react-toastify";
+import { toast, ToastContainer } from "react-toastify";
 
 function Layout({ children }) {
     const [user, setUser] = useState(null);
@@ -52,10 +52,7 @@ function Layout({ children }) {
                     .get("/auth/logout")
                     .then((res) => {
                         if (res.data.check === true) {
-                            window.notyf.open({
-                                type: "success",
-                                message: res.data.msg,
-                            });
+                            toast.success(res.data.message);
                             setTimeout(() => {
                                 router.visit("/auth/login", {
                                     method: "get",
@@ -65,10 +62,7 @@ function Layout({ children }) {
                     })
                     .catch((err) => {
                         if (err.response && err.response.status === 401) {
-                            window.notyf.open({
-                                type: "error",
-                                message: "Bạn đã đăng xuất rồi! Hãy thử lại",
-                            });
+                            toast.error(err.response.data.msg);
                         }
                     });
             }
@@ -84,7 +78,7 @@ function Layout({ children }) {
     return (
         <>
             {/* Alert notification */}
-            <ToastContainer autoClose={3000} />
+            <ToastContainer autoClose={2000} />
             {/* Alert notification */}
 
             <div id="app" style={({ height: "100vh" }, { display: "flex" })}>
