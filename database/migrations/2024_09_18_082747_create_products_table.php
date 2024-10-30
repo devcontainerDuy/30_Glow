@@ -19,6 +19,7 @@ return new class extends Migration
             $table->string('discount')->default(0);
             $table->text('content');
             $table->tinyInteger('status')->default(1);
+            $table->tinyInteger(column: 'highlighted')->default(0);
             $table->bigInteger('id_category')->unsigned();
             $table->bigInteger('id_brand')->unsigned();
             $table->bigInteger('in_stock')->default(0);

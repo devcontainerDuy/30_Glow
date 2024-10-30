@@ -25,7 +25,6 @@ class SlidesController extends Controller
     public function index()
     {
         $this->crumbs = [
-            ['name' => 'Slides', 'url' => '/admin/slides'],
             ['name' => 'Danh sách Slides', 'url' => '/admin/slides'],
         ];
         $this->data = $this->model::all();
