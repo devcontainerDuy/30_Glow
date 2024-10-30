@@ -35,6 +35,7 @@ class ProductRequest extends BaseRequest
             'discount' => ['nullable', 'numeric'],
             'image' => ['nullable', 'image', 'max:2048'],
             'status' => ['nullable', 'boolean'],
+            'highlighted' => ['nullable', 'boolean'],
             'content' => ['nullable', 'string'],
             'id_category' => ['nullable', 'exists:categories,id',],
             'id_brand' => ['nullable', 'exists:brands,id'],

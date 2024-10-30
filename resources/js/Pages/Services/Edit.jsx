@@ -2,17 +2,7 @@ import React, { useEffect, useState } from "react";
 import { Box } from "@mui/material";
 import Layout from "@/Layouts/Index";
 
-import {
-    Button,
-    Card,
-    Col,
-    Form,
-    Image,
-    InputGroup,
-    Modal,
-    Row,
-    Spinner,
-} from "react-bootstrap";
+import { Button, Card, Col, Form, Image, InputGroup, Modal, Row, Spinner } from "react-bootstrap";
 import Swal from "sweetalert2";
 import CKEditor from "@/Containers/CKEditor";
 import { Dropzone, FileMosaic } from "@dropzone-ui/react";
@@ -150,28 +140,16 @@ function Edit({ service, collections, crumbs }) {
                                 <i className="bi bi-box-arrow-right" />
                                 <span className="ms-2">Quay lại</span>
                             </Button>
-                            <Button
-                                className="ms-2"
-                                variant="success"
-                                type="submit"
-                                disabled={loading}
-                                onClick={handleSubmit}
-                            >
+                            <Button className="ms-2" variant="success" type="submit" disabled={loading} onClick={handleSubmit}>
                                 {loading ? (
                                     <>
-                                        <Spinner
-                                            size="sm"
-                                            animation="border"
-                                            variant="secondary"
-                                        />
+                                        <Spinner size="sm" animation="border" variant="secondary" />
                                         <span>Đang lưu...</span>
                                     </>
                                 ) : (
                                     <>
                                         <i className="bi bi-floppy-fill" />
-                                        <span className="ms-2">
-                                            Lưu cập nhật
-                                        </span>
+                                        <span className="ms-2">Lưu cập nhật</span>
                                     </>
                                 )}
                             </Button>
@@ -183,120 +161,47 @@ function Edit({ service, collections, crumbs }) {
                                 <div className="text-start">
                                     <h4>Danh sách sản phẩm </h4>
                                 </div>
-                                <Form
-                                    onSubmit={handleSubmit}
-                                    encType="multipart/form-data"
-                                >
+                                <Form onSubmit={handleSubmit} encType="multipart/form-data">
                                     <Row className="row-cols-2">
                                         <Col className="d-flex flex-column">
                                             {/* Tên sản phẩm */}
-                                            <Form.Group
-                                                className="mb-3"
-                                                controlId="name"
-                                            >
-                                                <Form.Label>
-                                                    Nhập tên sản phẩm
-                                                </Form.Label>
-                                                <Form.Control
-                                                    type="text"
-                                                    placeholder="Tên sản phẩm..."
-                                                    value={name}
-                                                    onChange={(e) =>
-                                                        setName(e.target.value)
-                                                    }
-                                                />
+                                            <Form.Group className="mb-3" controlId="name">
+                                                <Form.Label>Nhập tên sản phẩm</Form.Label>
+                                                <Form.Control type="text" placeholder="Tên sản phẩm..." value={name} onChange={(e) => setName(e.target.value)} />
                                             </Form.Group>
-                                            <Form.Group
-                                                className="mb-3"
-                                                controlId="name"
-                                            >
+                                            <Form.Group className="mb-3" controlId="name">
                                                 <Form.Label>Slug</Form.Label>
-                                                <Form.Control
-                                                    type="text"
-                                                    value={slug}
-                                                    disabled
-                                                />
+                                                <Form.Control type="text" value={slug} disabled />
                                             </Form.Group>
                                             <Row>
                                                 <Col>
-                                                    <Form.Group
-                                                        className="mb-3"
-                                                        controlId="price"
-                                                    >
-                                                        <Form.Label>
-                                                            Giá sản phẩm
-                                                        </Form.Label>
+                                                    <Form.Group className="mb-3" controlId="price">
+                                                        <Form.Label>Giá sản phẩm</Form.Label>
                                                         <InputGroup className="mb-3">
-                                                            <Form.Control
-                                                                type="number"
-                                                                placeholder="100000"
-                                                                value={price}
-                                                                onChange={(e) =>
-                                                                    setPrice(
-                                                                        e.target
-                                                                            .value
-                                                                    )
-                                                                }
-                                                            />
-                                                            <InputGroup.Text>
-                                                                VND
-                                                            </InputGroup.Text>
+                                                            <Form.Control type="number" placeholder="100000" value={price} onChange={(e) => setPrice(e.target.value)} />
+                                                            <InputGroup.Text>VND</InputGroup.Text>
                                                         </InputGroup>
                                                     </Form.Group>
                                                 </Col>
                                                 <Col xs={4}>
                                                     {/* Phần trăm giảm */}
-                                                    <Form.Group
-                                                        className="mb-3"
-                                                        controlId="discount"
-                                                    >
-                                                        <Form.Label>
-                                                            Giảm giá
-                                                        </Form.Label>
+                                                    <Form.Group className="mb-3" controlId="discount">
+                                                        <Form.Label>Giảm giá</Form.Label>
                                                         <InputGroup className="mb-3">
-                                                            <Form.Control
-                                                                type="number"
-                                                                placeholder="10"
-                                                                value={discount}
-                                                                onChange={(e) =>
-                                                                    setDiscount(
-                                                                        e.target
-                                                                            .value
-                                                                    )
-                                                                }
-                                                            />
-                                                            <InputGroup.Text>
-                                                                %
-                                                            </InputGroup.Text>
+                                                            <Form.Control type="number" placeholder="10" value={discount} onChange={(e) => setDiscount(e.target.value)} />
+                                                            <InputGroup.Text>%</InputGroup.Text>
                                                         </InputGroup>
                                                     </Form.Group>
                                                 </Col>
                                                 <Col>
-                                                    <Form.Group
-                                                        className="mb-3"
-                                                        controlId="status"
-                                                    >
-                                                        <Form.Label>
-                                                            Trạng thái
-                                                        </Form.Label>
+                                                    <Form.Group className="mb-3" controlId="status">
+                                                        <Form.Label>Trạng thái</Form.Label>
                                                         <Form.Check
-                                                            checked={
-                                                                status === 1
-                                                            }
+                                                            checked={status === 1}
                                                             type="switch"
                                                             id="status"
-                                                            label={
-                                                                status === 1
-                                                                    ? "Hoạt động"
-                                                                    : "Tạm ngừng"
-                                                            }
-                                                            onChange={() =>
-                                                                setStatus(
-                                                                    status === 1
-                                                                        ? 0
-                                                                        : 1
-                                                                )
-                                                            }
+                                                            label={status === 1 ? "Hoạt động" : "Tạm ngừng"}
+                                                            onChange={() => setStatus(status === 1 ? 0 : 1)}
                                                         />
                                                     </Form.Group>
                                                 </Col>
@@ -304,38 +209,12 @@ function Edit({ service, collections, crumbs }) {
                                         </Col>
                                         <Col>
                                             <Row>
-                                                <Col>
-                                                    {files && (
-                                                        <Image
-                                                            fluid
-                                                            className="mb-3 rounded-1 w-100 h-100"
-                                                            src={
-                                                                "/storage/services/" +
-                                                                files
-                                                            }
-                                                            alt={files}
-                                                        />
-                                                    )}
-                                                </Col>
-                                                <Col
-                                                    xs={4}
-                                                    className="d-flex flex-column"
-                                                >
+                                                <Col>{files && <Image fluid className="mb-3 rounded-1 w-100 h-100" src={"/storage/services/" + files} alt={files} />}</Col>
+                                                <Col xs={4} className="d-flex flex-column">
                                                     {/* Chọn hiệu dữ liệu */}
-                                                    <Dropzone
-                                                        onChange={updateFiles}
-                                                        className="mb-3"
-                                                        accept="image/*"
-                                                    >
-                                                        <Form.Label>
-                                                            Ảnh sản phẩm
-                                                        </Form.Label>
-
-                                                        <FileMosaic
-                                                            preview
-                                                            info
-                                                            onDelete={onDelete}
-                                                        />
+                                                    <Dropzone onChange={updateFiles} className="mb-3" accept="image/*">
+                                                        <Form.Label>Ảnh sản phẩm</Form.Label>
+                                                        <FileMosaic preview info onDelete={onDelete} />
                                                     </Dropzone>
                                                 </Col>
                                             </Row>
@@ -345,59 +224,27 @@ function Edit({ service, collections, crumbs }) {
                                     <Row className="row-cols-3">
                                         <Col>
                                             {/* Chọn danh mục */}
-                                            <Form.Group
-                                                className="mb-3"
-                                                controlId="id_category"
-                                            >
-                                                <Form.Label>
-                                                    Chọn danh mục
-                                                </Form.Label>
-                                                <Form.Select
-                                                    name="id_category"
-                                                    value={idCollection}
-                                                    onChange={(e) =>
-                                                        setIdCategory(
-                                                            e.target.value
-                                                        )
-                                                    }
-                                                >
-                                                    <option value="">
-                                                        -- Chọn --
-                                                    </option>
-                                                    {collectionsData.length >
-                                                    0 ? (
-                                                        collectionsData.map(
-                                                            (item, index) => (
-                                                                <option
-                                                                    key={index}
-                                                                    value={
-                                                                        item.id
-                                                                    }
-                                                                >
-                                                                    {item.name}
-                                                                </option>
-                                                            )
-                                                        )
+                                            <Form.Group className="mb-3" controlId="id_category">
+                                                <Form.Label>Chọn danh mục</Form.Label>
+                                                <Form.Select name="id_category" value={idCollection} onChange={(e) => setIdCategory(e.target.value)}>
+                                                    <option value="">-- Chọn --</option>
+                                                    {collectionsData.length > 0 ? (
+                                                        collectionsData.map((item, index) => (
+                                                            <option key={index} value={item.id}>
+                                                                {item.name}
+                                                            </option>
+                                                        ))
                                                     ) : (
-                                                        <option value="">
-                                                            Không có danh mục
-                                                            nào
-                                                        </option>
+                                                        <option value="">Không có danh mục nào</option>
                                                     )}
                                                 </Form.Select>
                                             </Form.Group>
                                         </Col>
                                     </Row>
 
-                                    <Form.Group
-                                        className="mb-3"
-                                        controlId="name"
-                                    >
+                                    <Form.Group className="mb-3" controlId="name">
                                         <Form.Label>Nội dung chính</Form.Label>
-                                        <CKEditor
-                                            value={content}
-                                            onBlur={handleEditorBlur}
-                                        />
+                                        <CKEditor value={content} onBlur={handleEditorBlur} />
                                     </Form.Group>
                                 </Form>
                             </Box>

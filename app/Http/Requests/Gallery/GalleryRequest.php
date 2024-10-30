@@ -24,7 +24,7 @@ class GalleryRequest extends BaseRequest
     {
         return [
             'image' => ['nullable', 'image', 'max:2048'],
-            'id_parent' => ['nullable', 'exists:products,id'],
+            'id_parent' => ['nullable', 'exists:products,id', 'exists:gallery,id'],
             'status' => ['nullable', 'boolean'],
         ];
     }

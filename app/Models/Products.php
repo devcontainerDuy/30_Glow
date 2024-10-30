@@ -22,6 +22,7 @@ class Products extends Model
         'discount',
         'content',
         'status',
+        "highlighted",
         'id_category',
         'id_brand',
         'in_stock',
@@ -60,6 +61,11 @@ class Products extends Model
     public function scopeActive($query)
     {
         return $query->where('status', 1);
+    }
+
+    public function scopeHighlighted($query)
+    {
+        return $query->where('highlighted', 1);
     }
 
     public function scopeRelatedProducts()

@@ -45,6 +45,7 @@ class GalleryController extends Controller
     {
         $this->data = $request->validated();
         $files = $request->file('images');
+        $parent = $this->data['id_parent'];
 
         // Kiểm tra dữ liệu hình ảnh
         if (!is_array($files) || empty($files)) {
@@ -56,7 +57,7 @@ class GalleryController extends Controller
         // Tạo bản ghi trong cơ sở dữ liệu cho mỗi file đã lưu
         $isFirstImage = true; // Biến để xác định ảnh đầu tiên
         foreach ($this->instance as $filename) {
-            $this->createGalleryRecord($filename, $hasMainImage, $isFirstImage);
+            $this->createGalleryRecord($filename, $hasMainImage, $isFirstImage, $parent);
             $isFirstImage = false;
         }
 
@@ -86,9 +87,10 @@ class GalleryController extends Controller
     /**
      * Tạo bản ghi trong cơ sở dữ liệu cho hình ảnh
      */
-    private function createGalleryRecord($filename, $hasMainImage, $isFirstImage)
+    private function createGalleryRecord($filename, $hasMainImage, $isFirstImage, $parent = null)
     {
         $this->data['image'] = $filename;
+        $this->data['id_parent'] = $parent;
         ($hasMainImage || !$isFirstImage) ? $this->data['status'] = 0 : $this->data['status'] = 1;
         $this->model::create($this->data);
     }
@@ -118,13 +120,18 @@ class GalleryController extends Controller
     {
         $this->data = $request->validated();
         $this->instance = $this->model::findOrFail($id);
+        // dd($this->instance);
 
-        if (is_null($this->instance->id_parent)) {
-            return $this->updateInstance();
+        if (is_null($this->instance->id_parent) && $this->instance->id_parent == null) {
+            if (isset($this->data['status']) && $this->data['status'] == 1) {
+                return response()->json(['check' => false, 'message' => 'Không thể đặt làm ảnh chính'], 400);
+            } else {
+                return $this->updateInstance();
+            }
         }
 
         if (!$this->isMain($id)) {
-            return response()->json(['check' => false, 'message' => 'Không thể bỏ trạng thái ảnh chính khi sản phẩm chỉ có 1 ảnh chính'], 400);
+            return response()->json(['check' => false, 'message' => 'Không chỉ có một ảnh chính'], 400);
         }
 
         return $this->updateInstance();
