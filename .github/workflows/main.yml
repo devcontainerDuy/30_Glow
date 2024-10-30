@@ -32,10 +32,6 @@ jobs:
         run: composer dump-autoload --optimize
         continue-on-error: false
 
-      - name: Remove storage link
-        run: php artisan storage:unlink
-        continue-on-error: false
-
       - name: Generate storage link
         run: php artisan storage:link
         continue-on-error: false
