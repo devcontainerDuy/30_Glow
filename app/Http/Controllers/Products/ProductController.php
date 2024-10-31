@@ -147,6 +147,45 @@ class ProductController extends Controller
     /**
      * API Client
      */
+    public function apiHighlighted()
+    {
+        $this->data = $this->model::with('category', 'brand', 'gallery')->highlighted()->active()->limit(4)->get();
+        $this->data->transform(function ($item) {
+            return [
+                'id' => $item->id,
+                'name' => $item->name,
+                'slug' => $item->slug,
+                'price' => $item->price,
+                'discount' => $item->discount,
+                'in_stock' => $item->in_stock,
+                'content' => $item->content,
+                'status' => $item->status,
+                'category' => $item->category ? [
+                    'id' => $item->category->id,
+                    'name' => $item->category->name,
+                    'slug' => $item->category->slug,
+                    'status' => $item->category->status,
+                ] : null,
+                'brand' => $item->brand ? [
+                    'id' => $item->brand->id,
+                    'name' => $item->brand->name,
+                    'slug' => $item->brand->slug,
+                    'status' => $item->brand->status,
+                ] : null,
+                'gallery' => $item->gallery->map(function ($galleryItem) {
+                    return [
+                        'id' => $galleryItem->id,
+                        'image' => asset('storage/gallery/' . $galleryItem->image),
+                        'id_parent' => $galleryItem->id_parent,
+                        'status' => $galleryItem->status,
+                    ];
+                }),
+            ];
+        });
+
+        return response()->json(['check' => true, 'data' => $this->data], 200);
+    }
+
     public function apiIndex()
     {
         $this->data = $this->model::with('category', 'brand', 'gallery')->active()->paginate(10);
@@ -183,7 +222,7 @@ class ProductController extends Controller
             ];
         });
 
-        return response()->json($this->data);
+        return response()->json(['check' => true, 'data' => $this->data], 200);
     }
 
     public function apiShow($slug)
@@ -235,7 +274,6 @@ class ProductController extends Controller
                 ];
             }),
         ];
-
-        return response()->json($this->instance);
+        return response()->json(['check' => true, 'data' => $this->instance], 200);
     }
 }

@@ -98,7 +98,7 @@ class BrandsController extends Controller
     public function apiIndex()
     {
         $this->data = $this->model::active()->select('id', 'name', 'slug', 'status')->whereHas('products')->orderBy('id', 'asc')->get();
-        return response()->json($this->data);
+        return response()->json(['check' => true, 'data' => $this->data], 200);
     }
 
     public function apiShow($slug)
@@ -108,6 +108,6 @@ class BrandsController extends Controller
         if (!$this->data) {
             return response()->json(['check' => false, 'message' => 'Không tìm thấy thương hiệu'], 404);
         }
-        return response()->json($this->data);
+        return response()->json(['check' => true, 'data' => $this->data], 200);
     }
 }

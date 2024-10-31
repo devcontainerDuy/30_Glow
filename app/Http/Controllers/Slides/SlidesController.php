@@ -157,7 +157,7 @@ class SlidesController extends Controller
             $item->mobile = asset('storage/slides/mobile/' . $item->mobile);
             return $item;
         });
-        return response()->json($this->data);
+        return response()->json(['check' => true, 'data' => $this->data], 200);
     }
 
     public function apiShow($slug)
@@ -170,6 +170,6 @@ class SlidesController extends Controller
         if (!$this->data) {
             return response()->json(['check' => false, 'message' => 'Không tìm thấy slide'], 404);
         }
-        return response()->json($this->data);
+        return response()->json(['check' => true, 'data' => $this->data], 200);
     }
 }

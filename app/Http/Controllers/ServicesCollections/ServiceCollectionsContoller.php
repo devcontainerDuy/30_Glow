@@ -101,13 +101,13 @@ class ServiceCollectionsContoller extends Controller
     public function apiHighlighted()
     {
         $this->data = $this->model::highlighted()->select('id', 'name', 'slug', 'status', 'highlighted')->whereHas('services')->orderBy('id', 'asc')->get();
-        return $this->data;
+        return response()->json(['check' => true, 'data' => $this->data], 200);
     }
 
     public function apiIndex()
     {
         $this->data = $this->model::active()->select('id', 'name', 'slug', 'status', 'highlighted')->whereHas('services')->orderBy('id', 'asc')->get();
-        return $this->data;
+        return response()->json(['check' => true, 'data' => $this->data], 200);
     }
 
     public function apiShow($slug)
@@ -117,6 +117,6 @@ class ServiceCollectionsContoller extends Controller
         if (!$this->data) {
             return response()->json(['check' => false, 'message' => 'Không tìm thấy dịch vụ!'], 404);
         }
-        return $this->data;
+        return response()->json(['check' => true, 'data' => $this->data], 200);
     }
 }

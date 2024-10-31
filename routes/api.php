@@ -30,6 +30,7 @@ Route::middleware('api')->controller(App\Http\Controllers\Categories\CategoriesC
 });
 
 Route::middleware('api')->controller(App\Http\Controllers\Products\ProductController::class)->group(function () {
+    Route::get('/products/highlighted', 'apiHighlighted');
     Route::get('/products', 'apiIndex');
     Route::get('/products/{slug}', 'apiShow');
 });

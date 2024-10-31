@@ -64,7 +64,8 @@ class CategoriesController extends Controller
     public function apiIndex()
     {
         $this->data = $this->model::with("parent")->active()->select('id', 'name', 'slug', 'id_parent', 'status')->whereHas('products')->orderBy('id', 'asc')->get();
-        return response()->json($this->data);
+        return response()->json(['check' => true, 'data' => $this->data], 200);
+
     }
 
     public function apiShow($slug)
@@ -74,6 +75,7 @@ class CategoriesController extends Controller
         if (!$this->data) {
             return response()->json(['check' => false, 'message' => 'Không tìm thấy phân loại sản phẩm'], 404);
         }
-        return response()->json($this->data);
+        return response()->json(['check' => true, 'data' => $this->data], 200);
+
     }
 }

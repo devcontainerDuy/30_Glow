@@ -139,7 +139,7 @@ class ServiceController extends Controller
                 ] : null,
             ];
         });
-        return response()->json($this->data);
+        return response()->json(['check' => true, 'data' => $this->data], 200);
     }
     public function apiIndex()
     {
@@ -164,7 +164,7 @@ class ServiceController extends Controller
                 ] : null,
             ];
         });
-        return response()->json($this->data);
+        return response()->json(['check' => true, 'data' => $this->data], 200);
     }
 
     public function apiShow($slug)
@@ -190,6 +190,6 @@ class ServiceController extends Controller
             ] : null,
         ];
 
-        return response()->json($this->instance);
+        return response()->json(['check' => true, 'data' => $this->instance], 200);
     }
 }
