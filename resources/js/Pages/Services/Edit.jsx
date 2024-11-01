@@ -21,7 +21,7 @@ function Edit({ service, collections, crumbs }) {
     const [summary, setSummary] = useState("");
     const [idCollection, setIdCollection] = useState(0);
     const [files, setFiles] = useState([]);
-    const [imagePreview, setImagePreview] = useState('');
+    const [imagePreview, setImagePreview] = useState("");
     const [content, setContent] = useState("");
     const [status, setStatus] = useState(0);
     const [highlighted, setHighlighted] = useState(0);
@@ -90,8 +90,8 @@ function Edit({ service, collections, crumbs }) {
 
     const handleDelete = (id) => {
         Swal.fire({
-            title: "Xóa tài khoản?",
-            text: "Bạn chắc chắn xóa tài khoản này!",
+            title: "Xóa mục?",
+            text: "Bạn chắc chắn xóa mục này!",
             icon: "error",
             showCancelButton: true,
             confirmButtonColor: "#3085d6",
@@ -101,11 +101,13 @@ function Edit({ service, collections, crumbs }) {
         }).then((result) => {
             if (result.isConfirmed) {
                 window.axios
-                    .delete("/admin/products/" + id)
+                    .delete("/admin/services/" + id)
                     .then((res) => {
                         if (res.data.check) {
                             toast.success(res.data.message);
-                            setData(res.data.data);
+                            router.visit("/admin/services/" + service?.id, {
+                                method: "get",
+                            });
                         } else {
                             toast.warning(res.data.message);
                         }
@@ -150,7 +152,10 @@ function Edit({ service, collections, crumbs }) {
                 <section className="container">
                     <Row>
                         <BreadcrumbComponent props={crumbs}>
-                            <Button variant="secondary" onClick={handleBack}>
+                            <Button variant="danger" onClick={() => handleDelete(service?.id)}>
+                                <i className="bi bi-trash-fill" />
+                            </Button>
+                            <Button className="ms-2" variant="secondary" onClick={handleBack}>
                                 <i className="bi bi-box-arrow-right" />
                                 <span className="ms-2">Quay lại</span>
                             </Button>
@@ -182,12 +187,7 @@ function Edit({ service, collections, crumbs }) {
                                             <Card className="p-3">
                                                 <Form.Group className="mb-3" controlId="name">
                                                     <Form.Label>Nhập tên sản phẩm</Form.Label>
-                                                    <Form.Control
-                                                        type="text"
-                                                        placeholder="Tên sản phẩm..."
-                                                        value={name}
-                                                        onChange={(e) => setName(e.target.value)}
-                                                    />
+                                                    <Form.Control type="text" placeholder="Tên sản phẩm..." value={name} onChange={(e) => setName(e.target.value)} />
                                                 </Form.Group>
                                                 <Form.Group className="mb-3" controlId="slug">
                                                     <Form.Label>Slug</Form.Label>
@@ -198,12 +198,7 @@ function Edit({ service, collections, crumbs }) {
                                                         <Form.Group className="mb-3" controlId="price">
                                                             <Form.Label>Giá sản phẩm</Form.Label>
                                                             <InputGroup className="mb-3">
-                                                                <Form.Control
-                                                                    type="number"
-                                                                    placeholder="100000"
-                                                                    value={price}
-                                                                    onChange={(e) => setPrice(e.target.value)}
-                                                                />
+                                                                <Form.Control type="number" placeholder="100000" value={price} onChange={(e) => setPrice(e.target.value)} />
                                                                 <InputGroup.Text>VND</InputGroup.Text>
                                                             </InputGroup>
                                                         </Form.Group>
@@ -213,12 +208,7 @@ function Edit({ service, collections, crumbs }) {
                                                         <Form.Group className="mb-3" controlId="discount">
                                                             <Form.Label>Giảm giá</Form.Label>
                                                             <InputGroup className="mb-3">
-                                                                <Form.Control
-                                                                    type="number"
-                                                                    placeholder="10"
-                                                                    value={discount}
-                                                                    onChange={(e) => setDiscount(e.target.value)}
-                                                                />
+                                                                <Form.Control type="number" placeholder="10" value={discount} onChange={(e) => setDiscount(e.target.value)} />
                                                                 <InputGroup.Text>%</InputGroup.Text>
                                                             </InputGroup>
                                                         </Form.Group>
@@ -276,7 +266,7 @@ function Edit({ service, collections, crumbs }) {
                                                 <Card.Header>Hình ảnh</Card.Header>
                                                 <Card.Body>
                                                     {files && (
-                                                        <div style={{ position: 'relative', cursor: 'pointer' }} onClick={() => document.getElementById('fileInput').click()}>
+                                                        <div style={{ position: "relative", cursor: "pointer" }} onClick={() => document.getElementById("fileInput").click()}>
                                                             <Image
                                                                 fluid
                                                                 className="mb-3 rounded-1 w-100 h-100"
@@ -288,7 +278,7 @@ function Edit({ service, collections, crumbs }) {
                                                                 type="file"
                                                                 accept="image/*"
                                                                 onChange={handleImageChange}
-                                                                style={{ display: 'none' }} // Ẩn input file
+                                                                style={{ display: "none" }} // Ẩn input file
                                                             />
                                                         </div>
                                                     )}
@@ -300,7 +290,7 @@ function Edit({ service, collections, crumbs }) {
                                                                 type="file"
                                                                 accept="image/*"
                                                                 onChange={handleImageChange}
-                                                                style={{ display: 'none' }} // Ẩn input file
+                                                                style={{ display: "none" }} // Ẩn input file
                                                             />
                                                         </Form.Group>
                                                     )}
@@ -313,8 +303,8 @@ function Edit({ service, collections, crumbs }) {
                                                     <Form.Group controlId="id_collection">
                                                         <Form.Select name="id_collection" value={idCollection} onChange={(e) => setIdCollection(e.target.value)}>
                                                             <option value="">-- Chọn --</option>
-                                                            {collections.length > 0 ? (
-                                                                collections.map((item, index) => (
+                                                            {collectionsData.length > 0 ? (
+                                                                collectionsData.map((item, index) => (
                                                                     <option key={index} value={item.id}>
                                                                         {item.name}
                                                                     </option>
@@ -328,9 +318,6 @@ function Edit({ service, collections, crumbs }) {
                                             </Card>
                                         </Col>
                                     </Row>
-
-
-
                                 </Form>
                             </Box>
                         </Col>
