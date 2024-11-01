@@ -149,7 +149,7 @@ class ProductController extends Controller
      */
     public function apiHighlighted()
     {
-        $this->data = $this->model::with('category', 'brand', 'gallery')->highlighted()->active()->limit(4)->get();
+        $this->data = $this->model::with('category', 'brand', 'gallery')->highlighted()->active()->limit(5)->get();
         $this->data->transform(function ($item) {
             return [
                 'id' => $item->id,
