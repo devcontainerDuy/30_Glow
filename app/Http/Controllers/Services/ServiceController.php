@@ -45,7 +45,6 @@ class ServiceController extends Controller
     {
         $this->data = $request->validated();
         $this->data['slug'] = Str::slug($this->data['name']);
-
         $file = $request->file('image');
         $imageName = $file->getClientOriginalName();
         $extractTo = storage_path('app/public/services/');
@@ -91,6 +90,15 @@ class ServiceController extends Controller
     {
         $this->data = $request->validated();
         if (isset($this->data['name'])) $this->data['slug'] = Str::slug($this->data['name']);
+        
+        if (isset($this->data['image'])) {
+            $file = $request->file('image');
+            $imageName = $file->getClientOriginalName();
+            $extractTo = storage_path('app/public/services/');
+            $file->move($extractTo, $imageName);
+            $this->data['image'] = $imageName;
+        }
+
         $this->instance = $this->model::findOrFail($id)->update($this->data);
         if ($this->instance) {
             $this->data = $this->model::with('collection')->get();
@@ -98,6 +106,7 @@ class ServiceController extends Controller
         }
         return response()->json(['check' => false, 'message' => 'Cập nhật thất bại!'], 400);
     }
+    
 
     /**
      * Remove the specified resource from storage.
