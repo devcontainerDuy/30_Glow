@@ -13,7 +13,7 @@ class Customers extends Model
 
     protected $primaryKey = "id";
 
-    protected $illable = [
+    protected $fillable = [
         'name',
         'address',
         'phone',

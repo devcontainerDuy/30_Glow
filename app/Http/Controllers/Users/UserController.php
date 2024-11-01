@@ -92,7 +92,6 @@ class UserController extends Controller
      */
     public function update(UserRequest $request, string $id)
     {
-
         $this->data = $request->validated();
         $this->instance = $this->model::findOrFail($id)->update($this->data);
         if ($this->instance) {

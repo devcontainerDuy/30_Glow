@@ -18,7 +18,7 @@ Route::get('/', function () {
     return redirect()->route('admin.home');
 });
 
-Route::middleware(['auth', 'web'])->prefix('admin')->as('admin.')->group(function () {
+Route::middleware(['auth', 'auth.session', 'web'])->prefix('admin')->as('admin.')->group(function () {
     Route::name('home')->get('/', function () {
         return Inertia::render('Home');
     });
@@ -29,6 +29,8 @@ Route::middleware(['auth', 'web'])->prefix('admin')->as('admin.')->group(functio
     Route::post('handleRole/permission/{id}', [App\Http\Controllers\Roles\RoleController::class, 'role_permission']);
     // Module Permission
     Route::resource('permissions', App\Http\Controllers\Permissions\PermissionController::class)->names('permission');
+    // Module Customer
+    Route::resource('customers', App\Http\Controllers\Customers\CustomerController::class)->names('customers');
     // Module Category
     Route::resource('categories', App\Http\Controllers\Categories\CategoriesController::class)->names('categories');
     //Module Brand

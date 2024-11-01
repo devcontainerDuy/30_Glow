@@ -1,17 +1,5 @@
 import * as React from "react";
-import {
-    Avatar,
-    Box,
-    Button,
-    Checkbox,
-    CssBaseline,
-    FormControlLabel,
-    Grid,
-    IconButton,
-    TextField,
-    Typography,
-    Paper,
-} from "@mui/material";
+import { Avatar, Box, Button, Checkbox, CssBaseline, FormControlLabel, Grid, IconButton, TextField, Typography, Paper } from "@mui/material";
 import LockOutlinedIcon from "@mui/icons-material/LockOutlined";
 import { createTheme, ThemeProvider } from "@mui/material/styles";
 
@@ -37,7 +25,7 @@ export default function Login() {
             .post("/auth/login", {
                 email: email,
                 password: password,
-                remember_token: remember_token,
+                remember_token: remember_token ? true : false,
             })
             .then((res) => {
                 if (res.data.check === true) {
@@ -71,23 +59,12 @@ export default function Login() {
                         backgroundImage:
                             "url(https://static.vecteezy.com/system/resources/thumbnails/023/886/344/small_2x/starry-night-landscape-with-mountain-and-milky-way-sky-background-beauty-in-nature-and-astrology-science-concept-digital-art-fantasy-illustration-generative-ai-photo.jpg)",
                         backgroundRepeat: "no-repeat",
-                        backgroundColor: (t) =>
-                            t.palette.mode === "light"
-                                ? t.palette.grey[50]
-                                : t.palette.grey[900],
+                        backgroundColor: (t) => (t.palette.mode === "light" ? t.palette.grey[50] : t.palette.grey[900]),
                         backgroundSize: "cover",
                         backgroundPosition: "center",
                     }}
                 />
-                <Grid
-                    item
-                    xs={12}
-                    sm={8}
-                    md={5}
-                    component={Paper}
-                    elevation={6}
-                    square
-                >
+                <Grid item xs={12} sm={8} md={5} component={Paper} elevation={6} square>
                     <Box
                         sx={{
                             my: 8,
@@ -103,22 +80,8 @@ export default function Login() {
                         <Typography component="h1" variant="h5">
                             Đăng nhập
                         </Typography>
-                        <Box
-                            component="form"
-                            noValidate
-                            sx={{ mt: 1, width: "100%" }}
-                            onSubmit={handleSubmit}
-                            method="post"
-                        >
-                            <TextField
-                                margin="normal"
-                                required
-                                fullWidth
-                                id="email"
-                                label="Địa chỉ Email"
-                                name="email"
-                                autoComplete="off"
-                            />
+                        <Box component="form" noValidate sx={{ mt: 1, width: "100%" }} onSubmit={handleSubmit} method="post">
+                            <TextField margin="normal" required fullWidth id="email" label="Địa chỉ Email" name="email" autoComplete="off" />
                             <TextField
                                 margin="normal"
                                 required
@@ -132,35 +95,14 @@ export default function Login() {
                                     // Thêm InputProps để tùy chỉnh input
                                     // Thêm icon vào cuối input
                                     endAdornment: (
-                                        <IconButton
-                                            aria-label="toggle password visibility"
-                                            onClick={handleClickShowPassword}
-                                            edge="end"
-                                        >
-                                            {showPassword ? (
-                                                <VisibilityOffOutlinedIcon />
-                                            ) : (
-                                                <VisibilityOutlinedIcon />
-                                            )}
+                                        <IconButton aria-label="toggle password visibility" onClick={handleClickShowPassword} edge="end">
+                                            {showPassword ? <VisibilityOffOutlinedIcon /> : <VisibilityOutlinedIcon />}
                                         </IconButton>
                                     ),
                                 }}
                             />
-                            <FormControlLabel
-                                control={
-                                    <Checkbox
-                                        color="primary"
-                                        name="remember_token"
-                                    />
-                                }
-                                label="Hãy nhớ tài khoản của tôi!"
-                            />
-                            <Button
-                                type="submit"
-                                fullWidth
-                                variant="contained"
-                                sx={{ mt: 3, mb: 2 }}
-                            >
+                            <FormControlLabel control={<Checkbox color="primary" name="remember_token" />} label="Hãy nhớ tài khoản của tôi!" />
+                            <Button type="submit" fullWidth variant="contained" sx={{ mt: 3, mb: 2 }}>
                                 Đăng nhập
                             </Button>
                             <Grid container>
@@ -168,9 +110,7 @@ export default function Login() {
                                     <Link href="#">Quên mật khẩu?</Link>
                                 </Grid>
                                 <Grid item>
-                                    <Link href="#">
-                                        {"Bạn chưa có tài khoản? Đăng ký ngay!"}
-                                    </Link>
+                                    <Link href="#">{"Bạn chưa có tài khoản? Đăng ký ngay!"}</Link>
                                 </Grid>
                             </Grid>
                         </Box>

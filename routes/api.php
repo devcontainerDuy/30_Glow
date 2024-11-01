@@ -15,8 +15,8 @@ use Illuminate\Support\Facades\Auth;
 |
 */
 
-Route::middleware(['auth', 'web'])->get('/user', function (Request $request) {
-    return Auth::user();
+Route::middleware(['auth:sanctum', 'web'])->get('/user', function (Request $request) {
+    return Auth::user()->status === 1 ? $request->user() : redirect('auth/login');
 });
 
 Route::middleware('api')->controller(App\Http\Controllers\Brands\BrandsController::class)->group(function () {

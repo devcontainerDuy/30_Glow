@@ -16,7 +16,7 @@ class AuthenRequest extends BaseRequest
         return [
             'email' => ['required', 'string', 'email', 'max:255', 'exists:users,email'],
             'password' => ['required', 'string', 'min:8'],
-            'remember_token' => ['nullable'],
+            'remember_token' => ['nullable', 'boolean'],
         ];
     }
 

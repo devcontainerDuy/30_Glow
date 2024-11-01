@@ -18,7 +18,7 @@ class AuthenController extends Controller
     }
     public function login()
     {
-        if (Session::has('user_session')) {
+        if (Auth::viaRemember() || Auth::check()) {
             return redirect()->route('admin.home');
         }
         return Inertia::render('Auth/Login');
@@ -27,10 +27,8 @@ class AuthenController extends Controller
     public function handleLogin(AuthenRequest $request)
     {
         $this->data = $request->validated();
-        if (Auth::attempt(['email' => $this->data['email'], 'password' => $this->data['password'], 'status' => 1], isset($this->data['remember_token']) ? true : false)) {
+        if (Auth::attempt(['email' => $this->data['email'], 'password' => $this->data['password'], 'status' => 1], $this->data['remember_token'])) {
             Session::regenerateToken();
-            $this->data = Auth::user();
-            Session::put('user_session', $this->data);
             return response()->json(['check' => true, 'message' => 'Đăng nhập thành công!'], 200);
         }
         return response()->json(['check' => false, 'message' => 'Đăng nhập thất bại!'], 400);

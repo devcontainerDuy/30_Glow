@@ -42,8 +42,8 @@ return [
         ],
         'api' => [
             'driver' => 'token',
-            'provider' => 'users',
-            'hash' => false,
+            'provider' => 'customers',
+            'hash' => true, // default: false
         ],
     ],
 
@@ -68,6 +68,11 @@ return [
         'users' => [
             'driver' => 'eloquent',
             'model' => App\Models\User::class,
+        ],
+
+        "customers" => [
+            "driver" => "eloquent",
+            "model" => App\Models\Customers::class,
         ],
 
         // 'users' => [
@@ -101,6 +106,13 @@ return [
             'table' => 'password_reset_tokens',
             'expire' => 60,
             'throttle' => 60,
+        ],
+
+        "customers" => [
+            "provider" => "customers",
+            "table" => "password_reset_tokens",
+            "expire" => 60,
+            "throttle" => 60,
         ],
     ],
 

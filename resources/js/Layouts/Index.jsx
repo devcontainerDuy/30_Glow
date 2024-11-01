@@ -1,13 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { Link, router } from "@inertiajs/react";
-import {
-    Sidebar,
-    SubMenu,
-    Menu,
-    MenuItem,
-    useProSidebar,
-    sidebarClasses,
-} from "react-pro-sidebar";
+import { Sidebar, SubMenu, Menu, MenuItem, useProSidebar, sidebarClasses } from "react-pro-sidebar";
 import { Container, Image, Navbar } from "react-bootstrap";
 import HomeOutlinedIcon from "@mui/icons-material/HomeOutlined";
 import PeopleOutlinedIcon from "@mui/icons-material/PeopleOutlined";
@@ -24,6 +17,7 @@ import BrandingWatermarkOutlinedIcon from "@mui/icons-material/BrandingWatermark
 import Inventory2OutlinedIcon from "@mui/icons-material/Inventory2Outlined";
 import MapOutlinedIcon from "@mui/icons-material/MapOutlined";
 import SlideOutlinedIcon from "@mui/icons-material/SlideshowOutlined";
+import PermContactCalendarOutlinedIcon from "@mui/icons-material/PermContactCalendarOutlined";
 import Swal from "sweetalert2";
 import ContentCutOutlinedIcon from "@mui/icons-material/ContentCutOutlined";
 import ContentPasteOutlinedIcon from "@mui/icons-material/ContentPasteOutlined";
@@ -84,114 +78,58 @@ function Layout({ children }) {
             <div id="app" style={({ height: "100vh" }, { display: "flex" })}>
                 <Sidebar style={{ height: "100vh" }}>
                     <Menu>
-                        <MenuItem
-                            icon={<MenuOutlinedIcon />}
-                            onClick={() => collapseSidebar()}
-                            style={{ textAlign: "center" }}
-                        >
+                        <MenuItem icon={<MenuOutlinedIcon />} onClick={() => collapseSidebar()} style={{ textAlign: "center" }}>
                             {/* <Image src="./resources/img/logo-30glow.jpg" /> */}
                             <h2> 30 Glow</h2>
                         </MenuItem>
-                        <MenuItem
-                            icon={<HomeOutlinedIcon />}
-                            component={
-                                <Link href="/admin/" method="get" as="a" />
-                            }
-                        >
+                        <MenuItem icon={<HomeOutlinedIcon />} component={<Link href="/admin/" method="get" as="a" />}>
                             Trang chủ
                         </MenuItem>
-                        <SubMenu
-                            icon={<PeopleOutlinedIcon />}
-                            label="Quản lý tài khoản"
-                        >
-                            <MenuItem
-                                icon={<BadgeOutlinedIcon />}
-                                component={<Link href="/admin/users" />}
-                            >
-                                Danh sách tài khoản
+                        <SubMenu icon={<PeopleOutlinedIcon />} label="Quản lý tài khoản">
+                            <MenuItem icon={<BadgeOutlinedIcon />} component={<Link href="/admin/users" />}>
+                                Ds tài khoản
                             </MenuItem>
-                            <MenuItem
-                                icon={<ManageAccountsOutlinedIcon />}
-                                component={<Link href="/admin/roles" />}
-                            >
+                            <MenuItem icon={<PermContactCalendarOutlinedIcon />} component={<Link href="/admin/customers" />}>
+                                Ds khách hàng
+                            </MenuItem>
+                            <MenuItem icon={<ManageAccountsOutlinedIcon />} component={<Link href="/admin/roles" />}>
                                 Loại tài khoản
                             </MenuItem>
-                            <MenuItem
-                                icon={<VerifiedUserOutlinedIcon />}
-                                component={<Link href="/admin/permissions" />}
-                            >
+                            <MenuItem icon={<VerifiedUserOutlinedIcon />} component={<Link href="/admin/permissions" />}>
                                 Quyền tài khoản
                             </MenuItem>
                         </SubMenu>
-                        <SubMenu
-                            icon={<StorefrontIcon />}
-                            label="Quản lý Sản phẩm"
-                        >
-                            <MenuItem
-                                icon={<Inventory2OutlinedIcon />}
-                                component={<Link href="/admin/products" />}
-                            >
-                                Danh sách sản phẩm
+                        <SubMenu icon={<StorefrontIcon />} label="Quản lý Sản phẩm">
+                            <MenuItem icon={<Inventory2OutlinedIcon />} component={<Link href="/admin/products" />}>
+                                Ds sản phẩm
                             </MenuItem>
-                            <MenuItem
-                                icon={<CategoryOutlinedIcon />}
-                                component={<Link href="/admin/categories" />}
-                            >
+                            <MenuItem icon={<CategoryOutlinedIcon />} component={<Link href="/admin/categories" />}>
                                 Danh mục sản phẩm
                             </MenuItem>
-                            <MenuItem
-                                icon={<BrandingWatermarkOutlinedIcon />}
-                                component={<Link href="/admin/brands" />}
-                            >
+                            <MenuItem icon={<BrandingWatermarkOutlinedIcon />} component={<Link href="/admin/brands" />}>
                                 Thương hiệu sản phẩm
                             </MenuItem>
                         </SubMenu>
-                        <SubMenu
-                            icon={<ContentCutOutlinedIcon />}
-                            label="Quản lý dịch vụ"
-                        >
-                            <MenuItem
-                                icon={<ContentPasteOutlinedIcon />}
-                                component={<Link href="/admin/services" />}
-                            >
-                                Danh sách dịch vụ
+                        <SubMenu icon={<ContentCutOutlinedIcon />} label="Quản lý dịch vụ">
+                            <MenuItem icon={<ContentPasteOutlinedIcon />} component={<Link href="/admin/services" />}>
+                                Ds dịch vụ
                             </MenuItem>
-                            <MenuItem
-                                icon={<ClassOutlinedIcon />}
-                                component={
-                                    <Link href="/admin/service-collections" />
-                                }
-                            >
+                            <MenuItem icon={<ClassOutlinedIcon />} component={<Link href="/admin/service-collections" />}>
                                 Phân loại dịch vụ
                             </MenuItem>
                         </SubMenu>
-                        <MenuItem
-                            icon={<PermMediaOutlinedIcon />}
-                            component={<Link href="/admin/galleries" />}
-                        >
+                        <MenuItem icon={<PermMediaOutlinedIcon />} component={<Link href="/admin/galleries" />}>
                             Bộ sưu tập
                         </MenuItem>
-                        <MenuItem
-                            icon={<MapOutlinedIcon />}
-                            component={<Link href="/admin/sitemap" />}
-                        >
+                        <MenuItem icon={<MapOutlinedIcon />} component={<Link href="/admin/sitemap" />}>
                             Sitemap
                         </MenuItem>
-                        <MenuItem
-                            icon={<SlideOutlinedIcon />}
-                            component={<Link href="/admin/slides" />}
-                        >
+                        <MenuItem icon={<SlideOutlinedIcon />} component={<Link href="/admin/slides" />}>
                             Slides
                         </MenuItem>
-                        <MenuItem icon={<ContactsOutlinedIcon />}>
-                            Contacts
-                        </MenuItem>
-                        <MenuItem icon={<HelpOutlineOutlinedIcon />}>
-                            FAQ
-                        </MenuItem>
-                        <MenuItem icon={<CalendarTodayOutlinedIcon />}>
-                            Calendar
-                        </MenuItem>
+                        <MenuItem icon={<ContactsOutlinedIcon />}>Contacts</MenuItem>
+                        <MenuItem icon={<HelpOutlineOutlinedIcon />}>FAQ</MenuItem>
+                        <MenuItem icon={<CalendarTodayOutlinedIcon />}>Calendar</MenuItem>
                     </Menu>
                 </Sidebar>
 
@@ -200,19 +138,13 @@ function Layout({ children }) {
                     <Navbar expand="lg" className="bg-body-tertiary">
                         <Container fluid>
                             <Navbar.Brand href="#home">
-                                <Image
-                                    src="https://30shine.com/static/media/logo_30shine_new.7135aeb8.png"
-                                    alt="30Shine"
-                                    width="100"
-                                />
+                                <Image src="https://30shine.com/static/media/logo_30shine_new.7135aeb8.png" alt="30Shine" width="100" />
                             </Navbar.Brand>
                             <Navbar.Toggle />
                             <Navbar.Collapse className="justify-content-end">
                                 <Navbar.Text>
                                     <span>Xin chào: </span>
-                                    <strong>
-                                        {user ? user?.name : "Đang tải..."}
-                                    </strong>
+                                    <strong>{user ? user?.name : "Đang tải..."}</strong>
                                 </Navbar.Text>
                                 <ProfileDropdown event={handleLogout} />
                             </Navbar.Collapse>
