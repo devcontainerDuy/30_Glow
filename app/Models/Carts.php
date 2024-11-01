@@ -14,7 +14,7 @@ class Carts extends Model
 
     protected $primaryKey = "id";
 
-    protected $illable = [
+    protected $fillable = [
         'id_customer',
         'id_product',
         'quantity',

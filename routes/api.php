@@ -25,6 +25,10 @@ Route::middleware('api')->group(function () {
         Route::post('login', 'login');
         Route::post('logout', 'logout')->middleware('auth:sanctum');
     });
+
+    Route::middleware(['auth:sanctum', 'auth.session'])->group(function () {
+        Route::apiResource('carts', App\Http\Controllers\Carts\CartController::class);
+    });
 });
 
 Route::middleware('api')->controller(App\Http\Controllers\Brands\BrandsController::class)->group(function () {
