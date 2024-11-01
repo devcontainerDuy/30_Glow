@@ -21,8 +21,8 @@ Route::middleware(['auth:sanctum', 'web'])->get('/user', function (Request $requ
 
 Route::middleware('api')->group(function () {
     Route::controller(App\Http\Controllers\Auth\AuthenticateController::class)->group(function () {
-        Route::post('register', 'register')->middleware('auth:customer');
-        Route::post('login', 'login');
+        Route::post('register', 'register');
+        Route::post('login', 'login')->middleware('auth:customer');
         Route::post('logout', 'logout')->middleware('auth:sanctum');
     });
 });
