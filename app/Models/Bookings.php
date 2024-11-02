@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Bookings extends Model
 {
@@ -35,9 +36,9 @@ class Bookings extends Model
         return $this->belongsTo(Customers::class, 'id_customer', 'id');
     }
 
-    public function service(): BelongsTo
+    public function service(): HasMany
     {
-        return $this->belongsTo(Services::class, 'id_service', 'id');
+        return $this->hasMany(Services::class, 'id_service', 'id');
     }
 
     public function serviceDetailsBills(): BelongsTo

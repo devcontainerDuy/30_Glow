@@ -15,7 +15,7 @@ return new class extends Migration
             $table->id();
             $table->bigInteger('id_user')->unsigned()->nullable();
             $table->bigInteger('id_customer')->unsigned();
-            $table->bigInteger('id_service')->unsigned();
+            // $table->bigInteger('id_service')->unsigned();
             $table->time('time');
             $table->string('note')->nullable();
             $table->tinyInteger('status')->default(0);
@@ -29,9 +29,9 @@ return new class extends Migration
             if (Schema::hasColumn('bookings', 'id_customer')) {
                 $table->foreign('id_customer')->references('id')->on('customers')->onDelete('restrict');
             }
-            if (Schema::hasColumn('bookings', 'id_service')) {
-                $table->foreign('id_service')->references('id')->on('services')->onDelete('restrict');
-            }
+            // if (Schema::hasColumn('bookings', 'id_service')) {
+            //     $table->foreign('id_service')->references('id')->on('services')->onDelete('restrict');
+            // }
         });
     }
 
