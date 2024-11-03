@@ -56,6 +56,7 @@ Route::middleware('web')->prefix('auth')->as('auth.')->controller(App\Http\Contr
     Route::post('login', 'handleLogin')->middleware('throttle:5,1'); // Giới hạn request 5 lần mỗi 1 phút
     Route::get('logout', 'handleLogout')->middleware('auth');
 });
+Route::post('/users/{id}/reset-password', [App\Http\Controllers\Customers\CustomerController::class, 'resetPassword']);
 
 Route::group(['prefix' => 'laravel-filemanager', 'middleware' => ['web', 'api']], function () {
     \UniSharp\LaravelFilemanager\Lfm::routes();

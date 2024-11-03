@@ -8,6 +8,7 @@ use App\Models\Customers;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use App\Mail\createUser;
+use App\Mail\resetPassword;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Str;
@@ -64,6 +65,32 @@ class CustomerController extends Controller
             return response()->json(['check' => true, 'message' => 'Tạo tài khoản thành công!', 'data' => $this->data], 201);
         }
         return response()->json(['check' => false, 'message' => 'Tạo tài khoản thất bại!'], status: 400);
+    }
+
+    public function resetPassword(CustomerRequest $request)
+    {
+        // $this->data = $request->validated();
+        //tại trong CustomerRequest có name nữa nên sợ bắt lỗi name
+        $this->data = $request->validate([
+            'email' => 'required|email|exists:users,email'
+        ]);
+
+        $newPassword = Str::random(10);
+        $user = $this->model::where('email', $this->data['email'])->first();
+
+        if ($user) {
+            $user->password = Hash::make($newPassword);
+            $user->save();
+            $dataMail = [
+                'name' => $user->name,
+                'email' => $this->data['email'],
+                'password' => $newPassword,
+            ];
+            Mail::to($this->data['email'])->send(new resetPassword ($dataMail));
+            return response()->json(['check' => true, 'message' => 'Mật khẩu đã được đặt lại thành công và gửi qua email!'], 200);
+        }
+
+        return response()->json(['check' => false, 'message' => 'Không tìm thấy tài khoản với email này!'], 404);
     }
 
     /**
