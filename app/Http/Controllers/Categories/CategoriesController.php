@@ -50,12 +50,16 @@ class CategoriesController extends Controller
 
     public function destroy($id)
     {
-        $this->instance = $this->model::findOrFail($id)->delete();
-        if ($this->instance) {
-            $this->data = $this->model::all();
-            return response()->json(['check' => true, 'message' => 'Xoá thành công!', 'data' => $this->data], 200);
+        try {
+            $this->instance = $this->model::findOrFail($id)->delete();
+            if ($this->instance) {
+                $this->data = $this->model::all();
+                return response()->json(['check' => true, 'message' => 'Xoá thành công!', 'data' => $this->data], 200);
+            }
+            return response()->json(['check' => false, 'message' => 'Xoá thất bại!'], 400);
+        } catch (\Exception $e) {
+            return response()->json(['check' => false, 'message' => 'Doanh mục có sản phẩm!'], 400);
         }
-        return response()->json(['check' => false, 'message' => 'Xoá thất bại!'], 400);
     }
 
     /**
@@ -65,7 +69,6 @@ class CategoriesController extends Controller
     {
         $this->data = $this->model::with("parent")->active()->select('id', 'name', 'slug', 'id_parent', 'status')->whereHas('products')->orderBy('id', 'asc')->get();
         return response()->json(['check' => true, 'data' => $this->data], 200);
-
     }
 
     public function apiShow($slug)
@@ -76,6 +79,5 @@ class CategoriesController extends Controller
             return response()->json(['check' => false, 'message' => 'Không tìm thấy phân loại sản phẩm'], 404);
         }
         return response()->json(['check' => true, 'data' => $this->data], 200);
-
     }
 }

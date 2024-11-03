@@ -12,6 +12,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Log;
+use Inertia\Inertia;
 
 class BookingController extends Controller
 {
@@ -28,6 +29,8 @@ class BookingController extends Controller
             ['name' => 'Dịch vụ', 'url' => '/admin/services'],
             ['name' => 'Danh sách dịch vụ đặt lịch', 'url' => '/admin/bookings'],
         ];
+        $this->data = $this->model::with('customer', 'services')->get();
+        return Inertia::render('Bookings/Index', ['bookings' => $this->data, 'crumbs' => $this->crumbs]);
     }
 
     /**

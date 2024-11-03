@@ -86,7 +86,7 @@ class CustomerController extends Controller
                 'email' => $this->data['email'],
                 'password' => $newPassword,
             ];
-            Mail::to($this->data['email'])->send(new resetPassword ($dataMail));
+            Mail::to($this->data['email'])->send(new resetPassword($dataMail));
             return response()->json(['check' => true, 'message' => 'Mật khẩu đã được đặt lại thành công và gửi qua email!'], 200);
         }
 

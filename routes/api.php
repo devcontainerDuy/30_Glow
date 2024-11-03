@@ -28,7 +28,9 @@ Route::middleware('api')->group(function () {
 
     Route::middleware(['auth:sanctum', 'auth.session'])->group(function () {
         Route::apiResource('carts', App\Http\Controllers\Carts\CartController::class);
-        Route::apiResource('bookings', App\Http\Controllers\Bookings\BookingController::class);
+    });
+    Route::controller(App\Http\Controllers\Bookings\BookingController::class)->group(function () {
+        Route::post('/bookings', 'store');
     });
 });
 
