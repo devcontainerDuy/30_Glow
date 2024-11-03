@@ -121,7 +121,7 @@ function Index({ customers, crumbs }) {
     };
 
     const columns = useMemo(() => [
-        { field: "id", headerName: "ID", width: 80 },
+        { field: "uid", headerName: "ID", width: 80 },
         {
             field: "name",
             headerName: "Tên tài khoản",

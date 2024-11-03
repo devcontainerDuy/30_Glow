@@ -1,14 +1,7 @@
 import React, { useState, useEffect, useMemo } from "react";
 import Layout from "@/Layouts/Index";
 import { Button, Col, Form, Modal, Row, Spinner } from "react-bootstrap";
-import {
-    Box,
-    FormControl,
-    FormControlLabel,
-    MenuItem,
-    Select,
-    Switch,
-} from "@mui/material";
+import { Box, FormControl, FormControlLabel, MenuItem, Select, Switch } from "@mui/material";
 import { DataGrid, GridToolbar } from "@mui/x-data-grid";
 import Swal from "sweetalert2";
 import BreadcrumbComponent from "@/Components/BreadcrumbComponent";
@@ -119,7 +112,7 @@ function Index({ users, role, crumbs }) {
     };
 
     const columns = useMemo(() => [
-        { field: "id", headerName: "ID", width: 80 },
+        { field: "uid", headerName: "ID", width: 80 },
         {
             field: "name",
             headerName: "Tên tài khoản",
@@ -148,11 +141,7 @@ function Index({ users, role, crumbs }) {
                                 value={roleId}
                                 displayEmpty
                                 onChange={(e) => {
-                                    handleCellEditStop(
-                                        params.row.id,
-                                        "id_role",
-                                        e.target.value
-                                    );
+                                    handleCellEditStop(params.row.id, "id_role", e.target.value);
                                 }}
                             >
                                 <MenuItem value="">Chưa phân quyền</MenuItem>
@@ -175,18 +164,7 @@ function Index({ users, role, crumbs }) {
                 return (
                     <>
                         <FormControlLabel
-                            control={
-                                <Switch
-                                    checked={params.row.status === 1}
-                                    onClick={() =>
-                                        handleCellEditStop(
-                                            params.row.id,
-                                            "status",
-                                            params.row.status === 1 ? 0 : 1
-                                        )
-                                    }
-                                />
-                            }
+                            control={<Switch checked={params.row.status === 1} onClick={() => handleCellEditStop(params.row.id, "status", params.row.status === 1 ? 0 : 1)} />}
                             label={params.row.status ? "Hoạt động" : "Ẩn"}
                         />
                     </>
@@ -208,20 +186,10 @@ function Index({ users, role, crumbs }) {
             renderCell: (params) => {
                 return (
                     <>
-                        <Button
-                            type="button"
-                            variant="outline-dark"
-                            title="Cập nhật lại mật khẩu"
-                        >
+                        <Button type="button" variant="outline-dark" title="Cập nhật lại mật khẩu">
                             <i className="bi bi-bootstrap-reboot" />
                         </Button>
-                        <Button
-                            type="button"
-                            variant="outline-danger"
-                            className="ms-2"
-                            title="Xóa tài khoản"
-                            onClick={() => handleDelete(params.row.id)}
-                        >
+                        <Button type="button" variant="outline-danger" className="ms-2" title="Xóa tài khoản" onClick={() => handleDelete(params.row.id)}>
                             <i className="bi bi-trash-fill" />
                         </Button>
                     </>
@@ -245,11 +213,7 @@ function Index({ users, role, crumbs }) {
                 <section className="container">
                     <Row>
                         <BreadcrumbComponent props={crumbs}>
-                            <Button
-                                type="button"
-                                variant="primary"
-                                onClick={handleShow}
-                            >
+                            <Button type="button" variant="primary" onClick={handleShow}>
                                 <i className="bi bi-person-fill-add" />
                                 <span className="ms-2">Thêm tài khoản mới</span>
                             </Button>
@@ -264,56 +228,21 @@ function Index({ users, role, crumbs }) {
                                     </Modal.Title>
                                 </Modal.Header>
                                 <Modal.Body>
-                                    <Form.Group
-                                        className="mb-3"
-                                        controlId="name"
-                                    >
-                                        <Form.Label>
-                                            Nhập địa tên người dùng
-                                        </Form.Label>
-                                        <Form.Control
-                                            type="text"
-                                            placeholder="name abc"
-                                            name="name"
-                                            onChange={(e) =>
-                                                setName(e.target.value)
-                                            }
-                                        />
+                                    <Form.Group className="mb-3" controlId="name">
+                                        <Form.Label>Nhập địa tên người dùng</Form.Label>
+                                        <Form.Control type="text" placeholder="name abc" name="name" onChange={(e) => setName(e.target.value)} />
                                     </Form.Group>
-                                    <Form.Group
-                                        className="mb-3"
-                                        controlId="email"
-                                    >
-                                        <Form.Label>
-                                            Nhập địa chỉ mail
-                                        </Form.Label>
-                                        <Form.Control
-                                            type="email"
-                                            placeholder="name@example.com"
-                                            name="email"
-                                            onChange={(e) =>
-                                                setEmail(e.target.value)
-                                            }
-                                        />
+                                    <Form.Group className="mb-3" controlId="email">
+                                        <Form.Label>Nhập địa chỉ mail</Form.Label>
+                                        <Form.Control type="email" placeholder="name@example.com" name="email" onChange={(e) => setEmail(e.target.value)} />
                                     </Form.Group>
                                     <Form.Group>
-                                        <Form.Label>
-                                            Chọn loại tài khoản
-                                        </Form.Label>
-                                        <Form.Select
-                                            aria-label="Loại tài khoản"
-                                            name="role"
-                                            onChange={(e) =>
-                                                setIdRole(e.target.value)
-                                            }
-                                        >
+                                        <Form.Label>Chọn loại tài khoản</Form.Label>
+                                        <Form.Select aria-label="Loại tài khoản" name="role" onChange={(e) => setIdRole(e.target.value)}>
                                             <option value="">-- Chọn --</option>
                                             {roles.length > 0 &&
                                                 roles.map((item, index) => (
-                                                    <option
-                                                        key={index}
-                                                        value={item.id}
-                                                    >
+                                                    <option key={index} value={item.id}>
                                                         {item.name}
                                                     </option>
                                                 ))}
@@ -321,25 +250,14 @@ function Index({ users, role, crumbs }) {
                                     </Form.Group>
                                 </Modal.Body>
                                 <Modal.Footer>
-                                    <Button
-                                        variant="secondary"
-                                        onClick={handleClose}
-                                    >
+                                    <Button variant="secondary" onClick={handleClose}>
                                         <i className="bi bi-box-arrow-right" />
                                         <span className="ms-2">Thoát ra</span>
                                     </Button>
-                                    <Button
-                                        variant="primary"
-                                        type="submit"
-                                        disabled={loading}
-                                    >
+                                    <Button variant="primary" type="submit" disabled={loading}>
                                         {loading ? (
                                             <>
-                                                <Spinner
-                                                    size="sm"
-                                                    animation="border"
-                                                    variant="secondary"
-                                                />
+                                                <Spinner size="sm" animation="border" variant="secondary" />
                                                 <span>Đang lưu...</span>
                                             </>
                                         ) : (
@@ -384,18 +302,10 @@ function Index({ users, role, crumbs }) {
                                         },
                                     }}
                                     onCellEditStop={(params, e) => {
-                                        handleCellEditStop(
-                                            params.row.id,
-                                            params.field,
-                                            e.target.value
-                                        );
+                                        handleCellEditStop(params.row.id, params.field, e.target.value);
                                     }}
                                     onCellEditStart={(params, e) => {
-                                        handleCellEditStart(
-                                            params.row.id,
-                                            params.field,
-                                            e.target.value
-                                        );
+                                        handleCellEditStart(params.row.id, params.field, e.target.value);
                                     }}
                                     pageSizeOptions={[20, 40, 60, 80, 100]}
                                     checkboxSelection

@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Users;
 
 use App\Models\Role;
 use App\Models\User;
+use App\Traits\GeneratesUniqueId;
 use Inertia\Inertia;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
@@ -15,7 +16,7 @@ use Illuminate\Support\Str;
 
 class UserController extends Controller
 {
-
+    use GeneratesUniqueId;
     public function __construct()
     {
         $this->model = User::class;
@@ -55,6 +56,7 @@ class UserController extends Controller
         $this->data = $request->validated();
 
         $password = Str::random(10);
+        $this->data['uid'] = $this->createCodeUser();
         $this->data['password'] = Hash::make($password);
 
         $this->instance = $this->model::create($this->data);

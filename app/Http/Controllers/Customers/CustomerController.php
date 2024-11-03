@@ -9,12 +9,14 @@ use Illuminate\Http\Request;
 use Inertia\Inertia;
 use App\Mail\createUser;
 use App\Mail\resetPassword;
+use App\Traits\GeneratesUniqueId;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Str;
 
 class CustomerController extends Controller
 {
+    use GeneratesUniqueId;
     public function __construct()
     {
         $this->model = Customers::class;
@@ -51,6 +53,7 @@ class CustomerController extends Controller
         $this->data = $request->validated();
 
         $password = Str::random(10);
+        $this->data['uid'] = $this->createCodeCustomer();
         $this->data['password'] = Hash::make($password);
 
         $this->instance = $this->model::create($this->data);

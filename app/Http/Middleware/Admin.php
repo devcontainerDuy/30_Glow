@@ -21,11 +21,11 @@ class Admin
 
         foreach ($guards as $guard) {
             if (Auth::guard($guard)->check()) {
-                if (Auth::guard($guard)->user()->is_role == 1) {
+                if (Auth::guard($guard)->user()->id_role == 1 || Auth::guard($guard)->user()->id_role == 2) {
                     return $next($request);
                 }
-
-                return response()->json(['status' => false, 'message' => 'Bạn không có quyền truy cập.'], 403);
+                Auth::guard($guard)->logout();
+                return response()->json(['status' => false, 'message' => 'Bạn không có quyền truy cập.', 'url' => route('auth.login')], 403);
             }
         }
 
