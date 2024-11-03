@@ -31,6 +31,7 @@ Route::middleware(['auth', 'auth.session', 'web'])->prefix('admin')->as('admin.'
     Route::resource('permissions', App\Http\Controllers\Permissions\PermissionController::class)->names('permission');
     // Module Customer
     Route::resource('customers', App\Http\Controllers\Customers\CustomerController::class)->names('customers');
+    Route::post('/customers/{id}/reset-password', [App\Http\Controllers\Customers\CustomerController::class, 'resetPassword']);
     // Module Category
     Route::resource('categories', App\Http\Controllers\Categories\CategoriesController::class)->names('categories');
     //Module Brand
@@ -56,7 +57,6 @@ Route::middleware('web')->prefix('auth')->as('auth.')->controller(App\Http\Contr
     Route::post('login', 'handleLogin')->middleware('throttle:5,1'); // Giới hạn request 5 lần mỗi 1 phút
     Route::get('logout', 'handleLogout')->middleware('auth');
 });
-Route::post('/customer/reset-password', [App\Http\Controllers\Customers\CustomerController::class, 'resetPassword']);
 
 Route::group(['prefix' => 'laravel-filemanager', 'middleware' => ['web', 'api']], function () {
     \UniSharp\LaravelFilemanager\Lfm::routes();

@@ -107,6 +107,19 @@ function Index({ customers, crumbs }) {
         });
     };
 
+    const handleResetPassword = (id) => {
+        window.axios
+            .post("/admin/customers/" + id + "/reset-password")
+            .then((res) => {
+                if (res.data.check === true) {
+                    toast.success(res.data.message);
+                }
+            })
+            .catch((error) => {
+                toast.error(error.response.data.message);
+            });
+    };
+
     const columns = useMemo(() => [
         { field: "id", headerName: "ID", width: 80 },
         {
@@ -172,7 +185,7 @@ function Index({ customers, crumbs }) {
             renderCell: (params) => {
                 return (
                     <>
-                        <Button type="button" variant="outline-dark" title="Cập nhật lại mật khẩu">
+                        <Button type="button" variant="outline-dark" title="Cập nhật lại mật khẩu" onClick={() => handleResetPassword(params.row.id)}>
                             <i className="bi bi-bootstrap-reboot" />
                         </Button>
                         <Button type="button" variant="outline-danger" className="ms-2" title="Xóa tài khoản" onClick={() => handleDelete(params.row.id)}>

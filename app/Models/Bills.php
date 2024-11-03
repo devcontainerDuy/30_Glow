@@ -15,6 +15,7 @@ class Bills extends Model
     protected $primaryKey = "id";
 
     protected $fillable = [
+        'uid',
         'name',
         'email',
         'phone',

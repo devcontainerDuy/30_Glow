@@ -67,24 +67,18 @@ class CustomerController extends Controller
         return response()->json(['check' => false, 'message' => 'Tạo tài khoản thất bại!'], status: 400);
     }
 
-    public function resetPassword(CustomerRequest $request)
+    public function resetPassword($id)
     {
-        // $this->data = $request->validated();
-        //tại trong CustomerRequest có name nữa nên sợ bắt lỗi name
-        $this->data = $request->validate([
-            'email' => 'required|email|exists:users,email'
-        ]);
+        $this->instance = Str::random(10);
+        $this->data = $this->model::findOrFail($id);
 
-        $newPassword = Str::random(10);
-        $user = $this->model::where('email', $this->data['email'])->first();
-
-        if ($user) {
-            $user->password = Hash::make($newPassword);
-            $user->save();
+        if ($this->data) {
+            $this->data['password'] = Hash::make($this->instance);
+            $this->data->save();
             $dataMail = [
-                'name' => $user->name,
+                'name' => $this->data['name'],
                 'email' => $this->data['email'],
-                'password' => $newPassword,
+                'password' => $this->instance,
             ];
             Mail::to($this->data['email'])->send(new resetPassword($dataMail));
             return response()->json(['check' => true, 'message' => 'Mật khẩu đã được đặt lại thành công và gửi qua email!'], 200);

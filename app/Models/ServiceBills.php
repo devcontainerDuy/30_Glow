@@ -16,6 +16,7 @@ class ServiceBills extends Model
     protected $primaryKey = "id";
 
     protected $fillable = [
+        'uid',
         "id_customer",
         "status",
         "created_at",

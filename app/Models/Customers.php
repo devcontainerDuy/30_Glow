@@ -18,6 +18,7 @@ class Customers extends Authenticatable
     protected $primaryKey = "id";
 
     protected $fillable = [
+        'uid',
         'name',
         'address',
         'phone',
