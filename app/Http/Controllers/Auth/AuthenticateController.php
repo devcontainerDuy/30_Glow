@@ -7,6 +7,7 @@ use App\Http\Requests\Auth\AuthenticateRequest;
 use Illuminate\Http\Request;
 use App\Mail\createUser;
 use App\Models\Customers;
+use App\Traits\GeneratesUniqueId;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
@@ -15,6 +16,7 @@ use Illuminate\Support\Str;
 
 class AuthenticateController extends Controller
 {
+    use GeneratesUniqueId;
     public function __construct()
     {
         $this->model = Customers::class;
@@ -23,6 +25,8 @@ class AuthenticateController extends Controller
     public function register(AuthenticateRequest $request)
     {
         $this->data = $request->validated();
+
+        $this->data['uid'] = $this->createCodeCustomer();
         $this->data['password'] = Hash::make($request->input('password'));
 
         $this->instance = $this->model::create($this->data);
