@@ -7,6 +7,7 @@ use App\Http\Requests\Bookings\BookingRequest;
 use App\Models\BookingHasService;
 use App\Models\Bookings;
 use App\Models\Customers;
+use App\Traits\GeneratesUniqueId;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
@@ -16,6 +17,7 @@ use Inertia\Inertia;
 
 class BookingController extends Controller
 {
+    use GeneratesUniqueId;
     public function __construct()
     {
         $this->model = Bookings::class;
@@ -29,7 +31,8 @@ class BookingController extends Controller
             ['name' => 'Dịch vụ', 'url' => '/admin/services'],
             ['name' => 'Danh sách dịch vụ đặt lịch', 'url' => '/admin/bookings'],
         ];
-        $this->data = $this->model::with('customer', 'services')->get();
+        $this->data = $this->model::with('user', 'customer', 'service')->get();
+        // dd($this->data);
         return Inertia::render('Bookings/Index', ['bookings' => $this->data, 'crumbs' => $this->crumbs]);
     }
 
@@ -55,14 +58,10 @@ class BookingController extends Controller
                 $customerId = $this->instance->id;
             } else {
                 $password = Str::random(10);
-                $customerId = Customers::insertGetId(['name' => $this->data['name'], 'email' => $this->data['email'], 'phone' => $this->data['phone'], 'password' => Hash::make($password),]);
+                $customerId = Customers::insertGetId(['uid' => $this->createCodeCustomer(), 'name' => $this->data['name'], 'email' => $this->data['email'], 'phone' => $this->data['phone'], 'password' => Hash::make($password),]);
             }
 
-            $booking = $this->model::insertGetId([
-                'id_user' => $this->data['id_user'] ?? null,
-                'id_customer' => $customerId,
-                'time' => $this->data['time'],
-            ]);
+            $booking = $this->model::insertGetId(['id_user' => $this->data['id_user'] ?? null, 'id_customer' => $customerId, 'time' => $this->data['time'], 'created_at' => now(), 'updated_at' => now(),]);
 
             if ($booking) {
                 foreach ($this->data['service'] as $item) {

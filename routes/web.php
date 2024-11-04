@@ -44,6 +44,10 @@ Route::middleware(['auth', 'auth.session', 'web', 'authen:web'])->prefix('admin'
     Route::resource('service-collections', App\Http\Controllers\ServicesCollections\ServiceCollectionsContoller::class)->names('service_collections');
     // Module Service
     Route::resource('services', App\Http\Controllers\Services\ServiceController::class)->names('service');
+    // Module Booking
+    Route::prefix('bookings')->as('bookings.')->controller(App\Http\Controllers\Bookings\BookingController::class)->group(function () {
+        Route::get('/', 'index')->name('index');
+    });
     // Module Sitemap
     Route::resource('sitemap', App\Http\Controllers\Sitemap\SitemapController::class)->names('sitemap');
     // Module Slides

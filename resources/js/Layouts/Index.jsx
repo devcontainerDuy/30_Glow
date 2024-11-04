@@ -18,6 +18,7 @@ import Inventory2OutlinedIcon from "@mui/icons-material/Inventory2Outlined";
 import MapOutlinedIcon from "@mui/icons-material/MapOutlined";
 import SlideOutlinedIcon from "@mui/icons-material/SlideshowOutlined";
 import PermContactCalendarOutlinedIcon from "@mui/icons-material/PermContactCalendarOutlined";
+import CalendarMonthOutlinedIcon from "@mui/icons-material/CalendarMonthOutlined";
 import Swal from "sweetalert2";
 import ContentCutOutlinedIcon from "@mui/icons-material/ContentCutOutlined";
 import ContentPasteOutlinedIcon from "@mui/icons-material/ContentPasteOutlined";
@@ -116,6 +117,9 @@ function Layout({ children }) {
                             </MenuItem>
                             <MenuItem icon={<ClassOutlinedIcon />} component={<Link href="/admin/service-collections" />}>
                                 Phân loại dịch vụ
+                            </MenuItem>
+                            <MenuItem icon={<CalendarMonthOutlinedIcon />} component={<Link href="/admin/bookings" />}>
+                                Ds lịch đặt
                             </MenuItem>
                         </SubMenu>
                         <MenuItem icon={<PermMediaOutlinedIcon />} component={<Link href="/admin/galleries" />}>

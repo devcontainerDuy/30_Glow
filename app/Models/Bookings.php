@@ -5,7 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 class Bookings extends Model
 {
@@ -18,7 +18,6 @@ class Bookings extends Model
     protected $fillable = [
         'id_user',
         'id_customer',
-        'id_service',
         'time',
         'note',
         'status',
@@ -36,9 +35,9 @@ class Bookings extends Model
         return $this->belongsTo(Customers::class, 'id_customer', 'id');
     }
 
-    public function service(): HasMany
+    public function service(): BelongsToMany
     {
-        return $this->hasMany(Services::class, 'id_service', 'id');
+        return $this->belongsToMany(Services::class, 'booking_has_services', 'id_booking', 'id_service');
     }
 
     public function serviceDetailsBills(): BelongsTo

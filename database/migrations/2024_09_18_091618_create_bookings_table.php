@@ -16,7 +16,7 @@ return new class extends Migration
             $table->bigInteger('id_user')->unsigned()->nullable();
             $table->bigInteger('id_customer')->unsigned();
             // $table->bigInteger('id_service')->unsigned();
-            $table->time('time');
+            $table->dateTime('time');
             $table->string('note')->nullable();
             $table->tinyInteger('status')->default(0);
             $table->timestamps();
