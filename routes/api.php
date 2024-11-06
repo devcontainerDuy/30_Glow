@@ -30,6 +30,7 @@ Route::middleware('api')->group(function () {
         Route::apiResource('carts', App\Http\Controllers\Carts\CartController::class);
     });
     Route::controller(App\Http\Controllers\Bookings\BookingController::class)->group(function () {
+        Route::get('/bookings', 'create');
         Route::post('/bookings', 'store');
     });
 });

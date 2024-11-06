@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Bookings;
 
+use App\Events\Bookings\BookingEvent;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Bookings\BookingRequest;
 use App\Models\BookingHasService;
@@ -32,7 +33,6 @@ class BookingController extends Controller
             ['name' => 'Danh sách dịch vụ đặt lịch', 'url' => '/admin/bookings'],
         ];
         $this->data = $this->model::with('user', 'customer', 'service')->get();
-        // dd($this->data);
         return Inertia::render('Bookings/Index', ['bookings' => $this->data, 'crumbs' => $this->crumbs]);
     }
 
@@ -41,7 +41,30 @@ class BookingController extends Controller
      */
     public function create()
     {
-        // 
+        $this->data = $this->model::with('user', 'customer', 'service')->inActive()->get();
+        $this->instance = $this->data->map(function ($item) {
+            return [
+                'id' => $item->id,
+                'user' => $item->user ? [
+                    'uid' => $item->user->uid,
+                    'name' => $item->user->name,
+                ] : null,
+                'customer' => $item->customer ? [
+                    'uid' => $item->customer->uid,
+                    'name' => $item->customer->name,
+                ] : null,
+                'time' => $item->time,
+                'service' => $item->service ? $item->service->map(function ($service) {
+                    return [
+                        'id' => $service->id,
+                        'name' => $service->name,
+                    ];
+                })->toArray() : null,
+                'note' => $item->note,
+                'status' => $item->status,
+            ];
+        });
+        return response()->json(['check' => true, 'data' => $this->instance], 200);
     }
 
     /**
@@ -70,11 +93,13 @@ class BookingController extends Controller
             }
 
             DB::commit();
+            $bookingData = $this->model::with('user', 'customer', 'service')->inActive()->orderBy('id', 'desc')->get();
+            broadcast(new BookingEvent($bookingData))->toOthers();
             return response()->json(['check' => true, 'message' => 'Đặt lịch thành công!'], 200);
         } catch (\Throwable $e) {
             DB::rollBack();
             Log::error("Booking failed: " . $e->getMessage());
-            return response()->json(['check' => false, 'message' => 'Đặt lịch thất bại!'], 400);
+            return response()->json(['check' => false, 'message' => $e->getMessage()], 400);
         }
     }
 

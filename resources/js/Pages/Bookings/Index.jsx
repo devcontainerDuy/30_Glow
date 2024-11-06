@@ -1,17 +1,17 @@
 import React, { useState, useEffect, useMemo } from "react";
 import Layout from "@/Layouts/Index";
-import { Button, Col, Form, Row, Modal, Spinner } from "react-bootstrap";
-import { Box, FormControlLabel, Switch, FormControl, Select, MenuItem } from "@mui/material";
+import { Button, Col, Row } from "react-bootstrap";
+import { Box } from "@mui/material";
 import { DataGrid, GridToolbar } from "@mui/x-data-grid";
-
-import Swal from "sweetalert2";
 import { Helmet } from "react-helmet";
-import { toast } from "react-toastify";
 import BreadcrumbComponent from "@/Components/BreadcrumbComponent";
+import Echo from "laravel-echo";
+import axios from "axios";
+import Pusher from "pusher-js";
 
 function Index({ bookings, crumbs }) {
-    const [data, setData] = useState([]);
-    const [crumbsData, setCrumbsData] = useState([]);
+    const [data, setData] = useState(bookings || []);
+    const [crumbsData, setCrumbsData] = useState(crumbs || []);
 
     const handleView = (id) => {
         console.log("Hello: ", id);
@@ -81,10 +81,23 @@ function Index({ bookings, crumbs }) {
         },
     ]);
 
+    const pusher = new Pusher("a41649538081bc522756", {
+        cluster: "ap1",
+        wsHost: "ws-ap1.pusher.com",
+        wsPort: 443,
+        wssPort: 443,
+        forceTLS: true,
+        enabledTransports: ["ws", "wss"],
+        disableStats: true,
+        encrypted: true,
+    });
+
     useEffect(() => {
-        setData(bookings);
-        setCrumbsData(crumbs);
-    }, [bookings]);
+        var channel = pusher.subscribe("channelBookings");
+        channel.bind("BookingCreated", function (data) {
+            setData(data.bookingData);
+        });
+    }, []);
 
     return (
         <>

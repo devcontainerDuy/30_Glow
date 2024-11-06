@@ -49,4 +49,9 @@ class Bookings extends Model
     {
         return $query->where('status', 1);
     }
+
+    public function scopeInActive($query)
+    {
+        return $query->where('status', 0);
+    }
 }
