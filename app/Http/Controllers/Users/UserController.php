@@ -115,4 +115,10 @@ class UserController extends Controller
         }
         return response()->json(['check' => false, 'message' => 'Xoá thất bại!'], 400);
     }
+
+    public function apiIndex()
+    {
+        $this->data = $this->model::where('id_role', 3)->select('uid', 'name')->get();
+        return response()->json(['check' => true, 'data' => $this->data], 200);
+    }
 }

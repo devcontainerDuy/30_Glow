@@ -26,12 +26,21 @@ Route::middleware('api')->group(function () {
         Route::post('logout', 'logout')->middleware('auth:sanctum');
     });
 
+    Route::controller(App\Http\Controllers\Auth\Admin\AuthenController::class)->group(function () {
+        Route::post('login-manager', 'loginManager')->middleware('throttle:5,1');
+    });
+
     Route::middleware(['auth:sanctum', 'auth.session'])->group(function () {
         Route::apiResource('carts', App\Http\Controllers\Carts\CartController::class);
     });
+
     Route::controller(App\Http\Controllers\Bookings\BookingController::class)->group(function () {
-        Route::get('/bookings', 'create');
+        Route::get('/bookings', 'create')->middleware(['auth:sanctum', 'auth.session']);
         Route::post('/bookings', 'store');
+    });
+
+    Route::controller(App\Http\Controllers\Users\UserController::class)->group(function () {
+        Route::get('/staff', 'apiIndex');
     });
 });
 

@@ -56,7 +56,7 @@ Route::middleware(['auth', 'auth.session', 'web', 'authen:web'])->prefix('admin'
     Route::resource('bookings', App\Http\Controllers\Bookings\BookingController::class)->names('bookings');
 });
 
-Route::middleware('web')->prefix('auth')->as('auth.')->controller(App\Http\Controllers\Auth\AuthenController::class)->group(function () {
+Route::middleware('web')->prefix('auth')->as('auth.')->controller(App\Http\Controllers\Auth\Admin\AuthenController::class)->group(function () {
     Route::get('login', 'login')->name('login');
     Route::post('login', 'handleLogin')->middleware('throttle:5,1'); // Giới hạn request 5 lần mỗi 1 phút
     Route::get('logout', 'handleLogout')->middleware('auth');

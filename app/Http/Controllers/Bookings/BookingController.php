@@ -93,13 +93,12 @@ class BookingController extends Controller
             }
 
             DB::commit();
-            $bookingData = $this->model::with('user', 'customer', 'service')->inActive()->orderBy('id', 'desc')->get();
-            broadcast(new BookingEvent($bookingData))->toOthers();
+            broadcast(new BookingEvent($this->model::with('user', 'customer', 'service')->inActive()->get()))->toOthers();
             return response()->json(['check' => true, 'message' => 'Đặt lịch thành công!'], 200);
         } catch (\Throwable $e) {
             DB::rollBack();
             Log::error("Booking failed: " . $e->getMessage());
-            return response()->json(['check' => false, 'message' => $e->getMessage()], 400);
+            return response()->json(['check' => false, 'message' => "Đặt lịch thất bại!"], 400);
         }
     }
 
