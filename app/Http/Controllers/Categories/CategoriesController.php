@@ -4,7 +4,9 @@ namespace App\Http\Controllers\Categories;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Categories\CategoriesRequest;
+use App\Models\Brands;
 use App\Models\Categories;
+use App\Models\Products;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Illuminate\Support\Str;
@@ -21,8 +23,10 @@ class CategoriesController extends Controller
             ['name' => 'Sản phẩm', 'url' => '/admin/products'],
             ['name' => 'Danh sách danh mục', 'url' => '/admin/categories'],
         ];
-        $this->data = $this->model::with("parent")->get();
-        return Inertia::render('Categories/Index', ['categories' => $this->data, 'crumbs' => $this->crumbs]);
+
+        $this->data = $this->model::with('parent')->withCount('products')->get();
+        $products = Products::with('category', 'brand', 'gallery')->get();
+        return Inertia::render('Categories/Index', ['categories' => $this->data, 'products' => $products, 'crumbs' => $this->crumbs]);
     }
     public function store(CategoriesRequest $request)
     {
@@ -34,6 +38,18 @@ class CategoriesController extends Controller
             return response()->json(['check' => true, 'message' => 'Tạo thành công!', 'data' => $this->data], 201);
         }
         return response()->json(['check' => false, 'message' => 'Tạo thất bại!'], status: 400);
+    }
+    public function edit(string $id)
+    {
+        $this->crumbs = [
+            ['name' => 'Sản phẩm', 'url' => '/admin/products'],
+            ['name' => 'Danh sách danh mục', 'url' => '/admin/categories'],
+            ['name' => 'Sản phẩm thuộc danh mục', 'url' => '/admin/categories/' . $id . '/edit']
+        ];
+        $this->data = Products::with('category', 'brand', 'gallery')->where('id_category', $id)->get();
+        $category = Categories::active()->select('id', 'name')->get();
+        $brand = Brands::active()->select('id', 'name')->get();
+        return Inertia::render('Products/Index', ['products' => $this->data, 'crumbs' => $this->crumbs, 'categories' => $category, 'brands' => $brand]);
     }
 
     public function update(CategoriesRequest $request, $id)

@@ -14,8 +14,8 @@ class ProductRequest extends BaseRequest
     {
         return [
             'name' => ['required', 'string', 'max:255'],
-            'price' => ['required', 'numeric'],
-            'discount' => ['required', 'numeric'],
+            'price' => ['required', 'numeric', 'min:0'],
+            'discount' => ['required', 'numeric', 'min:0', 'max:100'],
             'image' => ['required', 'array', 'max:2048'],
             'content' => 'nullable|string',
             'id_category' => ['required', 'exists:categories,id'],
@@ -40,6 +40,12 @@ class ProductRequest extends BaseRequest
             'id_category' => ['nullable', 'exists:categories,id',],
             'id_brand' => ['nullable', 'exists:brands,id'],
             'in_stock' => ['nullable', 'integer', 'min:0'],
+        ];
+    }
+    public function messages()
+    {
+        return [
+            '*.min' => 'Trường :attribute không được mang giá trị âm',
         ];
     }
 }

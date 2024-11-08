@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo } from "react";
 import Layout from "@/Layouts/Index";
-import { Button, Col, Form, Row, Modal, Spinner } from "react-bootstrap";
+import { Button, Card, Col, Form, Row, Modal, Spinner } from "react-bootstrap";
 import {
     Box,
     FormControlLabel,
@@ -16,21 +16,34 @@ import { Helmet } from "react-helmet";
 import { toast } from "react-toastify";
 import BreadcrumbComponent from "@/Components/BreadcrumbComponent";
 
-function Index({ categories, crumbs }) {
+function Index({ categories, products, crumbs }) {
     const [data, setData] = useState([]);
+    const [productList, setProductList] = useState([]);
     const [show, setShow] = useState(false);
+    const [showProductsModal, setShowProductsModal] = useState(false);
+    const [selectedProducts, setSelectedProducts] = useState([]);
     const [loading, setLoading] = useState(false);
     const [editingCells, setEditingCells] = useState({});
     const [name, setName] = useState("");
     const [idParent, setIdParent] = useState("");
+    const [categoryId, setCategoryId] = useState(null);
 
     const handleClose = () => {
         setShow(false);
         setName("");
         setIdParent("");
     };
-
+    // console.log(categories.products);
     const handleShow = () => setShow(true);
+    const handleShowProducts = (categoryId) => {
+        setCategoryId(categoryId);
+        const filteredProducts = productList.filter(product => product.id_category === categoryId);
+        setSelectedProducts(filteredProducts);
+        setShowProductsModal(true);
+    };
+    const handleCloseProducts = (categoryId) => {
+        setShowProductsModal(false);
+    };
 
     const handleSubmit = (e) => {
         e.preventDefault();
@@ -154,6 +167,61 @@ function Index({ categories, crumbs }) {
         });
     };
 
+    const handleDeleteProduct = (id) => {
+        Swal.fire({
+            title: "Xóa mục?",
+            text: "Bạn chắc chắn xóa mục này!",
+            icon: "error",
+            showCancelButton: true,
+            confirmButtonColor: "#3085d6",
+            cancelButtonColor: "#d33",
+            confirmButtonText: "Có, xóa",
+            cancelButtonText: "Hủy",
+        }).then((result) => {
+            if (result.isConfirmed) {
+                window.axios
+                    .delete("/admin/products/" + id)
+                    .then((res) => {
+                        if (res.data.check === true) {
+                            toast.success(res.data.message);    
+                            const filteredProducts = res.data.data.filter(product => product.id_category === categoryId);
+                            setSelectedProducts(filteredProducts);
+                            setData(res.data.categories);
+                            setProductList(res.data.data)
+                        } else {
+                            toast.warning(res.data.message);
+                        }
+                    })
+                    .catch((error) => {
+                        toast.error(error.response.data.message);
+                    });
+            }
+        });
+    };
+
+    const handleUpdateProduct = (id, newCategoryId) => {
+        const updatedData = {
+            id_category: newCategoryId,
+        };
+    
+        window.axios
+            .put(`/admin/products/${id}`, updatedData)
+            .then((res) => {
+                if (res.data.check) {
+                    toast.success(res.data.message);    
+                    const filteredProducts = res.data.data.filter(product => product.id_category === categoryId);
+                    setSelectedProducts(filteredProducts);
+                    setData(res.data.categories);
+                    setProductList(res.data.data)
+                } else {
+                    toast.warning(res.data.message);
+                }
+            })
+            .catch((error) => {
+                toast.error(error.response.data.message);
+            });
+    };
+
     const columns = useMemo(() => [
         { field: "id", headerName: "ID", width: 80 },
         {
@@ -166,6 +234,19 @@ function Index({ categories, crumbs }) {
             field: "slug",
             headerName: "Slug",
             width: 180,
+        },
+        {
+            field: "products_count",
+            headerName: "Số lượng sản phẩm",
+            width: 180,
+            renderCell: (params) => (
+                <Button
+                    variant="link"
+                    onClick={() => handleShowProducts(params.row.id)}
+                >
+                    {params.row.products_count}
+                </Button>
+            ),
         },
         {
             field: "status",
@@ -261,9 +342,12 @@ function Index({ categories, crumbs }) {
         },
     ]);
 
+    console.log();
+
     useEffect(() => {
         setData(categories);
-    }, [categories]);
+        setProductList(products)
+    }, [categories, products]);
 
     return (
         <>
@@ -285,7 +369,7 @@ function Index({ categories, crumbs }) {
                             </Button>
                         </BreadcrumbComponent>
 
-                        {/* Start Modal */}
+                        {/* Start Modal Thêm danh mục mới */}
                         <Modal show={show} onHide={handleClose}>
                             <Form onSubmit={handleSubmit}>
                                 <Modal.Header closeButton>
@@ -366,7 +450,70 @@ function Index({ categories, crumbs }) {
                                 </Modal.Footer>
                             </Form>
                         </Modal>
-                        {/* End Modal */}
+                        {/* End Modal Thêm danh mục mới */}
+
+                        {/* Start Products Modal */}
+                        <Modal show={showProductsModal} onHide={() => setShowProductsModal(false)} size="lg">
+                            <Modal.Header closeButton>
+                                <Modal.Title>Danh Sách Sản Phẩm</Modal.Title>
+                            </Modal.Header>
+                            <Modal.Body>
+                                <Row className="row-cols-4 g-1">
+                                    {selectedProducts.length > 0 ? (
+                                        selectedProducts.map((item, index) => (
+                                            <Col key={index} className="mb-3">
+                                                <Card style={{ minHeight: "246px" }}>
+                                                    <div className="d-flex flex-column align-items-center">
+                                                        {item.gallery && item.gallery.length > 0 && item.gallery.find((image) => image.status === 1) && (
+                                                            <Card.Img
+                                                                variant="top"
+                                                                fluid
+                                                                className="mb-1 rounded-1 w-100"
+                                                                style={{ maxHeight: "182.75px" }}
+                                                                src={`/storage/gallery/${item.gallery.find((image) => image.status === 1).image}`}
+                                                                alt={item.name}
+                                                            />
+                                                        )}
+                                                        <span className="mt-2">{item.name}</span>
+                                                    </div>
+                                                    <Card.Body className="p-2 d-flex justify-content-between align-items-center">
+                                                        <select
+                                                            className="form-select w-75"
+                                                            defaultValue={item.id_category}
+                                                            onChange={(e) => handleUpdateProduct(item.id, e.target.value)} // Gọi hàm cập nhật khi chọn
+                                                        >
+                                                            {categories.map((category) => (
+                                                                <option key={category.id} value={category.id}>
+                                                                    {category.name}
+                                                                </option>
+                                                            ))}
+                                                        </select>
+                                                        <div className="d-flex">
+                                                            <Button
+                                                                className="me-2"
+                                                                variant="danger"
+                                                                type="button"
+                                                                onClick={() => handleDeleteProduct(item.id)}
+                                                            >
+                                                                Xóa
+                                                            </Button>
+                                                        </div>
+                                                    </Card.Body>
+                                                </Card>
+                                            </Col>
+                                        ))
+                                    ) : (
+                                        <p>Không có sản phẩm nào trong danh mục này.</p>
+                                    )}
+                                </Row>
+                            </Modal.Body>
+                            <Modal.Footer>
+                                <Button variant="secondary" onClick={() => handleCloseProducts()}>
+                                    Đóng
+                                </Button>
+                            </Modal.Footer>
+                        </Modal>
+                        {/* End Products Modal */}
 
                         {/* Start DataGrid */}
                         <Col xs="12">
@@ -421,6 +568,7 @@ function Index({ categories, crumbs }) {
             </Layout>
         </>
     );
+
 }
 
 export default Index;
