@@ -12,7 +12,7 @@ class Contacts extends Model
 
     protected $primaryKey = "id";
 
-    protected $illable = [
+    protected $fillable  = [
         'name',
         'email',
         'phone',
