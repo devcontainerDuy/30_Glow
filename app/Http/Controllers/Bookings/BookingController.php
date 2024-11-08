@@ -100,7 +100,7 @@ class BookingController extends Controller
         } catch (\Throwable $e) {
             DB::rollBack();
             Log::error("Booking failed: " . $e->getMessage());
-            return response()->json(['check' => false, 'message' => "Đặt lịch thất bại!", 'error' => $e->getMessage()], 400);
+            return response()->json(['check' => false, 'message' => "Đặt lịch thất bại!"], 400);
         }
     }
 
