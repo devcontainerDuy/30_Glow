@@ -14,7 +14,7 @@ class BookingRequest extends BaseRequest
     public function methodPost()
     {
         return [
-            'id_user' => ['nullable', 'exists:users,id'],
+            'id_user' => ['nullable', 'exists:users,uid'],
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'string', 'email', 'max:255'],
             'phone' => ['required', 'numeric'],

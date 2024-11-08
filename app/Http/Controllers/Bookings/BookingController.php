@@ -8,6 +8,7 @@ use App\Http\Requests\Bookings\BookingRequest;
 use App\Models\BookingHasService;
 use App\Models\Bookings;
 use App\Models\Customers;
+use App\Models\User;
 use App\Traits\GeneratesUniqueId;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -41,7 +42,7 @@ class BookingController extends Controller
      */
     public function create()
     {
-        $this->data = $this->model::with('user', 'customer', 'service')->inActive()->get();
+        $this->data = $this->model::with('user', 'customer', 'service')->inActive()->orderBy('id', 'desc')->get();
         $this->instance = $this->data->map(function ($item) {
             return [
                 'id' => $item->id,
@@ -76,6 +77,7 @@ class BookingController extends Controller
         try {
             $this->data = $request->validated();
             $this->instance = Customers::where('email', $this->data['email'])->where('phone', $this->data['phone'])->active()->first();
+            $idUser = User::where('uid', $this->data['id_user'])->first();
 
             if ($this->instance) {
                 $customerId = $this->instance->id;
@@ -84,7 +86,7 @@ class BookingController extends Controller
                 $customerId = Customers::insertGetId(['uid' => $this->createCodeCustomer(), 'name' => $this->data['name'], 'email' => $this->data['email'], 'phone' => $this->data['phone'], 'password' => Hash::make($password),]);
             }
 
-            $booking = $this->model::insertGetId(['id_user' => $this->data['id_user'] ?? null, 'id_customer' => $customerId, 'time' => $this->data['time'], 'created_at' => now(), 'updated_at' => now(),]);
+            $booking = $this->model::insertGetId(['id_user' => $idUser->id ?? null, 'id_customer' => $customerId, 'time' => $this->data['time'], 'created_at' => now(), 'updated_at' => now(),]);
 
             if ($booking) {
                 foreach ($this->data['service'] as $item) {
@@ -93,12 +95,12 @@ class BookingController extends Controller
             }
 
             DB::commit();
-            broadcast(new BookingEvent($this->model::with('user', 'customer', 'service')->inActive()->get()))->toOthers();
+            broadcast(new BookingEvent($this->model::with('user', 'customer', 'service')->inActive()->orderBy('id', 'desc')->get()))->toOthers();
             return response()->json(['check' => true, 'message' => 'Đặt lịch thành công!'], 200);
         } catch (\Throwable $e) {
             DB::rollBack();
             Log::error("Booking failed: " . $e->getMessage());
-            return response()->json(['check' => false, 'message' => "Đặt lịch thất bại!"], 400);
+            return response()->json(['check' => false, 'message' => "Đặt lịch thất bại!", 'error' => $e->getMessage()], 400);
         }
     }
 
