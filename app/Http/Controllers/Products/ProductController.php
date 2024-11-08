@@ -113,7 +113,8 @@ class ProductController extends Controller
         $this->instance = $this->model::findOrFail($id)->update($this->data);
         if ($this->instance) {
             $this->data = $this->model::with('category', 'brand', 'gallery')->get();
-            return response()->json(['check' => true, 'message' => 'Cập nhật thành công!', 'data' => $this->data], 200);
+            $categories = Categories::with('parent')->withCount('products')->get();
+            return response()->json(['check' => true, 'message' => 'Cập nhật thành công!', 'data' => $this->data, 'categories' => $categories], 200);
         }
         return response()->json(['check' => false, 'message' => 'Cập nhật thất bại!'], 400);
     }
@@ -138,7 +139,8 @@ class ProductController extends Controller
 
         if ($this->instance) {
             $this->data = $this->model::with('category', 'brand', 'gallery')->get();
-            return response()->json(['check' => true, 'message' => 'Xoá thành công!', 'data' => $this->data], 200);
+            $categories = Categories::with('parent')->withCount('products')->get();
+            return response()->json(['check' => true, 'message' => 'Xoá thành công!', 'data' => $this->data, 'categories' => $categories], 200);
         }
 
         return response()->json(['check' => false, 'message' => 'Xoá thất bại!'], 400);

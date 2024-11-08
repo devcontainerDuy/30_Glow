@@ -209,7 +209,8 @@ function Edit({ products, crumbs, categories, brands }) {
     const handleEditorBlur = (data) => {
         setContent(data);
     };
-
+    console.log(products.gallery);
+    
     useEffect(() => {
         setName(products.name);
         setSlug(products.slug);
