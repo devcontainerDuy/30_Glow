@@ -54,6 +54,8 @@ Route::middleware(['auth', 'auth.session', 'web', 'authen:web'])->prefix('admin'
     Route::resource('slides', App\Http\Controllers\Slides\SlidesController::class)->names('slides');
     // Module Booking
     Route::resource('bookings', App\Http\Controllers\Bookings\BookingController::class)->names('bookings');
+    // Module contacts
+    Route::resource('contacts', App\Http\Controllers\Contacts\ContactsController::class)->names('contacts');
 });
 
 Route::middleware('web')->prefix('auth')->as('auth.')->controller(App\Http\Controllers\Auth\Admin\AuthenController::class)->group(function () {
