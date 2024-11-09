@@ -77,7 +77,10 @@ class BookingController extends Controller
         try {
             $this->data = $request->validated();
             $this->instance = Customers::where('email', $this->data['email'])->where('phone', $this->data['phone'])->active()->first();
-            $idUser = User::where('uid', $this->data['id_user'])->first();
+
+            if (!empty($this->data['id_user'])) {
+                $idUser = User::where('uid', $this->data['id_user'])->first();
+            }
 
             if ($this->instance) {
                 $customerId = $this->instance->id;
