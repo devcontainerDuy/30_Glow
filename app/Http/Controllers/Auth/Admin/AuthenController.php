@@ -51,14 +51,16 @@ class AuthenController extends Controller
             if ($this->instance->id_role === 2 || $this->instance->id_role === 3) {
                 $this->instance->tokens()->delete();
 
-                $token = $this->instance->createToken($this->instance->name)->plainTextToken;
+                $expiry = $this->data['remember_token'] ? now()->addDays(2) : now()->addHours(6);
+                $token = $this->instance->createToken($this->instance->uid);
+                $token->accessToken->expires_at = $expiry;
 
-                return response()->json(['check' => true, 'role' => $this->instance->id_role === 2 ? 'manager' : 'staff', 'token' => $token], 200);
+                return response()->json(['check' => true, 'role' => $this->instance->id_role === 2 ? 'manager' : 'staff', 'token' => $token->plainTextToken, 'expiry' => $expiry->timestamp], 200);
             } else {
                 Auth::guard('api')->logout();
                 return response()->json(['check' => false, 'message' => 'Bạn không có quyền truy cập!'], 403);
             }
         }
-        return response()->json(['check' => false, 'message' => 'Đăng nhập thất bại!'], 400);
+        return response()->json(['check' => false, 'message' => 'Đăng nhập thất bại!'], 401);
     }
 }

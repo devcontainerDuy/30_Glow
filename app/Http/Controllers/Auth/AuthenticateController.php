@@ -59,8 +59,10 @@ class AuthenticateController extends Controller
         if (Auth::guard('customer')->attempt(['email' => $request->email, 'password' => $request->password, 'status' => 1], $request->remember_token)) {
             $this->instance = Auth::guard('customer')->user();
             $this->instance->tokens()->delete();
-            $token = $this->instance->createToken($this->instance->name)->plainTextToken;
-            return response()->json(['check' => true, 'id' => $this->instance->id, 'token' => $token], 200);
+            $expiry = $request->remember_token ? now()->addDays(2) : now()->addHours(6);
+            $token = $this->instance->createToken($this->instance->uid);
+            $token->accessToken->expires_at = $expiry;
+            return response()->json(['check' => true, 'token' => $token->plainTextToken, 'expiry' => $expiry->timestamp], 200);
         } else {
             return response()->json(['check' => false, 'message' => 'Sai email hoặc mật khẩu'], 401);
         }
