@@ -1,14 +1,7 @@
 import React, { useState, useEffect, useMemo } from "react";
 import Layout from "@/Layouts/Index";
 import { Button, Card, Col, Form, Row, Modal, Spinner } from "react-bootstrap";
-import {
-    Box,
-    FormControlLabel,
-    Switch,
-    FormControl,
-    Select,
-    MenuItem,
-} from "@mui/material";
+import { Box, FormControlLabel, Switch, FormControl, Select, MenuItem } from "@mui/material";
 import { DataGrid, GridToolbar } from "@mui/x-data-grid";
 
 import Swal from "sweetalert2";
@@ -35,9 +28,10 @@ function Index({ categories, products, crumbs }) {
     };
     // console.log(categories.products);
     const handleShow = () => setShow(true);
+
     const handleShowProducts = (categoryId) => {
         setCategoryId(categoryId);
-        const filteredProducts = productList.filter(product => product.id_category === categoryId);
+        const filteredProducts = productList.filter((product) => product.id_category === categoryId);
         setSelectedProducts(filteredProducts);
         setShowProductsModal(true);
     };
@@ -75,9 +69,7 @@ function Index({ categories, products, crumbs }) {
 
     const handleCellEditStop = (id, field, value) => {
         if (field === "id_parent") {
-            const childCategories = data.filter(
-                (category) => category.id_parent === id
-            );
+            const childCategories = data.filter((category) => category.id_parent === id);
             if (childCategories.length > 0) {
                 Swal.fire({
                     title: "Cập nhật các danh mục con?",
@@ -151,11 +143,7 @@ function Index({ categories, products, crumbs }) {
                     .then((res) => {
                         if (res.data.check === true) {
                             toast.success(res.data.message);
-                            setData((prevData) =>
-                                prevData.filter(
-                                    (category) => category.id !== id
-                                )
-                            );
+                            setData((prevData) => prevData.filter((category) => category.id !== id));
                         } else {
                             toast.warning(res.data.message);
                         }
@@ -183,11 +171,11 @@ function Index({ categories, products, crumbs }) {
                     .delete("/admin/products/" + id)
                     .then((res) => {
                         if (res.data.check === true) {
-                            toast.success(res.data.message);    
-                            const filteredProducts = res.data.data.filter(product => product.id_category === categoryId);
+                            toast.success(res.data.message);
+                            const filteredProducts = res.data.data.filter((product) => product.id_category === categoryId);
                             setSelectedProducts(filteredProducts);
                             setData(res.data.categories);
-                            setProductList(res.data.data)
+                            setProductList(res.data.data);
                         } else {
                             toast.warning(res.data.message);
                         }
@@ -203,16 +191,16 @@ function Index({ categories, products, crumbs }) {
         const updatedData = {
             id_category: newCategoryId,
         };
-    
+
         window.axios
             .put(`/admin/products/${id}`, updatedData)
             .then((res) => {
                 if (res.data.check) {
-                    toast.success(res.data.message);    
-                    const filteredProducts = res.data.data.filter(product => product.id_category === categoryId);
+                    toast.success(res.data.message);
+                    const filteredProducts = res.data.data.filter((product) => product.id_category === categoryId);
                     setSelectedProducts(filteredProducts);
                     setData(res.data.categories);
-                    setProductList(res.data.data)
+                    setProductList(res.data.data);
                 } else {
                     toast.warning(res.data.message);
                 }
@@ -240,10 +228,7 @@ function Index({ categories, products, crumbs }) {
             headerName: "Số lượng sản phẩm",
             width: 180,
             renderCell: (params) => (
-                <Button
-                    variant="link"
-                    onClick={() => handleShowProducts(params.row.id)}
-                >
+                <Button variant="link" onClick={() => handleShowProducts(params.row.id)}>
                     {params.row.products_count}
                 </Button>
             ),
@@ -255,18 +240,7 @@ function Index({ categories, products, crumbs }) {
             renderCell: (params) => (
                 <>
                     <FormControlLabel
-                        control={
-                            <Switch
-                                checked={params.row.status === 1}
-                                onClick={() =>
-                                    handleCellEditStop(
-                                        params.row.id,
-                                        "status",
-                                        params.row.status === 1 ? 0 : 1
-                                    )
-                                }
-                            />
-                        }
+                        control={<Switch checked={params.row.status === 1} onClick={() => handleCellEditStop(params.row.id, "status", params.row.status === 1 ? 0 : 1)} />}
                         label={params.row.status ? "Hoạt động" : "Ẩn"}
                     />
                 </>
@@ -287,27 +261,14 @@ function Index({ categories, products, crumbs }) {
                                 value={parentId}
                                 displayEmpty
                                 onChange={(e) => {
-                                    handleCellEditStop(
-                                        params.row.id,
-                                        "id_parent",
-                                        e.target.value
-                                    );
+                                    handleCellEditStop(params.row.id, "id_parent", e.target.value);
                                 }}
                             >
                                 <MenuItem value="">Danh mục cha</MenuItem>
                                 {data
-                                    .filter(
-                                        (category) =>
-                                            category.id_parent === null
-                                    )
+                                    .filter((category) => category.id_parent === null)
                                     .map((category, index) => (
-                                        <MenuItem
-                                            key={index}
-                                            value={category.id}
-                                            disabled={
-                                                category.id === params.row.id
-                                            }
-                                        >
+                                        <MenuItem key={index} value={category.id} disabled={category.id === params.row.id}>
                                             {category.name || "Lỗi"}
                                         </MenuItem>
                                     ))}
@@ -321,21 +282,14 @@ function Index({ categories, products, crumbs }) {
             field: "created_at",
             headerName: "Ngày tạo",
             width: 180,
-            renderCell: (params) =>
-                new Date(params.row.created_at).toLocaleString(),
+            renderCell: (params) => new Date(params.row.created_at).toLocaleString(),
         },
         {
             field: "action",
             headerName: "Thao tác",
             width: 160,
             renderCell: (params) => (
-                <Button
-                    type="button"
-                    variant="outline-danger"
-                    className="ms-2"
-                    title="Xóa danh mục"
-                    onClick={() => handleDelete(params.row.id)}
-                >
+                <Button type="button" variant="outline-danger" className="ms-2" title="Xóa danh mục" onClick={() => handleDelete(params.row.id)}>
                     <i className="bi bi-trash-fill" />
                 </Button>
             ),
@@ -346,7 +300,7 @@ function Index({ categories, products, crumbs }) {
 
     useEffect(() => {
         setData(categories);
-        setProductList(products)
+        setProductList(products);
     }, [categories, products]);
 
     return (
@@ -359,11 +313,7 @@ function Index({ categories, products, crumbs }) {
                 <section className="container">
                     <Row>
                         <BreadcrumbComponent props={crumbs}>
-                            <Button
-                                type="button"
-                                variant="primary"
-                                onClick={handleShow}
-                            >
+                            <Button type="button" variant="primary" onClick={handleShow}>
                                 <i className="bi bi-plus-circle" />
                                 <span className="ms-2">Thêm danh mục mới</span>
                             </Button>
@@ -373,53 +323,21 @@ function Index({ categories, products, crumbs }) {
                         <Modal show={show} onHide={handleClose}>
                             <Form onSubmit={handleSubmit}>
                                 <Modal.Header closeButton>
-                                    <Modal.Title>
-                                        Thêm danh mục sản phẩm mới
-                                    </Modal.Title>
+                                    <Modal.Title>Thêm danh mục sản phẩm mới</Modal.Title>
                                 </Modal.Header>
                                 <Modal.Body>
-                                    <Form.Group
-                                        className="mb-3"
-                                        controlId="name"
-                                    >
-                                        <Form.Label>
-                                            Tên danh mục sản phẩm
-                                        </Form.Label>
-                                        <Form.Control
-                                            type="text"
-                                            placeholder="Nhập tên danh mục sản phẩm"
-                                            onChange={(e) =>
-                                                setName(e.target.value)
-                                            }
-                                            required
-                                        />
+                                    <Form.Group className="mb-3" controlId="name">
+                                        <Form.Label>Tên danh mục sản phẩm</Form.Label>
+                                        <Form.Control type="text" placeholder="Nhập tên danh mục sản phẩm" onChange={(e) => setName(e.target.value)} required />
                                     </Form.Group>
-                                    <Form.Group
-                                        controlId="parentSelect"
-                                        className="mt-3"
-                                    >
-                                        <Form.Label>
-                                            Chọn danh mục cha (nếu có)
-                                        </Form.Label>
-                                        <Form.Select
-                                            onChange={(e) =>
-                                                setIdParent(e.target.value)
-                                            }
-                                        >
-                                            <option value="">
-                                                Không có danh mục cha
-                                            </option>
+                                    <Form.Group controlId="parentSelect" className="mt-3">
+                                        <Form.Label>Chọn danh mục cha (nếu có)</Form.Label>
+                                        <Form.Select onChange={(e) => setIdParent(e.target.value)}>
+                                            <option value="">Không có danh mục cha</option>
                                             {data
-                                                .filter(
-                                                    (category) =>
-                                                        category.id_parent ===
-                                                        null
-                                                )
+                                                .filter((category) => category.id_parent === null)
                                                 .map((category) => (
-                                                    <option
-                                                        key={category.id}
-                                                        value={category.id}
-                                                    >
+                                                    <option key={category.id} value={category.id}>
                                                         {category.name || "Lỗi"}
                                                     </option>
                                                 ))}
@@ -427,25 +345,11 @@ function Index({ categories, products, crumbs }) {
                                     </Form.Group>
                                 </Modal.Body>
                                 <Modal.Footer>
-                                    <Button
-                                        variant="secondary"
-                                        onClick={handleClose}
-                                    >
+                                    <Button variant="secondary" onClick={handleClose}>
                                         Đóng
                                     </Button>
-                                    <Button
-                                        variant="primary"
-                                        type="submit"
-                                        disabled={loading}
-                                    >
-                                        {loading ? (
-                                            <Spinner
-                                                animation="border"
-                                                size="sm"
-                                            />
-                                        ) : (
-                                            "Lưu danh mục"
-                                        )}
+                                    <Button variant="primary" type="submit" disabled={loading}>
+                                        {loading ? <Spinner animation="border" size="sm" /> : "Lưu danh mục"}
                                     </Button>
                                 </Modal.Footer>
                             </Form>
@@ -489,12 +393,7 @@ function Index({ categories, products, crumbs }) {
                                                             ))}
                                                         </select>
                                                         <div className="d-flex">
-                                                            <Button
-                                                                className="me-2"
-                                                                variant="danger"
-                                                                type="button"
-                                                                onClick={() => handleDeleteProduct(item.id)}
-                                                            >
+                                                            <Button className="me-2" variant="danger" type="button" onClick={() => handleDeleteProduct(item.id)}>
                                                                 Xóa
                                                             </Button>
                                                         </div>
@@ -543,18 +442,10 @@ function Index({ categories, products, crumbs }) {
                                         },
                                     }}
                                     onCellEditStop={(params, e) => {
-                                        handleCellEditStop(
-                                            params.row.id,
-                                            params.field,
-                                            e.target.value
-                                        );
+                                        handleCellEditStop(params.row.id, params.field, e.target.value);
                                     }}
                                     onCellEditStart={(params, e) => {
-                                        handleCellEditStart(
-                                            params.row.id,
-                                            params.field,
-                                            e.target.value
-                                        );
+                                        handleCellEditStart(params.row.id, params.field, e.target.value);
                                     }}
                                     pageSizeOptions={[20, 40, 60, 80, 100]}
                                     checkboxSelection
@@ -568,7 +459,6 @@ function Index({ categories, products, crumbs }) {
             </Layout>
         </>
     );
-
 }
 
 export default Index;

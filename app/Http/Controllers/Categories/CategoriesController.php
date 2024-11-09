@@ -89,11 +89,44 @@ class CategoriesController extends Controller
 
     public function apiShow($slug)
     {
-        $this->data = $this->model::active()->select('id', 'name', 'slug', 'id_parent', 'status')->whereHas('products.gallery')->where('slug', $slug)->firstOrFail();
+        $this->data = $this->model::with("products.gallery", "products.brand", "products.category")->active()->select('id', 'name', 'slug', 'id_parent', 'status')->whereHas('products.gallery')->where('slug', $slug)->firstOrFail();
 
         if (!$this->data) {
             return response()->json(['check' => false, 'message' => 'Không tìm thấy phân loại sản phẩm'], 404);
         }
+
+        $this->data->products->transform(function ($item) {
+            return [
+                'id' => $item->id,
+                'name' => $item->name,
+                'slug' => $item->slug,
+                'price' => $item->price,
+                'discount' => $item->discount,
+                'in_stock' => $item->in_stock,
+                'content' => $item->content,
+                'status' => $item->status,
+                'category' => $item->category ? [
+                    'id' => $item->category->id,
+                    'name' => $item->category->name,
+                    'slug' => $item->category->slug,
+                    'status' => $item->category->status,
+                ] : null,
+                'brand' => $item->brand ? [
+                    'id' => $item->brand->id,
+                    'name' => $item->brand->name,
+                    'slug' => $item->brand->slug,
+                    'status' => $item->brand->status,
+                ] : null,
+                'gallery' => $item->gallery->map(function ($galleryItem) {
+                    return [
+                        'id' => $galleryItem->id,
+                        'image' => asset('storage/gallery/' . $galleryItem->image),
+                        'id_parent' => $galleryItem->id_parent,
+                        'status' => $galleryItem->status,
+                    ];
+                }),
+            ];
+        });
         return response()->json(['check' => true, 'data' => $this->data], 200);
     }
 }
