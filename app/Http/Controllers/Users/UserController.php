@@ -118,7 +118,7 @@ class UserController extends Controller
 
     public function apiIndex()
     {
-        $this->data = $this->model::where('id_role', 3)->select('uid', 'name')->get();
+        $this->data = $this->model::where('id_role', 3)->select('uid', 'name')->active()->get();
         return response()->json(['check' => true, 'data' => $this->data], 200);
     }
 }

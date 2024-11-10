@@ -59,4 +59,9 @@ class User extends Authenticatable
     {
         return $this->belongsTo(Bookings::class, 'id_user', 'id');
     }
+
+    public function scopeActive($query)
+    {
+        return $query->where('status', 1);
+    }
 }
