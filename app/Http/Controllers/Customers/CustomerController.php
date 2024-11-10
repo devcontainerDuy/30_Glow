@@ -12,6 +12,7 @@ use App\Mail\resetPassword;
 use App\Traits\GeneratesUniqueId;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
 
 class CustomerController extends Controller
@@ -67,7 +68,7 @@ class CustomerController extends Controller
             Mail::to($request->input('email'))->send(new createUser($dataMail));
             return response()->json(['check' => true, 'message' => 'Tạo tài khoản thành công!', 'data' => $this->data], 201);
         }
-        return response()->json(['check' => false, 'message' => 'Tạo tài khoản thất bại!'], status: 400);
+        return response()->json(['check' => false, 'message' => 'Tạo tài khoản thất bại!'], 400);
     }
 
     public function resetPassword($id)
@@ -93,17 +94,57 @@ class CustomerController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(string $id)
+    public function show(CustomerRequest $request, string $id)
     {
-        //
+        $this->data = $request->validated();
+        $this->instance = $this->model::where('uid', $id)->where('email', $this->data['email'])->where('phone', $this->data['phone'])->select('uid', 'name', 'address', 'email', 'phone',)->active()->first();
+
+        if ($this->instance) {
+            return response()->json(['check' => true, 'data' => $this->instance], 200);
+        }
+
+        return response()->json(['check' => false, 'message' => 'Không tìm thấy tài khoản!'], 404);
     }
 
     /**
-     * Show the form for editing the specified resource.
+     * Show api the form for editing the specified resource.
      */
-    public function edit(string $id)
+    public function edit(CustomerRequest $request, string $id)
     {
-        //
+        $this->data = $request->validated();
+        $this->instance = $this->model::where('uid', $id)->active()->first();
+
+        if ($this->instance->update($this->data)) {
+            return response()->json(['check' => true, 'message' => 'Cập nhật thành công!'], 200);
+        }
+        return response()->json(['check' => false, 'message' => 'Cập nhật thất bại!'], 401);
+    }
+
+    public function changePassword(Request $request, string $id)
+    {
+        $validator = Validator::make($request->all(), [
+            'password' => ['required', 'string', 'min:8', 'confirmed'],
+            // 'password_confirmation' => ['required', 'string', 'min:8'],
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json(['check' => false, 'message' => $validator->errors()->first()], 401);
+        }
+
+        $this->data = $request->only('password');
+        $this->instance = $this->model::where('uid', $id)->active()->first();
+
+        $hashPassword = Hash::make($this->data['password']);
+        if ($this->instance->update(['password' => $hashPassword])) {
+            $dataMail = [
+                'name' => $this->instance['name'],
+                'email' => $this->instance['email'],
+                'password' => $this->data['password'],
+            ];
+            Mail::to($this->instance['email'])->send(new resetPassword($dataMail));
+            return response()->json(['check' => true, 'message' => 'Cập nhật thành công!'], 200);
+        }
+        return response()->json(['check' => false, 'message' => 'Cập nhật thất bại!'], 401);
     }
 
     /**

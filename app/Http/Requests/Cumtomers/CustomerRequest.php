@@ -10,6 +10,14 @@ class CustomerRequest extends BaseRequest
     /**
      * Determine if the user is authorized to make this request.
      */
+    public function methodGet()
+    {
+        return [
+            'email' => ['required', 'string', 'email', 'max:255', 'exists:customers,email'],
+            'phone' => ['required', 'numeric', 'exists:customers,phone'],
+        ];
+    }
+
     public function methodPost()
     {
         return [
