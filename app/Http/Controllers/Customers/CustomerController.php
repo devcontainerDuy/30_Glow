@@ -94,10 +94,9 @@ class CustomerController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(CustomerRequest $request, string $id)
+    public function show(string $id)
     {
-        $this->data = $request->validated();
-        $this->instance = $this->model::where('uid', $id)->where('email', $this->data['email'])->where('phone', $this->data['phone'])->select('uid', 'name', 'address', 'email', 'phone',)->active()->first();
+        $this->instance = $this->model::where('uid', $id)->select('uid', 'name', 'address', 'email', 'phone',)->active()->first();
 
         if ($this->instance) {
             return response()->json(['check' => true, 'data' => $this->instance], 200);
