@@ -90,7 +90,7 @@ class ServiceController extends Controller
     {
         $this->data = $request->validated();
         if (isset($this->data['name'])) $this->data['slug'] = Str::slug($this->data['name']);
-        
+
         if (isset($this->data['image'])) {
             $file = $request->file('image');
             $imageName = $file->getClientOriginalName();
@@ -106,7 +106,7 @@ class ServiceController extends Controller
         }
         return response()->json(['check' => false, 'message' => 'Cập nhật thất bại!'], 400);
     }
-    
+
 
     /**
      * Remove the specified resource from storage.
@@ -127,7 +127,7 @@ class ServiceController extends Controller
 
     public function apiHighlighted()
     {
-        $this->data = $this->model::with('collection')->highlighted()->active()->limit(4)->get();
+        $this->data = $this->model::with('collection')->highlighted()->active()->limit(5)->get();
         $this->data->transform(function ($item) {
             return [
                 'id' => $item->id,

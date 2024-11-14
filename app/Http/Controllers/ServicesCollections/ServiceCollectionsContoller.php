@@ -112,11 +112,33 @@ class ServiceCollectionsContoller extends Controller
 
     public function apiShow($slug)
     {
-        $this->data = $this->model::active()->select('id', 'name', 'slug', 'status', 'highlighted')->whereHas('services')->where('slug', $slug)->firstOrFail();
+        $this->data = $this->model::with('services')->active()->select('id', 'name', 'slug', 'status', 'highlighted')->whereHas('services')->where('slug', $slug)->firstOrFail();
 
         if (!$this->data) {
             return response()->json(['check' => false, 'message' => 'Không tìm thấy dịch vụ!'], 404);
         }
+
+        $this->data->services->transform(function ($item) {
+            return [
+                'id' => $item->id,
+                'name' => $item->name,
+                'slug' => $item->slug,
+                'price' => $item->price,
+                'compare_price' => $item->compare_price,
+                'discount' => $item->discount,
+                'image' => asset('storage/services/' . $item->image),
+                'summary' => $item->summary,
+                'content' => $item->content,
+                'status' => $item->status,
+                'collection' => $item->collection ? [
+                    'id' => $item->collection->id,
+                    'name' => $item->collection->name,
+                    'slug' => $item->collection->slug,
+                    'status' => $item->collection->status,
+                ] : null,
+            ];
+        });
+
         return response()->json(['check' => true, 'data' => $this->data], 200);
     }
 }
