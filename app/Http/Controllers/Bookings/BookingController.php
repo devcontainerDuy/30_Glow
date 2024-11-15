@@ -33,7 +33,7 @@ class BookingController extends Controller
             ['name' => 'Dịch vụ', 'url' => '/admin/services'],
             ['name' => 'Danh sách dịch vụ đặt lịch', 'url' => '/admin/bookings'],
         ];
-        $this->data = $this->model::with('user', 'customer', 'service')->get();
+        $this->data = $this->model::with('user', 'customer', 'service')->orderBy('id', 'desc')->get();
         return Inertia::render('Bookings/Index', ['bookings' => $this->data, 'crumbs' => $this->crumbs]);
     }
 

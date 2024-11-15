@@ -8,20 +8,15 @@ const CKEditor = React.memo(({ onBlur, value }) => {
         if (window.CKEDITOR) {
             const options = {
                 filebrowserImageBrowseUrl: "/laravel-filemanager?type=Images",
-                filebrowserImageUploadUrl:
-                    "/laravel-filemanager/upload?type=Images&_token=",
+                filebrowserImageUploadUrl: "/laravel-filemanager/upload?type=Images&_token=",
                 filebrowserBrowseUrl: "/laravel-filemanager?type=Files",
-                filebrowserUploadUrl:
-                    "/laravel-filemanager/upload?type=Files&_token=",
+                filebrowserUploadUrl: "/laravel-filemanager/upload?type=Files&_token=",
             };
 
             // editorRef.current = window.CKEDITOR.replace("editor", options);
             const editorElement = document.getElementById("editor");
             if (editorElement) {
-                editorRef.current = window.CKEDITOR.replace(
-                    editorElement,
-                    options
-                );
+                editorRef.current = window.CKEDITOR.replace(editorElement, options);
                 // Set editor height
                 editorRef.current.config.height = 300;
 
@@ -54,9 +49,9 @@ const CKEditor = React.memo(({ onBlur, value }) => {
     return <textarea id="editor"></textarea>;
 });
 
-export default CKEditor;
-
 CKEditor.propTypes = {
     value: PropTypes.string,
     onBlur: PropTypes.func,
 };
+
+export default CKEditor;

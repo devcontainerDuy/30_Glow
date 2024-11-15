@@ -24,7 +24,7 @@ class CategoriesController extends Controller
             ['name' => 'Danh sách danh mục', 'url' => '/admin/categories'],
         ];
 
-        $this->data = $this->model::with('parent')->withCount('products')->get();
+        $this->data = $this->model::with('parent')->withCount('products')->orderBy('id', 'desc')->get();
         $products = Products::with('category', 'brand', 'gallery')->get();
         return Inertia::render('Categories/Index', ['categories' => $this->data, 'products' => $products, 'crumbs' => $this->crumbs]);
     }
@@ -34,7 +34,7 @@ class CategoriesController extends Controller
         $this->data['slug'] = Str::slug($this->data['name']);
         $this->instance = $this->model::create($this->data);
         if ($this->instance) {
-            $this->data = $this->model::all();
+            $this->data = $this->model::with('parent')->orderBy('id', 'desc')->get();
             return response()->json(['check' => true, 'message' => 'Tạo thành công!', 'data' => $this->data], 201);
         }
         return response()->json(['check' => false, 'message' => 'Tạo thất bại!'], status: 400);
@@ -58,7 +58,7 @@ class CategoriesController extends Controller
         if (isset($this->data['name'])) $this->data['slug'] = Str::slug($this->data['name']);
         $this->instance = $this->model::findOrFail($id)->update($this->data);
         if ($this->instance) {
-            $this->data = $this->model::all();
+            $this->data = $this->model::with('parent')->orderBy('id', 'desc')->get();
             return response()->json(['check' => true, 'message' => 'Cập nhật thành công!', 'data' => $this->data], 200);
         }
         return response()->json(['check' => false, 'message' => 'Cập nhật thất bại!'], 400);
@@ -69,7 +69,7 @@ class CategoriesController extends Controller
         try {
             $this->instance = $this->model::findOrFail($id)->delete();
             if ($this->instance) {
-                $this->data = $this->model::all();
+                $this->data = $this->model::with('parent')->orderBy('id', 'desc')->get();
                 return response()->json(['check' => true, 'message' => 'Xoá thành công!', 'data' => $this->data], 200);
             }
             return response()->json(['check' => false, 'message' => 'Xoá thất bại!'], 400);
@@ -83,7 +83,7 @@ class CategoriesController extends Controller
      */
     public function apiIndex()
     {
-        $this->data = $this->model::with("parent")->active()->select('id', 'name', 'slug', 'id_parent', 'status')->whereHas('products')->orderBy('id', 'asc')->get();
+        $this->data = $this->model::with("parent")->active()->select('id', 'name', 'slug', 'id_parent', 'status')->whereHas('products')->orderBy('created_at', 'desc')->get();
         return response()->json(['check' => true, 'data' => $this->data], 200);
     }
 

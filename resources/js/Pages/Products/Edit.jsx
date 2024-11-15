@@ -208,9 +208,9 @@ function Edit({ products, crumbs, categories, brands }) {
 
     const handleEditorBlur = (data) => {
         setContent(data);
+        console.log(data);
     };
-    console.log(products.gallery);
-    
+
     useEffect(() => {
         setName(products.name);
         setSlug(products.slug);
@@ -334,7 +334,7 @@ function Edit({ products, crumbs, categories, brands }) {
                                                 </Row>
 
                                                 {/* Nội dung chính */}
-                                                <Form.Group controlId="name">
+                                                <Form.Group controlId="content">
                                                     <Form.Label>Nội dung chính</Form.Label>
                                                     <CKEditor value={content} onBlur={handleEditorBlur} />
                                                 </Form.Group>
@@ -347,9 +347,7 @@ function Edit({ products, crumbs, categories, brands }) {
                                                     {image &&
                                                         image
                                                             .filter((x) => x.status === 1)
-                                                            ?.map((item, index) => (
-                                                                <Image fluid key={index} className="mb-3 rounded-2 w-100 h-100" src={"/storage/gallery/" + item.image} alt={item?.name} />
-                                                            ))}
+                                                            ?.map((item, index) => <Image fluid key={index} className="mb-3 rounded-2" src={"/storage/gallery/" + item.image} alt={item?.name} />)}
                                                     <Button className="w-100" variant="primary" type="button" onClick={handleShow}>
                                                         <i className="bi bi-images" />
                                                         <span className="ms-2">Chọn hiệu dữ liệu</span>

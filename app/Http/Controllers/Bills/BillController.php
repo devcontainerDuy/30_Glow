@@ -5,12 +5,16 @@ namespace App\Http\Controllers\Bills;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Bills\BillRequest;
 use App\Models\Bills;
+use App\Models\BillsDetail;
+use App\Models\Customers;
+use App\Traits\GeneratesUniqueId;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
 class BillController extends Controller
 {
+    use GeneratesUniqueId;
     public function __construct()
     {
         $this->middleware('auth');
@@ -41,12 +45,41 @@ class BillController extends Controller
         DB::beginTransaction();
         try {
             $this->data = $request->validated();
-            $this->instance = $this->model::insertGetId([]);
+            $idCustomer = Customers::where("uid", $this->data['customer_id'])->first();
+
+            if ($idCustomer->address === null && $idCustomer->phone === null) {
+                $idCustomer->update(['address' => $this->data['address'], 'phone' => $this->data['phone']]);
+            }
+
+            $this->instance = $this->model::insertGetId([
+                'uid' => $this->createCodeOrder(),
+                'customer_id' => $idCustomer->id,
+                'name' => $this->data['name'],
+                'email' => $this->data['email'],
+                'phone' => $this->data['phone'],
+                'address' => $this->data['address'],
+                'note' => $this->data['note'],
+                'name_other' => $this->data['name_other'] ?? null,
+                'email_other' => $this->data['email_other'] ?? null,
+                'phone_other' => $this->data['phone_other'] ?? null,
+                'address_other' => $this->data['address_other'] ?? null,
+                'note_other' => $this->data['note_other'] ?? null,
+                'payment_method' => $this->data['payment_method'],
+                'transaction_id' => $this->data['transaction_id'] ?? null,
+                'total' => $this->data['total'],
+                'status' => 1,
+            ]);
+
+            foreach ($this->data['cart'] as $item) {
+                BillsDetail::create(['id_bill' => $this->instance, 'id_product' => $item['id_product'], 'quantity' => $item['quantity'], 'unit_price' => $item['unit_price']]);
+            }
+
             DB::commit();
+            return response()->json(['check' => true, 'message' => 'Đặt hàng thành công!'], 201);
         } catch (\Throwable $e) {
             DB::rollBack();
             Log::error("Error: " . $e->getMessage());
-            return response()->json(['check' => false, 'message' => 'Đặt hàng thất bại!'], 400);
+            return response()->json(['check' => false, 'message' => 'Đặt hàng thất bại!'], 401);
         }
     }
 

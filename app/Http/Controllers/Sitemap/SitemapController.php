@@ -22,8 +22,7 @@ class SitemapController extends Controller
         $this->crumbs = [
             ['name' => 'Sitemap', 'url' => '/admin/sitemaps'],
         ];
-        $this->data = $this->model::all();
-        // dd($this->data, $this->instance);
+        $this->data = $this->model::orderBy('id', 'desc')->get();
         return Inertia::render('Sitemap/Index', ['sitemap' => $this->data, 'crumbs' => $this->crumbs]);
     }
 
@@ -52,7 +51,8 @@ class SitemapController extends Controller
         $this->instance = $this->model::create($this->data);
 
         if ($this->instance) {
-            $this->data = $this->model::all();
+            $this->data = $this->model::orderBy('id', 'desc')->get();
+
             return response()->json(['check' => true, 'message' => 'Tạo thành công!', 'data' => $this->data], 201);
         }
         return response()->json(['check' => false, 'message' => 'Tạo thất bại!'], 400);
@@ -90,7 +90,7 @@ class SitemapController extends Controller
         $this->data = $request->validated();
         $this->instance = $this->model::findOrFail($id)->update($this->data);
         if ($this->instance) {
-            $this->data = $this->model::all();
+            $this->data = $this->model::orderBy('id', 'desc')->get();
             return response()->json(['check' => true, 'message' => 'Cập nhật thành công!', 'data' => $this->data], 200);
         }
         return response()->json(['check' => false, 'message' => 'Cập nhật thất bại!'], 400);
@@ -103,9 +103,21 @@ class SitemapController extends Controller
     {
         $this->instance = $this->model::findOrFail($id)->delete();
         if ($this->instance) {
-            $this->data = $this->model::all();
+            $this->data = $this->model::orderBy('id', 'desc')->get();
             return response()->json(['check' => true, 'message' => 'Xoá thành công!', 'data' => $this->data], 200);
         }
         return response()->json(['check' => false, 'message' => 'Xoá thất bại!'], 400);
+    }
+
+    public function apiIndex()
+    {
+        $this->data = $this->model::orderBy('created_at', 'desc')->active()->get();
+        return response()->json(['check' => true, 'data' => $this->data], 200);
+    }
+
+    public function apiShow($id)
+    {
+        $this->data = $this->model::findOrFail($id);
+        return response()->json(['check' => true, 'data' => $this->data], 200);
     }
 }

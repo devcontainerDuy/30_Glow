@@ -9,7 +9,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 class BillsDetail extends Model
 {
     use HasFactory;
-    protected $table = 'bills_detail';
+    protected $table = 'bills_details';
 
     protected $primaryKey = "id";
 
@@ -18,7 +18,8 @@ class BillsDetail extends Model
         'id_product',
         'quantity',
         'created_at',
-        'updated_at'
+        'updated_at',
+        'unit_price'
     ];
 
     public function bill(): BelongsTo

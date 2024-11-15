@@ -279,12 +279,6 @@ function Index({ categories, products, crumbs }) {
             },
         },
         {
-            field: "created_at",
-            headerName: "Ngày tạo",
-            width: 180,
-            renderCell: (params) => new Date(params.row.created_at).toLocaleString(),
-        },
-        {
             field: "action",
             headerName: "Thao tác",
             width: 160,

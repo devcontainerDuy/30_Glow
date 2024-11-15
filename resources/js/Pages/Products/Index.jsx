@@ -163,7 +163,6 @@ function Index({ products, crumbs, categories, brands }) {
     };
 
     const columns = useMemo(() => [
-        { field: "id", headerName: "ID", width: 80 },
         {
             field: "name",
             headerName: "Tên sản phẩm",
@@ -192,12 +191,12 @@ function Index({ products, crumbs, categories, brands }) {
             field: "in_stock",
             headerName: "Số lượng",
             editable: true,
-            width: 120,
+            width: 100,
         },
         {
             field: "status",
             headerName: "Trạng thái",
-            width: 180,
+            width: 160,
             renderCell: (params) => (
                 <>
                     <FormControlLabel
@@ -205,12 +204,33 @@ function Index({ products, crumbs, categories, brands }) {
                             <Switch
                                 checked={params.row.status === 1}
                                 onChange={() => {
-                                    const newStatus = params.row.status === 1 ? 0 : 1; // Lấy trạng thái mới
-                                    handleCellEditStop(params.row.id, "status", newStatus); // Gửi dữ liệu đi
+                                    const newStatus = params.row.status === 1 ? 0 : 1;
+                                    handleCellEditStop(params.row.id, "status", newStatus);
                                 }}
                             />
                         }
                         label={params.row.status ? "Mặc định" : "Không"}
+                    />
+                </>
+            ),
+        },
+        {
+            field: "highlighted",
+            headerName: "Nổi bật",
+            width: 150,
+            renderCell: (params) => (
+                <>
+                    <FormControlLabel
+                        control={
+                            <Switch
+                                checked={params.row.highlighted === 1}
+                                onChange={() => {
+                                    const newhigHlighted = params.row.highlighted === 1 ? 0 : 1;
+                                    handleCellEditStop(params.row.id, "highlighted", newhigHlighted);
+                                }}
+                            />
+                        }
+                        label={params.row.highlighted ? "Hiện" : "Không"}
                     />
                 </>
             ),
@@ -232,9 +252,9 @@ function Index({ products, crumbs, categories, brands }) {
                             }}
                         >
                             <MenuItem value="">Chọn danh mục</MenuItem>
-                            {categories.map((category) => (
-                                <MenuItem key={category.id} value={category.id}>
-                                    {category.name || "Lỗi"}
+                            {category.map((item) => (
+                                <MenuItem key={item.id} value={item.id}>
+                                    {item.name || "Lỗi"}
                                 </MenuItem>
                             ))}
                         </Select>

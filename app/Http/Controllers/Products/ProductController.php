@@ -29,8 +29,7 @@ class ProductController extends Controller
             ['name' => 'Sản phẩm', 'url' => '/admin/products'],
             ['name' => 'Danh sách sản phẩm', 'url' => '/admin/products'],
         ];
-        $this->data = $this->model::with('category', 'brand', 'gallery')->get();
-        // dd($this->data);
+        $this->data = $this->model::with('category', 'brand', 'gallery')->orderBy('id', 'desc')->get();
         $category = Categories::active()->select('id', 'name')->get();
         $brand = Brands::active()->select('id', 'name')->get();
         return Inertia::render('Products/Index', ['products' => $this->data, 'crumbs' => $this->crumbs, 'categories' => $category, 'brands' => $brand]);
@@ -71,7 +70,7 @@ class ProductController extends Controller
         }
 
         if ($this->instance) {
-            $this->data = $this->model::with('category', 'brand', 'gallery')->get();
+            $this->data = $this->model::with('category', 'brand', 'gallery')->orderBy('id', 'desc')->get();
             return response()->json(['check' => true, 'message' => 'Tạo thành công!', 'data' => $this->data], 201);
         }
 
@@ -112,7 +111,7 @@ class ProductController extends Controller
         if (isset($this->data['name'])) $this->data['slug'] = Str::slug($this->data['name']);
         $this->instance = $this->model::findOrFail($id)->update($this->data);
         if ($this->instance) {
-            $this->data = $this->model::with('category', 'brand', 'gallery')->get();
+            $this->data = $this->model::with('category', 'brand', 'gallery')->orderBy('id', 'desc')->get();
             $categories = Categories::with('parent')->withCount('products')->get();
             return response()->json(['check' => true, 'message' => 'Cập nhật thành công!', 'data' => $this->data, 'categories' => $categories], 200);
         }
@@ -138,7 +137,7 @@ class ProductController extends Controller
         $this->instance = $this->instance->delete();
 
         if ($this->instance) {
-            $this->data = $this->model::with('category', 'brand', 'gallery')->get();
+            $this->data = $this->model::with('category', 'brand', 'gallery')->orderBy('id', 'desc')->get();
             $categories = Categories::with('parent')->withCount('products')->get();
             return response()->json(['check' => true, 'message' => 'Xoá thành công!', 'data' => $this->data, 'categories' => $categories], 200);
         }
@@ -151,7 +150,7 @@ class ProductController extends Controller
      */
     public function apiHighlighted()
     {
-        $this->data = $this->model::with('category', 'brand', 'gallery')->highlighted()->active()->limit(5)->get();
+        $this->data = $this->model::with('category', 'brand', 'gallery')->highlighted()->active()->orderBy('created_at', 'desc')->limit(5)->get();
         $this->data->transform(function ($item) {
             return [
                 'id' => $item->id,
@@ -273,6 +272,26 @@ class ProductController extends Controller
                     'discount' => $related->discount,
                     'in_stock' => $related->in_stock,
                     'status' => $related->status,
+                    'category' => $related->category ? [
+                        'id' => $related->category->id,
+                        'name' => $related->category->name,
+                        'slug' => $related->category->slug,
+                        'status' => $related->category->status,
+                    ] : null,
+                    'brand' => $related->brand ? [
+                        'id' => $related->brand->id,
+                        'name' => $related->brand->name,
+                        'slug' => $related->brand->slug,
+                        'status' => $related->brand->status,
+                    ] : null,
+                    'gallery' => $related->gallery->map(function ($gallery) {
+                        return [
+                            'id' => $gallery->id,
+                            'image' => asset('storage/gallery/' . $gallery->image),
+                            'id_parent' => $gallery->id_parent,
+                            'status' => $gallery->status,
+                        ];
+                    }),
                 ];
             }),
         ];

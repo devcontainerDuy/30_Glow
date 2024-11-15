@@ -13,7 +13,7 @@ class CartRequest extends BaseRequest
     public function methodPost()
     {
         return [
-            'id_customer' => ['required', 'exists:customers,id'],
+            'id_customer' => ['required', 'string', 'exists:customers,uid'],
             'id_product' => ['required', 'exists:products,id'],
             'quantity' => ['required', 'integer', 'min:1'],
         ];
@@ -22,7 +22,7 @@ class CartRequest extends BaseRequest
     public function methodPut()
     {
         return [
-            'id_customer' => ['sometimes', 'exists:customers,id'],
+            'id_customer' => ['sometimes', 'string', 'exists:customers,uid'],
             'id_product' => ['sometimes', 'exists:products,id'],
             'quantity' => ['required', 'integer', 'min:1'],
         ];

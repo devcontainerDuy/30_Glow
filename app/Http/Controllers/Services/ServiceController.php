@@ -25,7 +25,7 @@ class ServiceController extends Controller
             ['name' => 'Dịch vụ', 'url' => '/admin/services'],
             ['name' => 'Danh sách dịch vụ', 'url' => '/admin/services'],
         ];
-        $this->data = $this->model::with('collection')->get();
+        $this->data = $this->model::with('collection')->orderBy('id', 'desc')->get();
         $this->instance = ServicesCollections::active()->select('id', 'name')->get();
         return Inertia::render('Services/Index', ['services' => $this->data, 'collections' => $this->instance, 'crumbs' => $this->crumbs]);
     }
@@ -53,7 +53,7 @@ class ServiceController extends Controller
         $this->data['image'] = $imageName;
         $this->instance = $this->model::create($this->data);
         if ($this->instance) {
-            $this->data = $this->model::with('collection')->get();
+            $this->data = $this->model::with('collection')->orderBy('id', 'desc')->get();
             return response()->json(['check' => true, 'message' => 'Thêm thành công!', 'data' => $this->data], 201);
         }
         return response()->json(['check' => false, 'message' => 'Thêm thất bại!'], 400);
@@ -78,7 +78,6 @@ class ServiceController extends Controller
             ['name' => 'Chi tiết dịch vụ', 'url' => '/admin/services/' . $id . '/edit'],
         ];
         $this->data = $this->model::findOrFail($id);
-        // dd($this->data);
         $this->instance = ServicesCollections::active()->select('id', 'name')->get();
         return Inertia::render('Services/Edit', ['service' => $this->data, 'collections' => $this->instance, 'crumbs' => $this->crumbs]);
     }
@@ -101,7 +100,7 @@ class ServiceController extends Controller
 
         $this->instance = $this->model::findOrFail($id)->update($this->data);
         if ($this->instance) {
-            $this->data = $this->model::with('collection')->get();
+            $this->data = $this->model::with('collection')->orderBy('id', 'desc')->get();
             return response()->json(['check' => true, 'message' => 'Cập nhật thành công!', 'data' => $this->data], 200);
         }
         return response()->json(['check' => false, 'message' => 'Cập nhật thất bại!'], 400);
@@ -115,7 +114,7 @@ class ServiceController extends Controller
     {
         $this->instance = $this->model::findOrFail($id)->delete();
         if ($this->instance) {
-            $this->data = $this->model::with('collection')->get();
+            $this->data = $this->model::with('collection')->orderBy('id', 'desc')->get();
             return response()->json(['check' => true, 'message' => 'Xóa thành công!', 'data' => $this->data], 200);
         }
         return response()->json(['check' => false, 'message' => 'Xóa thất bại!'], 400);
@@ -127,7 +126,7 @@ class ServiceController extends Controller
 
     public function apiHighlighted()
     {
-        $this->data = $this->model::with('collection')->highlighted()->active()->limit(5)->get();
+        $this->data = $this->model::with('collection')->highlighted()->active()->orderBy('created_at', 'desc')->limit(5)->get();
         $this->data->transform(function ($item) {
             return [
                 'id' => $item->id,

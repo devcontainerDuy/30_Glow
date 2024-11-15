@@ -44,6 +44,10 @@ Route::middleware('api')->group(function () {
         Route::post('/bookings', 'store');
     });
 
+    Route::controller(App\Http\Controllers\Bills\BillController::class)->middleware(['auth:sanctum', 'auth.session'])->group(function () {
+        Route::post('/bills', 'store');
+    });
+
     Route::controller(App\Http\Controllers\Users\UserController::class)->group(function () {
         Route::get('/staff', 'apiIndex');
     });
@@ -75,6 +79,11 @@ Route::middleware('api')->controller(App\Http\Controllers\Services\ServiceContro
     Route::get('/services/highlighted', 'apiHighlighted');
     Route::get('/services', 'apiIndex');
     Route::get('/services/{slug}', 'apiShow');
+});
+
+Route::middleware('api')->controller(App\Http\Controllers\Sitemap\SitemapController::class)->group(function () {
+    Route::get('/sitemap', 'apiIndex');
+    Route::get('/sitemap/{id}', 'apiShow');
 });
 
 Route::middleware('api')->controller(App\Http\Controllers\Slides\SlidesController::class)->group(function () {
