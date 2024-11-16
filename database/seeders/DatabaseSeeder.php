@@ -2,12 +2,12 @@
 
 namespace Database\Seeders;
 
-use App\Models\Permissions;
-use App\Models\Role;
 use App\Models\User;
-use App\Traits\GeneratesUniqueId;
 use Illuminate\Database\Seeder;
+use App\Traits\GeneratesUniqueId;
+use Spatie\Permission\Models\Role;
 use Illuminate\Support\Facades\Hash;
+use Spatie\Permission\Models\Permission;
 
 class DatabaseSeeder extends Seeder
 {
@@ -17,16 +17,38 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        // Tạo người dùng
-        User::factory()->create([
+        $role = Role::create(['name' => 'Super Admin']);
+        Role::create(['name' => 'Manager']);
+        Role::create(['name' => 'Staff']);
+        Role::create(['name' => 'Support']);
+
+        $permission = Permission::create(['name' => 'show_product']);
+        Permission::create(['name' => 'create_product'])->assignRole($role);
+        Permission::create(['name' => 'update_product'])->assignRole($role);
+        Permission::create(['name' => 'delete_product'])->assignRole($role);
+
+        Permission::create(['name' => 'show_category'])->assignRole($role);
+        Permission::create(['name' => 'create_category'])->assignRole($role);
+        Permission::create(['name' => 'update_category'])->assignRole($role);
+        Permission::create(['name' => 'delete_category'])->assignRole($role);
+
+        Permission::create(['name' => 'show_brand'])->assignRole($role);
+        Permission::create(['name' => 'create_brand'])->assignRole($role);
+        Permission::create(['name' => 'update_brand'])->assignRole($role);
+        Permission::create(['name' => 'delete_brand'])->assignRole($role);
+
+        $role->givePermissionTo($permission);
+
+        $user = User::create([
             'uid' => $this->createCodeUser(),
             'name' => 'Admin',
             'email' => 'admin@gmail.com',
             'password' => Hash::make('12345678'),
             'status' => 1,
+            'id_role' => $role->id
         ]);
 
-        User::factory()->create([
+        User::create([
             'uid' => $this->createCodeUser(),
             'name' => 'Manager',
             'email' => 'manager@gmail.com',
@@ -34,7 +56,7 @@ class DatabaseSeeder extends Seeder
             'status' => 1,
         ]);
 
-        User::factory()->create([
+        User::create([
             'uid' => $this->createCodeUser(),
             'name' => 'Staff',
             'email' => 'staff@gmail.com',
@@ -42,33 +64,12 @@ class DatabaseSeeder extends Seeder
             'status' => 1,
         ]);
 
-        User::factory()->create([
+        User::create([
             'uid' => $this->createCodeUser(),
             'name' => 'Support',
             'email' => 'support@gmail.com',
             'password' => Hash::make('12345678'),
             'status' => 1,
         ]);
-
-        // Tạo vai trò
-        Role::create(['name' => 'Super Admin', 'guard_name' => 'web']);
-        Role::create(['name' => 'Manager', 'guard_name' => 'web']);
-        Role::create(['name' => 'Staff', 'guard_name' => 'web']);
-        Role::create(['name' => 'Support', 'guard_name' => 'web']);
-
-        // Tạo quyền
-        $permissions = [
-            'created_product',
-            'show_product',
-            'updated_product',
-            'delete_product',
-            'created_post',
-            'show_post',
-            'updated_post',
-        ];
-
-        foreach ($permissions as $permission) {
-            Permissions::create(['name' => $permission, 'guard_name' => 'web']);
-        }
     }
 }
