@@ -45,7 +45,7 @@ class PermissionController extends Controller
     {
 
         $this->data = $request->validated();
-        $this->instance = $this->model::create($this->data);
+        $this->instance = $this->model::create(['name' => $this->data['name']]);
         if ($this->instance) {
             $this->data = $this->model::with('roles')->get();
             return response()->json(['check' => true, 'message' => 'Thêm thành công!', 'data' => $this->data], 201);

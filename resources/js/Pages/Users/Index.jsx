@@ -10,7 +10,7 @@ import { toast } from "react-toastify";
 
 function Index({ users, role, crumbs }) {
     const [data, setData] = useState([]);
-    const [roles, setRoles] = useState([]);
+    const [rolesData, setRolesData] = useState([]);
     const [editingCells, setEditingCells] = useState({});
     const [loading, setLoading] = useState(false);
     const [show, setShow] = useState(false);
@@ -34,7 +34,7 @@ function Index({ users, role, crumbs }) {
             .post("/admin/users", {
                 name: name,
                 email: email,
-                id_role: idRole,
+                roles: idRole,
             })
             .then((res) => {
                 if (res.data.check === true) {
@@ -127,11 +127,12 @@ function Index({ users, role, crumbs }) {
             type: "email",
         },
         {
-            field: "id_role",
+            field: "roles",
             headerName: "Loại tài khoản",
             width: 200,
             renderCell: (params) => {
-                let roleId = params.row.id_role || "";
+                let roleId = params.row.roles[0]?.name || "";
+                console.log(roleId);
 
                 return (
                     <>
@@ -141,13 +142,13 @@ function Index({ users, role, crumbs }) {
                                 value={roleId}
                                 displayEmpty
                                 onChange={(e) => {
-                                    handleCellEditStop(params.row.id, "id_role", e.target.value);
+                                    handleCellEditStop(params.row.id, "roles", e.target.value);
                                 }}
                             >
                                 <MenuItem value="">Chưa phân quyền</MenuItem>
-                                {roles.map((role, index) => (
-                                    <MenuItem key={index} value={role.id}>
-                                        {role.name || "Lỗi"}
+                                {rolesData.map((item, index) => (
+                                    <MenuItem key={index} value={item.name}>
+                                        {item.name || "Lỗi"}
                                     </MenuItem>
                                 ))}
                             </Select>
@@ -200,7 +201,7 @@ function Index({ users, role, crumbs }) {
 
     useEffect(() => {
         setData(users);
-        setRoles(role);
+        setRolesData(role);
     }, [users]);
 
     return (
@@ -240,9 +241,9 @@ function Index({ users, role, crumbs }) {
                                         <Form.Label>Chọn loại tài khoản</Form.Label>
                                         <Form.Select aria-label="Loại tài khoản" name="role" onChange={(e) => setIdRole(e.target.value)}>
                                             <option value="">-- Chọn --</option>
-                                            {roles.length > 0 &&
-                                                roles.map((item, index) => (
-                                                    <option key={index} value={item.id}>
+                                            {rolesData.length > 0 &&
+                                                rolesData.map((item, index) => (
+                                                    <option key={index} value={item.name}>
                                                         {item.name}
                                                     </option>
                                                 ))}

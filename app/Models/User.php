@@ -12,7 +12,7 @@ use Spatie\Permission\Traits\HasRoles;
 
 class User extends Authenticatable
 {
-    use HasApiTokens, HasFactory, Notifiable, HasRoles;
+    use HasRoles, HasApiTokens, HasFactory, Notifiable;
 
     /**
      * The attributes that are mass assignable.
@@ -50,15 +50,15 @@ class User extends Authenticatable
         'email_verified_at' => 'datetime',
     ];
 
-    public function roles(): BelongsTo
-    {
-        return $this->belongsTo(Role::class, 'id_role', 'id');
-    }
+    // public function roles(): BelongsTo
+    // {
+    //     return $this->belongsTo(Role::class, 'id_role', 'id');
+    // }
 
-    public function bookings(): BelongsTo
-    {
-        return $this->belongsTo(Bookings::class, 'id_user', 'id');
-    }
+    // public function bookings(): BelongsTo
+    // {
+    //     return $this->belongsTo(Bookings::class, 'id_user', 'id');
+    // }
 
     public function scopeActive($query)
     {

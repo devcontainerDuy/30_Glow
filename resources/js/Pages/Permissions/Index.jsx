@@ -15,12 +15,10 @@ function Index({ permissions, crumbs }) {
     const [loading, setLoading] = useState(false);
     const [showModal, setShowModal] = useState(false);
     const [name, setName] = useState("");
-    const [guardName, setGuardName] = useState("");
 
     const handleClose = () => {
         setShowModal(false);
         setName("");
-        setGuardName("");
     };
     const handleShow = () => setShowModal(true);
 
@@ -28,10 +26,7 @@ function Index({ permissions, crumbs }) {
         e.preventDefault();
         setLoading(true);
         window.axios
-            .post("/admin/permissions", {
-                name: name,
-                guard_name: guardName,
-            })
+            .post("/admin/permissions", { name: name })
             .then((response) => {
                 if (response.data.check === true) {
                     toast.success(response.data.message);
@@ -144,13 +139,7 @@ function Index({ permissions, crumbs }) {
             width: 180,
             renderCell: (params) => (
                 <>
-                    <Button
-                        type="button"
-                        variant="outline-danger"
-                        className="ms-2"
-                        title="Xóa loại tài khoản"
-                        onClick={() => handleDelete(params.row.id)}
-                    >
+                    <Button type="button" variant="outline-danger" className="ms-2" title="Xóa loại tài khoản" onClick={() => handleDelete(params.row.id)}>
                         <i className="bi bi-trash-fill" />
                     </Button>
                 </>
@@ -172,79 +161,32 @@ function Index({ permissions, crumbs }) {
                 <section className="container">
                     <Row>
                         <BreadcrumbComponent props={crumbs}>
-                            <Button
-                                type="button"
-                                variant="primary"
-                                onClick={handleShow}
-                            >
+                            <Button type="button" variant="primary" onClick={handleShow}>
                                 <i className="bi bi-plus-lg" />
-                                <span className="ms-2">
-                                    Thêm quyền tài khoản mới
-                                </span>
+                                <span className="ms-2">Thêm quyền tài khoản mới</span>
                             </Button>
                         </BreadcrumbComponent>
                         {/* Start Modal */}
                         <Modal show={showModal} onHide={handleClose}>
                             <Form onSubmit={handleSubmit}>
                                 <Modal.Header closeButton>
-                                    <Modal.Title>
-                                        Thêm quyền tài khoản mới
-                                    </Modal.Title>
+                                    <Modal.Title>Thêm quyền tài khoản mới</Modal.Title>
                                 </Modal.Header>
                                 <Modal.Body>
-                                    <Form.Group
-                                        className="mb-3"
-                                        controlId="formBasic"
-                                    >
-                                        <Form.Label>
-                                            Tên quyền tài khoản
-                                        </Form.Label>
-                                        <Form.Control
-                                            type="text"
-                                            placeholder="Nhập tên quyền tài khoản"
-                                            onChange={(e) =>
-                                                setName(e.target.value)
-                                            }
-                                        />
-                                    </Form.Group>
-                                    <Form.Group
-                                        className="mb-3"
-                                        controlId="formBasic"
-                                    >
-                                        <Form.Label>Quyền truy cập</Form.Label>
-                                        <Form.Select
-                                            aria-label="Default select example"
-                                            onChange={(e) =>
-                                                setGuardName(e.target.value)
-                                            }
-                                        >
-                                            <option value="">-- Chọn --</option>
-                                            <option value="web">Web</option>
-                                            <option value="api">API</option>
-                                        </Form.Select>
+                                    <Form.Group className="mb-3" controlId="formBasic">
+                                        <Form.Label>Tên quyền tài khoản</Form.Label>
+                                        <Form.Control type="text" placeholder="Nhập tên quyền tài khoản" onChange={(e) => setName(e.target.value)} />
                                     </Form.Group>
                                 </Modal.Body>
                                 <Modal.Footer>
-                                    <Button
-                                        variant="secondary"
-                                        type="button"
-                                        onClick={handleClose}
-                                    >
+                                    <Button variant="secondary" type="button" onClick={handleClose}>
                                         <i className="bi bi-box-arrow-right" />
                                         <span className="ms-2">Thoát ra</span>
                                     </Button>
-                                    <Button
-                                        variant="primary"
-                                        type="submit"
-                                        disabled={loading}
-                                    >
+                                    <Button variant="primary" type="submit" disabled={loading}>
                                         {loading ? (
                                             <>
-                                                <Spinner
-                                                    size="sm"
-                                                    animation="border"
-                                                    variant="secondary"
-                                                />
+                                                <Spinner size="sm" animation="border" variant="secondary" />
                                                 <span>Đang lưu...</span>
                                             </>
                                         ) : (
@@ -287,18 +229,10 @@ function Index({ permissions, crumbs }) {
                                         },
                                     }}
                                     onCellEditStop={(params, e) => {
-                                        handleCellEditStop(
-                                            params.row.id,
-                                            params.field,
-                                            e.target.value
-                                        );
+                                        handleCellEditStop(params.row.id, params.field, e.target.value);
                                     }}
                                     onCellEditStart={(params, e) => {
-                                        handleCellEditStart(
-                                            params.row.id,
-                                            params.field,
-                                            e.target.value
-                                        );
+                                        handleCellEditStart(params.row.id, params.field, e.target.value);
                                     }}
                                     pageSizeOptions={[20, 40, 60, 80, 100]}
                                     checkboxSelection

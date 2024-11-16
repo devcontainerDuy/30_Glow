@@ -39,14 +39,13 @@ class DatabaseSeeder extends Seeder
 
         $role->givePermissionTo($permission);
 
-        $user = User::create([
+        User::create([
             'uid' => $this->createCodeUser(),
             'name' => 'Admin',
             'email' => 'admin@gmail.com',
             'password' => Hash::make('12345678'),
             'status' => 1,
-            'id_role' => $role->id
-        ]);
+        ])->assignRole($role);
 
         User::create([
             'uid' => $this->createCodeUser(),

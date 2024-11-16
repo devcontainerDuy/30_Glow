@@ -18,7 +18,7 @@ Route::get('/', function () {
     return redirect()->route('admin.home');
 });
 
-Route::middleware(['auth', 'auth.session', 'web'])->prefix('admin')->as('admin.')->group(function () {
+Route::middleware(['auth', 'auth.session', 'web', 'role:Super Admin|Manager'])->prefix('admin')->as('admin.')->group(function () {
     Route::name('home')->get('/', function () {
         return Inertia::render('Home');
     });

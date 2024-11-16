@@ -48,10 +48,7 @@ class RoleController extends Controller
     public function store(RoleRequest $request)
     {
         $this->data = $request->validated();
-        $this->instance = $this->model::create([
-            'name' => $this->data['name'],
-            'guard_name' => $this->data['guard_name'],
-        ]);
+        $this->instance = $this->model::create(['name' => $this->data['name']]);
 
         if ($this->instance) {
             $this->data = $this->model::with('permissions')->get();

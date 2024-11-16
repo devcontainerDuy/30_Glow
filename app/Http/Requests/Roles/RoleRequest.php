@@ -15,7 +15,6 @@ class RoleRequest extends BaseRequest
     {
         return [
             'name' => ['required', 'string', 'max:255', 'unique:roles,name'],
-            'guard_name' => ['required', 'string', 'max:255',],
         ];
     }
 

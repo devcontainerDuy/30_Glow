@@ -19,14 +19,12 @@ function Index({ roles, permissions, crumbs }) {
     const [showModal, setShowModal] = useState(false);
     const [showDetail, setShowDetail] = useState(false);
     const [name, setName] = useState("");
-    const [guardName, setGuardName] = useState("");
     const [editingId, setEditingId] = useState({});
     const [selectedPermissions, setSelectedPermissions] = useState([]);
 
     const handleClose = () => {
         setShowModal(false);
         setName("");
-        setGuardName("");
     };
     const handleShow = () => setShowModal(true);
 
@@ -35,6 +33,7 @@ function Index({ roles, permissions, crumbs }) {
         setEditingId({});
         setSelectedPermissions([]);
     };
+
     const handleShowDetail = (id) => {
         setShowDetail(true);
         window.axios
@@ -55,10 +54,7 @@ function Index({ roles, permissions, crumbs }) {
         e.preventDefault();
         setLoading(true);
         window.axios
-            .post("/admin/roles", {
-                name: name,
-                guard_name: guardName,
-            })
+            .post("/admin/roles", { name: name })
             .then((response) => {
                 if (response.data.check === true) {
                     toast.success(response.data.message);
@@ -175,16 +171,11 @@ function Index({ roles, permissions, crumbs }) {
             headerName: "Quyền truy cập",
             width: 380,
             renderCell: (params) => {
-                if (
-                    params.row.permissions &&
-                    params.row.permissions.length > 0
-                ) {
+                if (params.row.permissions && params.row.permissions.length > 0) {
                     return params.row.permissions.map((permission, index) => (
                         <span key={index}>
                             {permission.name}
-                            {index < params.row.permissions.length - 1
-                                ? ", "
-                                : ""}
+                            {index < params.row.permissions.length - 1 ? ", " : ""}
                         </span>
                     ));
                 } else {
@@ -206,21 +197,10 @@ function Index({ roles, permissions, crumbs }) {
             width: 160,
             renderCell: (params) => (
                 <>
-                    <Button
-                        type="button"
-                        variant="outline-info"
-                        title="Xem và sửa loại tài khoản"
-                        onClick={() => handleShowDetail(params.row.id)}
-                    >
+                    <Button type="button" variant="outline-info" title="Xem và sửa loại tài khoản" onClick={() => handleShowDetail(params.row.id)}>
                         <i className="bi bi-exclamation-circle" />
                     </Button>
-                    <Button
-                        type="button"
-                        variant="outline-danger"
-                        className="ms-2"
-                        title="Xóa loại tài khoản"
-                        onClick={() => handleDelete(params.row.id)}
-                    >
+                    <Button type="button" variant="outline-danger" className="ms-2" title="Xóa loại tài khoản" onClick={() => handleDelete(params.row.id)}>
                         <i className="bi bi-trash-fill" />
                     </Button>
                 </>
@@ -251,11 +231,7 @@ function Index({ roles, permissions, crumbs }) {
                 <section className="container">
                     <Row>
                         <BreadcrumbComponent props={crumbs}>
-                            <Button
-                                type="button"
-                                variant="primary"
-                                onClick={handleShow}
-                            >
+                            <Button type="button" variant="primary" onClick={handleShow}>
                                 <i className="bi bi-plus-lg" />
                                 <span className="ms-2">Thêm vai trò mới</span>
                             </Button>
@@ -268,57 +244,20 @@ function Index({ roles, permissions, crumbs }) {
                                     <Modal.Title>Thêm vai trò mới</Modal.Title>
                                 </Modal.Header>
                                 <Modal.Body>
-                                    <Form.Group
-                                        className="mb-3"
-                                        controlId="formBasic"
-                                    >
+                                    <Form.Group className="mb-3" controlId="formBasic">
                                         <Form.Label>Tên vai trò</Form.Label>
-                                        <Form.Control
-                                            type="text"
-                                            placeholder="Nhập tên vai trò"
-                                            onChange={(e) =>
-                                                setName(e.target.value)
-                                            }
-                                        />
-                                    </Form.Group>
-                                    <Form.Group
-                                        className="mb-3"
-                                        controlId="formBasic"
-                                    >
-                                        <Form.Label>Quyền truy cập</Form.Label>
-                                        <Form.Select
-                                            aria-label="Default select example"
-                                            onChange={(e) =>
-                                                setGuardName(e.target.value)
-                                            }
-                                        >
-                                            <option value="">-- Chọn --</option>
-                                            <option value="web">Web</option>
-                                            <option value="api">API</option>
-                                        </Form.Select>
+                                        <Form.Control type="text" placeholder="Nhập tên vai trò" onChange={(e) => setName(e.target.value)} />
                                     </Form.Group>
                                 </Modal.Body>
                                 <Modal.Footer>
-                                    <Button
-                                        variant="secondary"
-                                        type="button"
-                                        onClick={handleClose}
-                                    >
+                                    <Button variant="secondary" type="button" onClick={handleClose}>
                                         <i className="bi bi-box-arrow-right" />
                                         <span className="ms-2">Thoát ra</span>
                                     </Button>
-                                    <Button
-                                        variant="primary"
-                                        type="submit"
-                                        disabled={loading}
-                                    >
+                                    <Button variant="primary" type="submit" disabled={loading}>
                                         {loading ? (
                                             <>
-                                                <Spinner
-                                                    size="sm"
-                                                    animation="border"
-                                                    variant="secondary"
-                                                />
+                                                <Spinner size="sm" animation="border" variant="secondary" />
                                                 <span>Đang lưu...</span>
                                             </>
                                         ) : (
@@ -363,18 +302,10 @@ function Index({ roles, permissions, crumbs }) {
                                         },
                                     }}
                                     onCellEditStop={(params, e) => {
-                                        handleCellEditStop(
-                                            params.row.id,
-                                            params.field,
-                                            e.target.value
-                                        );
+                                        handleCellEditStop(params.row.id, params.field, e.target.value);
                                     }}
                                     onCellEditStart={(params, e) => {
-                                        handleCellEditStart(
-                                            params.row.id,
-                                            params.field,
-                                            e.target.value
-                                        );
+                                        handleCellEditStart(params.row.id, params.field, e.target.value);
                                     }}
                                     pageSizeOptions={[20, 40, 60, 80, 100]}
                                     checkboxSelection
@@ -383,156 +314,73 @@ function Index({ roles, permissions, crumbs }) {
                             </Box>
                         </Col>
                         {/* End DataGrid */}
-                        <Col xs="12" hidden={showDetail === false}>
-                            {editingId !== null && (
-                                <>
-                                    <Card className="border border-dark rounded-2">
-                                        <Form
-                                            className="p-4"
-                                            onSubmit={(e) =>
-                                                handleUpdate(editingId.id, e)
-                                            }
-                                        >
-                                            <h2>
-                                                Thông tin & thao tác loại tài
-                                                khoản
-                                            </h2>
-                                            <hr className="mb-4" />
-                                            <Form.Group
-                                                className="mb-3"
-                                                controlId="formBasic1"
-                                            >
-                                                <Form.Label>
-                                                    Tên loại tài khoản
-                                                </Form.Label>
-                                                <Form.Control
-                                                    type="text"
-                                                    placeholder="Nhập tên loại tài khoản"
-                                                    defaultValue={
-                                                        editingId.name
-                                                    }
-                                                    disabled
-                                                />
-                                            </Form.Group>
-                                            <Form.Group
-                                                className="mb-3"
-                                                controlId="formBasic5"
-                                            >
-                                                <Form.Label>
-                                                    Quyền truy cập
-                                                </Form.Label>
-                                                <Form.Control
-                                                    type="text"
-                                                    placeholder="Nhập quyền truy cập"
-                                                    defaultValue={
-                                                        editingId.guard_name
-                                                    }
-                                                    disabled
-                                                />
-                                            </Form.Group>
-                                            <div className="d-flex column-gap-2 justify-content-between">
-                                                <Form.Group
-                                                    className="mb-3 w-50"
-                                                    controlId="formBasic2"
-                                                >
-                                                    <Form.Label>
-                                                        Ngày tạo
-                                                    </Form.Label>
-                                                    <Form.Control
-                                                        type="text"
-                                                        value={new Date(
-                                                            editingId.created_at
-                                                        ).toLocaleString()}
-                                                        disabled
-                                                    />
-                                                </Form.Group>
-                                                <Form.Group
-                                                    className="mb-3 w-50"
-                                                    controlId="formBasic3"
-                                                >
-                                                    <Form.Label>
-                                                        Ngày cập nhật
-                                                    </Form.Label>
-                                                    <Form.Control
-                                                        type="text"
-                                                        value={new Date(
-                                                            editingId.updated_at
-                                                        ).toLocaleString()}
-                                                        disabled
-                                                    />
-                                                </Form.Group>
-                                            </div>
-                                            <Form.Group
-                                                className="mb-3"
-                                                controlId="formBasic4"
-                                            >
-                                                <Form.Label>
-                                                    Các quyền của loại tài khoản
-                                                </Form.Label>
-                                                {/* Start Select2 */}
-                                                <AsyncSelect
-                                                    name="permissions"
-                                                    cacheOptions={true}
-                                                    closeMenuOnSelect={false}
-                                                    components={makeAnimated()}
-                                                    isMulti
-                                                    value={selectedPermissions}
-                                                    defaultOptions={permissionData.map(
-                                                        (perm) => ({
-                                                            value: perm.id,
-                                                            label: perm.name,
-                                                        })
-                                                    )}
-                                                    onChange={(newValue) => {
-                                                        setSelectedPermissions(
-                                                            newValue
-                                                        );
-                                                        console.log(newValue);
-                                                    }}
-                                                    placeholder="Chọn quyền"
-                                                    noOptionsMessage={() => {
-                                                        return "Không có quyền";
-                                                    }}
-                                                />
-                                                {/* End Select2 */}
-                                            </Form.Group>
+                        <Modal show={showDetail} onHide={handleCloseDetail} centered size="lg">
+                            <Form className="p-4" onSubmit={(e) => handleUpdate(editingId.id, e)}>
+                                <Modal.Header closeButton>
+                                    <Modal.Title>Thông tin & thao tác loại tài khoản</Modal.Title>
+                                </Modal.Header>
+                                <Modal.Body>
+                                    <Form.Group className="mb-3" controlId="formBasic1">
+                                        <Form.Label>Tên loại tài khoản</Form.Label>
+                                        <Form.Control type="text" placeholder="Nhập tên loại tài khoản" defaultValue={editingId.name} disabled />
+                                    </Form.Group>
+                                    <Form.Group className="mb-3" controlId="formBasic5">
+                                        <Form.Label>Quyền truy cập</Form.Label>
+                                        <Form.Control type="text" placeholder="Nhập quyền truy cập" defaultValue={editingId.guard_name} disabled />
+                                    </Form.Group>
+                                    <div className="d-flex column-gap-2 justify-content-between">
+                                        <Form.Group className="mb-3 w-50" controlId="formBasic2">
+                                            <Form.Label>Ngày tạo</Form.Label>
+                                            <Form.Control type="text" value={new Date(editingId.created_at).toLocaleString()} disabled />
+                                        </Form.Group>
+                                        <Form.Group className="mb-3 w-50" controlId="formBasic3">
+                                            <Form.Label>Ngày cập nhật</Form.Label>
+                                            <Form.Control type="text" value={new Date(editingId.updated_at).toLocaleString()} disabled />
+                                        </Form.Group>
+                                    </div>
+                                    <Form.Group className="mb-3" controlId="formBasic4">
+                                        <Form.Label>Các quyền của loại tài khoản</Form.Label>
+                                        {/* Start Select2 */}
+                                        <AsyncSelect
+                                            name="permissions"
+                                            cacheOptions={true}
+                                            closeMenuOnSelect={false}
+                                            components={makeAnimated()}
+                                            isMulti
+                                            value={selectedPermissions}
+                                            defaultOptions={permissionData.map((perm) => ({
+                                                value: perm.id,
+                                                label: perm.name,
+                                            }))}
+                                            onChange={(newValue) => {
+                                                setSelectedPermissions(newValue);
+                                                console.log(newValue);
+                                            }}
+                                            placeholder="Chọn quyền"
+                                            noOptionsMessage={() => {
+                                                return "Không có quyền";
+                                            }}
+                                        />
+                                        {/* End Select2 */}
+                                    </Form.Group>
+                                </Modal.Body>
+                                <Modal.Footer>
+                                    <Button type="button" variant="danger">
+                                        <i className="bi bi-trash-fill" />
+                                    </Button>
 
-                                            <div className="d-flex column-gap-2">
-                                                <Button
-                                                    type="button"
-                                                    variant="danger"
-                                                >
-                                                    <i className="bi bi-trash-fill" />
-                                                </Button>
+                                    <Button type="button" variant="secondary" onClick={handleCloseDetail}>
+                                        <i className="bi bi-x-circle" />
+                                        <span className="ms-2">Hủy chỉnh sửa</span>
+                                    </Button>
 
-                                                <Button
-                                                    type="button"
-                                                    variant="secondary"
-                                                    className="w-100"
-                                                    onClick={handleCloseDetail}
-                                                >
-                                                    <i className="bi bi-x-circle" />
-                                                    <span className="ms-2">
-                                                        Hủy chỉnh sửa
-                                                    </span>
-                                                </Button>
-
-                                                <Button
-                                                    type="submit"
-                                                    variant="success"
-                                                    className="w-100"
-                                                >
-                                                    <i className="bi bi-floppy" />
-                                                    <span className="ms-2">
-                                                        Lưu lại chỉnh sửa này
-                                                    </span>
-                                                </Button>
-                                            </div>
-                                        </Form>
-                                    </Card>
-                                </>
-                            )}
-                        </Col>
+                                    <Button type="submit" variant="success">
+                                        <i className="bi bi-floppy" />
+                                        <span className="ms-2">Lưu lại chỉnh sửa này</span>
+                                    </Button>
+                                </Modal.Footer>
+                            </Form>
+                        </Modal>
                     </Row>
                 </section>
             </Layout>

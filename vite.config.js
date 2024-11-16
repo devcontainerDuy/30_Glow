@@ -25,14 +25,6 @@ export default defineConfig({
     server: {
         hmr: {
             host: "localhost",
-            port: 8080,
-            protocol: "ws",
-
-            hmrOptions: {
-                host: "localhost",
-                port: 8080,
-                protocol: "ws",
-            },
         },
     },
 

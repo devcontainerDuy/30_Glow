@@ -16,7 +16,7 @@ class UserRequest extends BaseRequest
         return [
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'string', 'email', 'max:255', 'unique:users'],
-            'id_role' => ['nullable', 'exists:roles,name'],
+            'roles' => ['nullable', 'exists:roles,name'],
         ];
     }
 
@@ -30,7 +30,7 @@ class UserRequest extends BaseRequest
         return [
             'name' => ['nullable', 'string', 'max:255'],
             'email' => ['nullable', 'string', 'email', 'max:255', 'unique:users'],
-            'id_role' => ['nullable', 'exists:roles,id'],
+            'roles' => ['nullable', 'exists:roles,name'],
             'status' => ['nullable', 'boolean'],
         ];
     }

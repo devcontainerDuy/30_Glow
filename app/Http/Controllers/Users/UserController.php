@@ -32,6 +32,7 @@ class UserController extends Controller
             ['name' => 'Danh sách tài khoản', 'url' => '/admin/users'],
         ];
         $this->data = $this->model::with('roles')->get();
+        // dd($this->data);
         $this->instance = Role::select('id', 'name')->get();
         return Inertia::render('Users/Index', [
             'users' => $this->data,
@@ -60,6 +61,8 @@ class UserController extends Controller
         $this->data['password'] = Hash::make($password);
 
         $this->instance = $this->model::create($this->data);
+        $this->instance->syncRoles(['name' => $this->data['roles']]);
+
         if ($this->instance) {
             $dataMail = [
                 'name' => $request->input('name'),
@@ -95,7 +98,8 @@ class UserController extends Controller
     public function update(UserRequest $request, string $id)
     {
         $this->data = $request->validated();
-        $this->instance = $this->model::findOrFail($id)->update($this->data);
+        isset($this->data['roles']) ? $this->instance = $this->model::findOrFail($id)->syncRoles(['name' => $this->data['roles']]) : $this->instance = $this->model::findOrFail($id)->update($this->data);
+
         if ($this->instance) {
             $this->data = $this->model::with('roles')->get();
             return response()->json(['check' => true, 'message' => 'Cập nhật thành công!', 'data' => $this->data], 200);
