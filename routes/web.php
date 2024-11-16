@@ -26,7 +26,7 @@ Route::middleware(['auth', 'auth.session', 'web', 'authen:web'])->prefix('admin'
     Route::resource('users', App\Http\Controllers\Users\UserController::class)->names('user');
     // Module Role
     Route::resource('roles', App\Http\Controllers\Roles\RoleController::class)->names('role');
-    Route::post('handleRole/permission/{id}', [App\Http\Controllers\Roles\RoleController::class, 'role_permission']);
+    Route::post('handleRole/permission/{id}', [App\Http\Controllers\Roles\RoleController::class, 'givePermissionToRole']);
     // Module Permission
     Route::resource('permissions', App\Http\Controllers\Permissions\PermissionController::class)->names('permission');
     // Module Customer

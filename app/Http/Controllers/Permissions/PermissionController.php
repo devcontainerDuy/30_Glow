@@ -4,7 +4,7 @@ namespace App\Http\Controllers\Permissions;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Permissions\PermissionRequests;
-use App\Models\Permissions;
+use Spatie\Permission\Models\Permission;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 
@@ -12,7 +12,7 @@ class PermissionController extends Controller
 {
     public function __construct()
     {
-        $this->model = Permissions::class;
+        $this->model = Permission::class;
     }
     /**
      * Display a listing of the resource.

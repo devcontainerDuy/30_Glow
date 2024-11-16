@@ -4,8 +4,8 @@ namespace App\Http\Controllers\Roles;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Roles\RoleRequest;
-use App\Models\Permissions;
-use App\Models\Role;
+use Spatie\Permission\Models\Permission;
+use Spatie\Permission\Models\Role;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 
@@ -26,7 +26,7 @@ class RoleController extends Controller
         ];
         $this->data = $this->model::with('permissions')->get();
         // dd($this->data[0]->permissions[0]->id);
-        $this->instance = Permissions::with('roles')->select('id', 'name')->get();
+        $this->instance = Permission::with('roles')->select('id', 'name')->get();
         return Inertia::render('Roles/Index', [
             'roles' => $this->data,
             'permissions' => $this->instance,
@@ -94,7 +94,7 @@ class RoleController extends Controller
         return response()->json(['check' => false, 'message' => 'Cập nhật thất bại!'], 400);
     }
 
-    public function role_permission(Request $request, string $id)
+    public function givePermissionToRole(Request $request, string $id)
     {
         $this->data = $request->only(['permissions']);
         $this->instance = $this->model::findOrFail($id);
