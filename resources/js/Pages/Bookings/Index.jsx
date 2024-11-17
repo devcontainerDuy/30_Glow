@@ -22,17 +22,13 @@ function Index({ bookings, crumbs }) {
     };
 
     const columns = useMemo(() => [
-        { field: "id", headerName: "ID", width: 80 },
         {
-            field: "id_user",
-            headerName: "Nhân viên thực hiện",
-            width: 200,
-            renderCell: (params) => (
-                <>
-                    <p>{params.row.user ? params.row.user.name : "Chưa sắp xếp nhân viên"}</p>
-                </>
-            ),
+            field: "time",
+            headerName: "Thời gian đến",
+            width: 160,
+            renderCell: (params) => new Date(params.row.time).toLocaleString(),
         },
+
         {
             field: "id_customer",
             headerName: "Khách hàng",
@@ -44,19 +40,56 @@ function Index({ bookings, crumbs }) {
             ),
         },
         {
+            field: "phone",
+            headerName: "SĐT",
+            width: 120,
+            renderCell: (params) => (
+                <span>
+                    {params.row.customer ? (
+                        <a href={"tel:" + params.row?.phone} className="text-decoration-none">
+                            {params.row.customer?.phone?.toString().replace(/(\d{3})(\d{3})(\d{4})/, "$1-$2-$3")}
+                        </a>
+                    ) : (
+                        "Không có SĐT"
+                    )}
+                </span>
+            ),
+        },
+        {
             field: "status",
             headerName: "Trạng thái",
-            width: 140,
-            renderCell: (params) => (
-                <>
-                    <span>{params.row.status === 0 ? "Vừa đặt" : params.row.status === 1 ? "Hoàn thành" : params.row.status === 2 ? "Hủy lịch" : params.row.status === 3 ? "Đã thanh toán" : ""}</span>
-                </>
-            ),
+            width: 180,
+            renderCell: (params) => {
+                let statusText = "";
+                switch (params.row.status) {
+                    case 0:
+                        statusText = "Đang chờ xếp nhân viên";
+                        break;
+                    case 1:
+                        statusText = "Đã xếp nhân viên";
+                        break;
+                    case 2:
+                        statusText = "Đang thực hiện";
+                        break;
+                    case 3:
+                        statusText = "Thành công";
+                        break;
+                    case 4:
+                        statusText = "Đã thanh toán";
+                        break;
+                    case 5:
+                        statusText = "Thất bại";
+                        break;
+                    default:
+                        statusText = "Chưa xác định";
+                }
+                return <span>{statusText}</span>;
+            },
         },
         {
             field: "service",
             headerName: "Dịch vụ",
-            width: 350,
+            width: 340,
             renderCell: (params) => (
                 <>
                     <span title={params.row.service && params.row.service.map((item) => item.name).join(", ")}>{params.row.service && params.row.service.map((item) => item.name).join(", ")}</span>
@@ -64,17 +97,21 @@ function Index({ bookings, crumbs }) {
             ),
         },
         {
-            field: "time",
-            headerName: "Thời gian đến",
+            field: "id_user",
+            headerName: "Nhân viên thực hiện",
             width: 160,
-            renderCell: (params) => new Date(params.row.time).toLocaleString(),
+            renderCell: (params) => (
+                <>
+                    <p>{params.row.user ? params.row.user.name : "Chưa sắp xếp nhân viên"}</p>
+                </>
+            ),
         },
         {
             field: "action",
             headerName: "Thao tác",
-            width: 120,
+            width: 100,
             renderCell: (params) => (
-                <Button type="button" variant="outline-info" title="Xem chi tiết sản phẩm" onClick={() => handleView(params.row.id)}>
+                <Button type="button" variant="outline-info" title="Xem chi tiết dịch vụ" onClick={() => handleView(params.row.id)}>
                     <i className="bi bi-exclamation-circle" />
                 </Button>
             ),

@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Customers;
 
+use App\Events\Customers\PhoneChanged;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Cumtomers\CustomerRequest;
 use App\Models\Customers;
@@ -152,13 +153,18 @@ class CustomerController extends Controller
     public function update(CustomerRequest $request, string $id)
     {
         $this->data = $request->validated();
-        $this->instance = $this->model::findOrFail($id)->update($this->data);
+        // $this->instance = $this->model::findOrFail($id)->update($this->data); gộp 1 dòng kh chạy đc mà tách ra thì đc :)))))))) 
+        // à tại dòng ở trên là trả về true fail nên bị bắt lỗi kiểu dữ liệu nha
+        $this->instance = $this->model::find($id);
+        $this->instance->update($this->data);
+        if (isset($this->data['phone'])) broadcast(new PhoneChanged($this->instance))->toOthers();
         if ($this->instance) {
             $this->data = $this->model::all();
-            return response()->json(['check' => true, 'message' => 'Cập nhật thành công!', 'data' => $this->data], 200);
+            return response()->json(['check' => true, 'message' => 'Cập nhật thành công!', 'data' => $this->data,], 200);
         }
-        return response()->json(['check' => false, 'message' => 'Cập nhật thất bại!'], 400);
+        return response()->json(['check' => false, 'message' => 'Cập nhật thất bại!'], 400);
     }
+
 
     /**
      * Remove the specified resource from storage.

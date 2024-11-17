@@ -17,6 +17,10 @@ Broadcast::channel('App.Models.User.{id}', function ($user, $id) {
     return (int) $user->id === (int) $id;
 });
 
+Broadcast::channel('App.Models.Customer.{id}', function ($customer, $id) {
+    return (int) $customer->id === (int) $id;
+});
+
 Broadcast::channel('channelBookings', function ($user, int $id) {
     return true;
 });

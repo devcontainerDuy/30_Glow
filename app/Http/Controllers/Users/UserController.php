@@ -10,6 +10,7 @@ use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\User\UserRequest;
 use App\Mail\createUser;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Str;
@@ -122,7 +123,18 @@ class UserController extends Controller
 
     public function apiIndex()
     {
-        $this->data = $this->model::where('id_role', 3)->select('uid', 'name')->active()->get();
+        $this->data = $this->model::with('roles')->active()->whereHas("roles", function (Builder $query) {
+            $query->where('name', 'Staff');
+        })->get();
+
+        $this->data->transform(function ($item) {
+            return [
+                'uid' => $item->uid,
+                'name' => $item->name,
+                'roles' => $item->roles->pluck('name')->toArray(),
+            ];
+        });
+
         return response()->json(['check' => true, 'data' => $this->data], 200);
     }
 }
