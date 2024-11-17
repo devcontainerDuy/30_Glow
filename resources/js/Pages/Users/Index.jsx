@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo } from "react";
-import Layout from "@/Layouts/Index";
+import Layout from "@layouts/Index";
 import { Button, Col, Form, Modal, Row, Spinner } from "react-bootstrap";
 import { Box, FormControl, FormControlLabel, MenuItem, Select, Switch } from "@mui/material";
 import { DataGrid, GridToolbar } from "@mui/x-data-grid";

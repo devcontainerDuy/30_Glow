@@ -61,7 +61,7 @@ class AuthenticateController extends Controller
             $this->instance->tokens()->delete();
             $expiry = $request->remember_token ? now()->addDays(2) : now()->addHours(6);
             $token = $this->instance->createToken($this->instance->uid);
-            $token->accessToken->expires_at = $expiry;
+            $token->expires_at = $expiry;
             return response()->json(['check' => true, 'uid' => $this->instance->uid, 'token' => $token->plainTextToken, 'expiry' => $expiry->timestamp], 200);
         } else {
             return response()->json(['check' => false, 'message' => 'Sai email hoặc mật khẩu'], 401);

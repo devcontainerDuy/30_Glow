@@ -131,7 +131,9 @@ function Layout({ children }) {
                         <MenuItem icon={<SlideOutlinedIcon />} component={<Link href="/admin/slides" />}>
                             Slides
                         </MenuItem>
-                        <MenuItem icon={<ContactsOutlinedIcon />} component={<Link href="/admin/contacts" />}>Contacts</MenuItem>
+                        <MenuItem icon={<ContactsOutlinedIcon />} component={<Link href="/admin/contacts" />}>
+                            Contacts
+                        </MenuItem>
                         <MenuItem icon={<HelpOutlineOutlinedIcon />}>FAQ</MenuItem>
                         <MenuItem icon={<CalendarTodayOutlinedIcon />}>Calendar</MenuItem>
                     </Menu>

@@ -19,12 +19,20 @@ export default defineConfig({
     resolve: {
         alias: {
             "@": "/resources/js",
+            "@components": "/resources/js/Components",
+            "@pages": "/resources/js/Pages",
+            "@layouts": "/resources/js/Layouts",
+            "@css": "/resources/css",
         },
     },
 
     server: {
+        cors: true,
         hmr: {
             host: "localhost",
+        },
+        mimeTypes: {
+            "text/css": ["css"],
         },
     },
 

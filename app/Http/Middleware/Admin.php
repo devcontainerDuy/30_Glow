@@ -5,6 +5,7 @@ namespace App\Http\Middleware;
 use Closure;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Inertia\Inertia;
 use Symfony\Component\HttpFoundation\Response;
 
 class Admin
@@ -12,23 +13,24 @@ class Admin
     /**
      * Handle an incoming request.
      *
-     * @param  \Closure(\Illuminate\Http\Request): (\Symfony\Component\HttpFoundation\Response)  $next
+     * @param  \Illuminate\Http\Request  $request
+     * @param  \Closure  $next
+     * @param  string[]  ...$roles
      * @return \Symfony\Component\HttpFoundation\Response
      */
-    public function handle(Request $request, Closure $next, string ...$guards): Response
+    public function handle(Request $request, Closure $next, ...$roles): Response
     {
-        $guards = empty($guards) ? [null] : $guards;
+        if (Auth::guard('web')->check()) {
+            $user = Auth::guard('web')->user();
 
-        foreach ($guards as $guard) {
-            if (Auth::guard($guard)->check()) {
-                if (Auth::guard($guard)->user()->id_role == 1 || Auth::guard($guard)->user()->id_role == 2) {
-                    return $next($request);
-                }
-                Auth::guard($guard)->logout();
-                return response()->json(['status' => false, 'message' => 'Bạn không có quyền truy cập.', 'url' => route('auth.login')], 403);
+            if ($user->hasAnyRole($roles)) {
+                return $next($request);
             }
+
+            Auth::guard('web')->logout();
+            return redirect()->route('forbidden');
         }
 
-        return response()->json(['status' => false, 'message' => 'Vui lòng đăng nhâp.'], 403);
+        return redirect()->route('auth.login');
     }
 }

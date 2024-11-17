@@ -46,14 +46,14 @@ class AuthenController extends Controller
         $this->data = $request->validated();
 
         if (Auth::guard('api')->attempt(['email' => $this->data['email'], 'password' => $this->data['password'], 'status' => 1], $this->data['remember_token'])) {
-            $this->instance = Auth::guard('api')->user();
+            $this->instance = Auth::guard('api')->user()->load('roles');
 
-            if ($this->instance->id_role === 2 || $this->instance->id_role === 3) {
+            if ($this->instance->roles->pluck('id')[0] === 2 || $this->instance->roles->pluck('id')[0] === 3) {
                 $this->instance->tokens()->delete();
 
                 $expiry = $this->data['remember_token'] ? now()->addDays(2) : now()->addHours(6);
                 $token = $this->instance->createToken($this->instance->uid);
-                $token->accessToken->expires_at = $expiry;
+                $token->expires_at = $expiry;
 
                 return response()->json(['check' => true, 'role' => $this->instance->id_role === 2 ? 'manager' : 'staff', 'uid' => $this->instance->uid, 'token' => $token->plainTextToken, 'expiry' => $expiry->timestamp], 200);
             } else {
