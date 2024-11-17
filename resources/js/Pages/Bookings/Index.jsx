@@ -46,8 +46,8 @@ function Index({ bookings, crumbs }) {
             renderCell: (params) => (
                 <span>
                     {params.row.customer ? (
-                        <a href={"tel:" + params.row.phone} className="text-decoration-none">
-                            {params.row.customer.phone.toString().replace(/(\d{3})(\d{3})(\d{4})/, "$1-$2-$3")}
+                        <a href={"tel:" + params.row?.phone} className="text-decoration-none">
+                            {params.row.customer?.phone?.toString().replace(/(\d{3})(\d{3})(\d{4})/, "$1-$2-$3")}
                         </a>
                     ) : (
                         "Không có SĐT"
@@ -75,10 +75,10 @@ function Index({ bookings, crumbs }) {
                         statusText = "Thành công";
                         break;
                     case 4:
-                        statusText = "Thất bại";
+                        statusText = "Đã thanh toán";
                         break;
                     case 5:
-                        statusText = "Đã thanh toán";
+                        statusText = "Thất bại";
                         break;
                     default:
                         statusText = "Chưa xác định";

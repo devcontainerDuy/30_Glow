@@ -26,26 +26,47 @@ class BookingEvent implements ShouldBroadcast
     {
         // Assuming $booking is a collection of booking instances
         $this->bookingData = $parameters->map(function ($item) {
-            return [
-                'id' => $item->id,
-                'user' => $item->user ? [
-                    'uid' => $item->user->uid,
-                    'name' => $item->user->name,
-                ] : null,
-                'customer' => $item->customer ? [
-                    'uid' => $item->customer->uid,
-                    'name' => $item->customer->name,
-                ] : null,
-                'time' => $item->time,
-                'service' => $item->service ? $item->service->map(function ($service) {
-                    return [
-                        'uid' => $service->uid,
-                        'name' => $service->name,
-                    ];
-                })->toArray() : null,
-                'note' => $item->note,
-                'status' => $item->status,
-            ];
+            return
+                [
+                    'id' => $item->id,
+                    'user' => $item->user ? [
+                        'uid' => $item->user->uid,
+                        'name' => $item->user->name,
+                        'email' => $item->user->email,
+                        'phone' => $item->user->phone,
+                        'address' => $item->user->address,
+                    ] : null,
+                    'customer' => $item->customer ? [
+                        'uid' => $item->customer->uid,
+                        'name' => $item->customer->name,
+                        'email' => $item->customer->email,
+                        'phone' => $item->customer->phone,
+                        'address' => $item->customer->address,
+                    ] : null,
+                    'time' => $item->time,
+                    'service' => $item->service ? $item->service->map(function ($service) {
+                        return [
+                            'id' => $service->id,
+                            'name' => $service->name,
+                            'slug' => $service->slug,
+                            'price' => $service->price,
+                            'compare_price' => $service->compare_price,
+                            'discount' => $service->discount,
+                            'summary' => $service->summary,
+                            'image' => asset('storage/services/' . $service->image),
+                            'content' => $service->content,
+                            'highlighted' => $service->highlighted,
+                            "collection" => $service->collection ? [
+                                'id' => $service->collection->id,
+                                'name' => $service->collection->name,
+                                'slug' => $service->collection->slug,
+                                'highlighted' => $service->collection->highlighted,
+                            ] : null,
+                        ];
+                    })->toArray() : null,
+                    'note' => $item->note,
+                    'status' => $item->status,
+                ];
         });
     }
 

@@ -50,8 +50,8 @@ class Bookings extends Model
         return $query->where('status', 1);
     }
 
-    public function scopeInActive($query)
+    public function scopeRecent($query)
     {
-        return $query->where('status', 0);
+        return $query->whereBetween('created_at', [now()->subDays(7), now()]);
     }
 }

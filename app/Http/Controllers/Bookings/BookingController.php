@@ -33,7 +33,7 @@ class BookingController extends Controller
             ['name' => 'Dịch vụ', 'url' => '/admin/services'],
             ['name' => 'Danh sách dịch vụ đặt lịch', 'url' => '/admin/bookings'],
         ];
-        $this->data = $this->model::with('user', 'customer', 'service')->orderBy('id', 'desc')->get();
+        $this->data = $this->model::with('user', 'customer', 'service')->recent()->orderBy('id', 'desc')->get();
         return Inertia::render('Bookings/Index', ['bookings' => $this->data, 'crumbs' => $this->crumbs]);
     }
 
@@ -99,7 +99,7 @@ class BookingController extends Controller
             }
 
             DB::commit();
-            broadcast(new BookingEvent($this->model::with('user', 'customer', 'service')->inActive()->orderBy('id', 'desc')->get()))->toOthers();
+            broadcast(new BookingEvent($this->model::with('user', 'customer', 'service')->recent()->orderBy('id', 'desc')->get()))->toOthers();
             return response()->json(['check' => true, 'message' => 'Đặt lịch thành công!'], 200);
         } catch (\Throwable $e) {
             DB::rollBack();
@@ -168,7 +168,7 @@ class BookingController extends Controller
 
     /**
      * Update the specified resource in storage.
-     * status: 0 - Đang chờ xếp nhân viên, 1 - Đã xếp nhân viên, 2 - Đang thực hiện, 3 - Thành công, 4 - Thất bại, 5 - Đã thanh toán
+     * status: 0 - Đang chờ xếp nhân viên, 1 - Đã xếp nhân viên, 2 - Đang thực hiện, 3 - Thành công, 4 - Đã thanh toán, 5 - Thất bại
      */
     public function update(BookingRequest $request, string $id)
     {
@@ -186,11 +186,10 @@ class BookingController extends Controller
             if ($this->instance->id_user === null && empty($this->data['id_user']) && $this->data['status'] >= 2) {
                 return response()->json(['check' => false, 'message' => 'Vui lòng chọn nhân viên!'], 400);
             }
-
             $this->instance->update($this->data);
 
             DB::commit();
-            broadcast(new BookingEvent($this->model::with('user', 'customer', 'service')->inActive()->orderBy('id', 'desc')->get()))->toOthers();
+            broadcast(new BookingEvent($this->model::with('user', 'customer', 'service')->recent()->orderBy('id', 'desc')->get()))->toOthers();
             return response()->json(['check' => true, 'message' => 'Cập nhật lịch thành công!'], 200);
         } catch (\Throwable $e) {
             DB::rollBack();
