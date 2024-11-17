@@ -2,6 +2,8 @@
 
 namespace App\Providers;
 
+use App\Events\Customers\PhoneChanged;
+use App\Listeners\SendPhoneChangeNotification;
 use App\Listeners\ValidateUserStatus;
 use Illuminate\Auth\Events\Attempting;
 use Illuminate\Auth\Events\Registered;
@@ -22,6 +24,9 @@ class EventServiceProvider extends ServiceProvider
         ],
         Attempting::class => [
             ValidateUserStatus::class,
+        ],
+        PhoneChanged::class => [
+            SendPhoneChangeNotification::class,
         ],
     ];
 
