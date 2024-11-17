@@ -30,13 +30,19 @@ function Index({ categories, products, crumbs }) {
     const handleShow = () => setShow(true);
 
     const handleShowProducts = (categoryId) => {
-        setCategoryId(categoryId);
-        const filteredProducts = productList.filter((product) => product.id_category === categoryId);
-        setSelectedProducts(filteredProducts);
+        const category = categories.find((cat) => cat.id === categoryId);
+    
+        if (category && category.products) {
+            setSelectedProducts(category.products);
+        } else {
+            setSelectedProducts([]);
+        }
         setShowProductsModal(true);
     };
-    const handleCloseProducts = (categoryId) => {
+    
+    const handleCloseProducts = () => {
         setShowProductsModal(false);
+        setSelectedProducts([]);
     };
 
     const handleSubmit = (e) => {
@@ -155,38 +161,6 @@ function Index({ categories, products, crumbs }) {
         });
     };
 
-    const handleDeleteProduct = (id) => {
-        Swal.fire({
-            title: "Xóa mục?",
-            text: "Bạn chắc chắn xóa mục này!",
-            icon: "error",
-            showCancelButton: true,
-            confirmButtonColor: "#3085d6",
-            cancelButtonColor: "#d33",
-            confirmButtonText: "Có, xóa",
-            cancelButtonText: "Hủy",
-        }).then((result) => {
-            if (result.isConfirmed) {
-                window.axios
-                    .delete("/admin/products/" + id)
-                    .then((res) => {
-                        if (res.data.check === true) {
-                            toast.success(res.data.message);
-                            const filteredProducts = res.data.data.filter((product) => product.id_category === categoryId);
-                            setSelectedProducts(filteredProducts);
-                            setData(res.data.categories);
-                            setProductList(res.data.data);
-                        } else {
-                            toast.warning(res.data.message);
-                        }
-                    })
-                    .catch((error) => {
-                        toast.error(error.response.data.message);
-                    });
-            }
-        });
-    };
-
     const handleUpdateProduct = (id, newCategoryId) => {
         const updatedData = {
             id_category: newCategoryId,
@@ -290,8 +264,6 @@ function Index({ categories, products, crumbs }) {
         },
     ]);
 
-    console.log();
-
     useEffect(() => {
         setData(categories);
         setProductList(products);
@@ -351,7 +323,7 @@ function Index({ categories, products, crumbs }) {
                         {/* End Modal Thêm danh mục mới */}
 
                         {/* Start Products Modal */}
-                        <Modal show={showProductsModal} onHide={() => setShowProductsModal(false)} size="lg">
+                        <Modal show={showProductsModal} onHide={handleCloseProducts} size="lg">
                             <Modal.Header closeButton>
                                 <Modal.Title>Danh Sách Sản Phẩm</Modal.Title>
                             </Modal.Header>
@@ -376,9 +348,9 @@ function Index({ categories, products, crumbs }) {
                                                     </div>
                                                     <Card.Body className="p-2 d-flex justify-content-between align-items-center">
                                                         <select
-                                                            className="form-select w-75"
+                                                            className="form-select"
                                                             defaultValue={item.id_category}
-                                                            onChange={(e) => handleUpdateProduct(item.id, e.target.value)} // Gọi hàm cập nhật khi chọn
+                                                            onChange={(e) => handleUpdateProduct(item.id, e.target.value)}
                                                         >
                                                             {categories.map((category) => (
                                                                 <option key={category.id} value={category.id}>
@@ -386,11 +358,6 @@ function Index({ categories, products, crumbs }) {
                                                                 </option>
                                                             ))}
                                                         </select>
-                                                        <div className="d-flex">
-                                                            <Button className="me-2" variant="danger" type="button" onClick={() => handleDeleteProduct(item.id)}>
-                                                                Xóa
-                                                            </Button>
-                                                        </div>
                                                     </Card.Body>
                                                 </Card>
                                             </Col>
@@ -401,7 +368,7 @@ function Index({ categories, products, crumbs }) {
                                 </Row>
                             </Modal.Body>
                             <Modal.Footer>
-                                <Button variant="secondary" onClick={() => handleCloseProducts()}>
+                                <Button variant="secondary" onClick={handleCloseProducts}>
                                     Đóng
                                 </Button>
                             </Modal.Footer>

@@ -23,10 +23,8 @@ class CategoriesController extends Controller
             ['name' => 'Sản phẩm', 'url' => '/admin/products'],
             ['name' => 'Danh sách danh mục', 'url' => '/admin/categories'],
         ];
-
-        $this->data = $this->model::with('parent')->withCount('products')->orderBy('id', 'desc')->get();
-        $products = Products::with('category', 'brand', 'gallery')->get();
-        return Inertia::render('Categories/Index', ['categories' => $this->data, 'products' => $products, 'crumbs' => $this->crumbs]);
+        $this->data = $this->model::with('parent', 'products', 'products.gallery')->active()->select('id', 'name', 'slug', 'id_parent', 'status')->withCount('products')->orderBy('id', 'desc')->get();
+        return Inertia::render('Categories/Index', ['categories' => $this->data, 'crumbs' => $this->crumbs]);
     }
     public function store(CategoriesRequest $request)
     {
