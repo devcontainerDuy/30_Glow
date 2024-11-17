@@ -42,6 +42,8 @@ Route::middleware('api')->group(function () {
     Route::controller(App\Http\Controllers\Bookings\BookingController::class)->group(function () {
         Route::get('/bookings', 'create')->middleware(['auth:sanctum', 'auth.session']);
         Route::post('/bookings', 'store');
+        Route::get('/bookings/{id}', 'show')->middleware(['auth:sanctum', 'auth.session']);
+        Route::put('/bookings/{id}', 'update')->middleware(['auth:sanctum', 'auth.session']);
     });
 
     Route::controller(App\Http\Controllers\Bills\BillController::class)->middleware(['auth:sanctum', 'auth.session'])->group(function () {
