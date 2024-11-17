@@ -24,3 +24,6 @@ Broadcast::channel('App.Models.Customer.{id}', function ($customer, $id) {
 Broadcast::channel('channelBookings', function ($user, int $id) {
     return true;
 });
+Broadcast::channel('channelContacts', function ($user) {
+    return true;
+});
