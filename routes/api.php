@@ -90,3 +90,7 @@ Route::middleware('api')->controller(App\Http\Controllers\Slides\SlidesControlle
     Route::get('/slides', 'apiIndex');
     Route::get('/slides/{slug}', 'apiShow');
 });
+
+Route::middleware('api')->controller(App\Http\Controllers\Contacts\ContactsController::class)->group(function () {
+    Route::post('/addContacts', 'addContacts');
+});

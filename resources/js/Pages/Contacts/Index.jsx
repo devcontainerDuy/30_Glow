@@ -10,10 +10,11 @@ import Swal from "sweetalert2";
 import CKEditor from "@/Containers/CKEditor";
 import BreadcrumbComponent from "@/Components/BreadcrumbComponent";
 import { Helmet } from "react-helmet";
+import Pusher from 'pusher-js';
 import { toast } from "react-toastify";
 
 function Index({ contacts, crumbs }) {
-    const [data, setData] = useState([]);
+    const [data, setData] = useState(contacts || []);
     const [editingCells, setEditingCells] = useState({});
     const [show, setShow] = useState(false);
     const [loading, setLoading] = useState(false);
@@ -157,7 +158,7 @@ function Index({ contacts, crumbs }) {
                         title="Xem chi tiết liên hệ"
                         onClick={() => handleShow(params.row.id)}
                     >
-                        <i className="bi bi-envelope"/>
+                        <i className="bi bi-envelope" />
                     </Button>
                     <Button
                         className="ms-2"
@@ -178,12 +179,23 @@ function Index({ contacts, crumbs }) {
         return date.toLocaleString();
     };
 
-    const handleEditorBlur = (data) => {
-        setReplyMessage(data);
-    };
     useEffect(() => {
-        setData(contacts);
-    }, [contacts]);
+        const pusher = new Pusher("a41649538081bc522756", {
+            cluster: "ap1",
+            wsHost: "ws-ap1.pusher.com",
+            wsPort: 443,
+            wssPort: 443,
+            forceTLS: true,
+            enabledTransports: ["ws", "wss"],
+            disableStats: true,
+            encrypted: true,
+        });
+        const channel = pusher.subscribe("channelContacts");
+        channel.bind("ContactsCreated", function (data) {
+            console.log("Received data:", data);
+            setData(data.ContactsData);
+        });
+    }, []);
 
     return (
         <>
@@ -256,6 +268,7 @@ function Index({ contacts, crumbs }) {
                             </Form>
                         </Modal>
                         {/* End Modal */}
+
                         {/* Start DataGrid */}
                         <Col xs="12">
                             <Box sx={{ height: "70vh", width: "100%" }}>
@@ -306,6 +319,7 @@ function Index({ contacts, crumbs }) {
                         {/* End DataGrid */}
                     </Row>
                 </section>
+
             </Layout>
         </>
     );
