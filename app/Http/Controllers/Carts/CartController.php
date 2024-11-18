@@ -220,22 +220,23 @@ class CartController extends Controller
         $cartItems = $request->only('cartItems')['cartItems'];
         $cart = [];
 
-        foreach ($cartItems as $key => $value) {
-            $cart = Products::with('gallery')->find($value['id']);
+        foreach ($cartItems as $value) {
+            $cartItem = Products::with(['gallery', 'category', 'brand'])->active()->findOrFail($value['id']);
 
-            if ($cart) {
+            if ($cartItem) {
                 $cart[] = [
-                    'id' => $cart->id,
-                    'name' => $cart->name,
-                    'slug' => $cart->slug,
-                    'price' => $cart->price,
-                    'discount' => $cart->discount,
-                    'in_stock' => $cart->in_stock,
-                    'highlighted' => $cart->highlighted,
-                    'image' => asset('storage/gallery/' . $cart->gallery->firstWhere('status', 1)->image),
+                    'id' => $cartItem->id,
+                    'name' => $cartItem->name,
+                    'slug' => $cartItem->slug,
+                    'price' => $cartItem->price,
+                    'discount' => $cartItem->discount,
+                    'in_stock' => $cartItem->in_stock,
+                    'highlighted' => $cartItem->highlighted,
+                    'gallery' => asset('storage/gallery/' . $cartItem->gallery->firstWhere('status', 1)->image),
                     'quantity' => $value['quantity']
-
                 ];
+            } else {
+                return response()->json(['check' => false, 'message' => 'Sản phẩm không tồn tại!'], 404);
             }
         }
 
