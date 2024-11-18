@@ -111,7 +111,7 @@ function Layout({ children }) {
                             {/* <h2> 30 Glow</h2> */}
                         </MenuItem>
                         <MenuItem icon={<HomeOutlinedIcon />} component={<Link href="/admin/" method="get" as="a" />}>
-                            Trang chủ
+                            Trang chủ hâhdfasdfasdfasdfasdf
                         </MenuItem>
                         <SubMenu icon={<PeopleOutlinedIcon />} label="Quản lý tài khoản">
                             <MenuItem icon={<BadgeOutlinedIcon />} component={<Link href="/admin/users" />}>
