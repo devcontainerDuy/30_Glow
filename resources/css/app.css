@@ -6,8 +6,8 @@
     font-family: monospace;
     white-space: nowrap;
     overflow: hidden;
-    /* border-right: 0.15em solid orange; */
-    /* animation: typing 3.5s steps(40, end), blink-caret 0.75s step-end infinite; */
+    /* border-right: 0.15em solid orange;
+    animation: typing 3.5s steps(40, end), blink-caret 0.75s step-end infinite; */
 }
 
 @keyframes typing {

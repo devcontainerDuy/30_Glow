@@ -198,7 +198,7 @@ function Layout({ children }) {
                                             width: "100%",
                                         }}
                                     >
-                                        Mọi cố gắn sẽ được đền đáp
+                                        🌟 Mọi cố gắng sẽ được đền đáp 🌟
                                     </marquee>
                                 </Container>
                             </Navbar.Collapse>
