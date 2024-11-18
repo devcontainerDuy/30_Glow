@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { Link, router } from "@inertiajs/react";
 import { Sidebar, SubMenu, Menu, MenuItem, useProSidebar, sidebarClasses } from "react-pro-sidebar";
-import { Container, Image, Navbar } from "react-bootstrap";
+import { Container, Form, Image, InputGroup, Navbar } from "react-bootstrap";
 import HomeOutlinedIcon from "@mui/icons-material/HomeOutlined";
 import PeopleOutlinedIcon from "@mui/icons-material/PeopleOutlined";
 import ContactsOutlinedIcon from "@mui/icons-material/ContactsOutlined";
@@ -26,10 +26,37 @@ import ClassOutlinedIcon from "@mui/icons-material/ClassOutlined";
 import ProfileDropdown from "../Components/ProfileDropdown";
 import PermMediaOutlinedIcon from "@mui/icons-material/PermMediaOutlined";
 import { toast, ToastContainer } from "react-toastify";
+import logo from "@img/logo-30glow.jpg";
+import SearchIcon from "@mui/icons-material/Search";
 
 function Layout({ children }) {
     const [user, setUser] = useState(null);
     const { collapseSidebar } = useProSidebar();
+
+    const [placeholderText, setPlaceholderText] = useState("");
+    const fullText = "Bạn muốn tìm gì...?";
+    let index = 0;
+    let direction = 1;
+
+    useEffect(() => {
+        function type() {
+            if (direction === 1 && index < fullText.length) {
+                setPlaceholderText((prev) => prev + fullText.charAt(index));
+                index++;
+                if (index === fullText.length) {
+                    direction = -1;
+                }
+            } else if (direction === -1 && index > 0) {
+                setPlaceholderText((prev) => prev.slice(0, -1));
+                index--;
+                if (index === 0) {
+                    direction = 1;
+                }
+            }
+            setTimeout(type, 100);
+        }
+        type();
+    }, []);
 
     const handleLogout = () => {
         Swal.fire({
@@ -80,8 +107,8 @@ function Layout({ children }) {
                 <Sidebar style={{ height: "100vh" }}>
                     <Menu>
                         <MenuItem icon={<MenuOutlinedIcon />} onClick={() => collapseSidebar()} style={{ textAlign: "center" }}>
-                            {/* <Image src="./resources/img/logo-30glow.jpg" /> */}
-                            <h2> 30 Glow</h2>
+                            <Image src={logo} />
+                            {/* <h2> 30 Glow</h2> */}
                         </MenuItem>
                         <MenuItem icon={<HomeOutlinedIcon />} component={<Link href="/admin/" method="get" as="a" />}>
                             Trang chủ
@@ -144,9 +171,38 @@ function Layout({ children }) {
                     <Navbar expand="lg" className="bg-body-tertiary">
                         <Container fluid>
                             <Navbar.Brand href="#home">
-                                <Image src="https://30shine.com/static/media/logo_30shine_new.7135aeb8.png" alt="30Shine" width="100" />
+                                <Form inline>
+                                    <InputGroup>
+                                        <InputGroup.Text id="btn-search">
+                                            <SearchIcon style={{ width: "20px", height: "20px" }} />
+                                        </InputGroup.Text>
+                                        <Form.Control placeholder={placeholderText} id="typing-text" aria-label="Username" aria-describedby="btn-search" />
+                                    </InputGroup>
+                                </Form>
                             </Navbar.Brand>
-                            <Navbar.Toggle />
+
+                            <Navbar.Collapse className="justify-content-center">
+                                <Container fluid>
+                                    <marquee
+                                        direction="right"
+                                        behavior="alternate"
+                                        scrollamount="5"
+                                        style={{
+                                            background: "linear-gradient(to right,#ff8983 17.85%,#7f0e7f 53.28%,#007a65 100%)",
+                                            WebkitBackgroundClip: "text",
+                                            color: "transparent",
+                                            fontSize: "20px",
+                                            fontWeight: "bold",
+                                            textTransform: "uppercase",
+                                            letterSpacing: "2px",
+                                            width: "100%",
+                                        }}
+                                    >
+                                        Mọi cố gắn sẽ được đền đáp
+                                    </marquee>
+                                </Container>
+                            </Navbar.Collapse>
+
                             <Navbar.Collapse className="justify-content-end">
                                 <Navbar.Text>
                                     <span>Xin chào: </span>

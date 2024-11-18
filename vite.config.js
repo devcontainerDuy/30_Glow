@@ -23,6 +23,7 @@ export default defineConfig({
             "@pages": "/resources/js/Pages",
             "@layouts": "/resources/js/Layouts",
             "@css": "/resources/css",
+            "@img": "/resources/img",
         },
     },
 
