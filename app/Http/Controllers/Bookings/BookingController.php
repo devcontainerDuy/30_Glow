@@ -90,7 +90,7 @@ class BookingController extends Controller
                 $customerId = Customers::insertGetId(['uid' => $this->createCodeCustomer(), 'name' => $this->data['name'], 'email' => $this->data['email'], 'phone' => $this->data['phone'], 'password' => Hash::make($password),]);
             }
 
-            $booking = $this->model::insertGetId(['id_user' => $idUser->id ?? null, 'id_customer' => $customerId, 'time' => $this->data['time'], 'note' => $this->data['note'], 'status' => $this->data['status'] ?? 1, 'created_at' => now(), 'updated_at' => now(),]);
+            $booking = $this->model::insertGetId(['id_user' => $idUser->id ?? null, 'id_customer' => $customerId, 'time' => $this->data['time'], 'status' => $this->data['status'] ?? 1, 'created_at' => now(), 'updated_at' => now(),]);
 
             if ($booking) {
                 foreach ($this->data['service'] as $item) {
@@ -186,6 +186,11 @@ class BookingController extends Controller
             if ($this->instance->id_user === null && empty($this->data['id_user']) && $this->data['status'] >= 2) {
                 return response()->json(['check' => false, 'message' => 'Vui lòng chọn nhân viên!'], 400);
             }
+
+            if ($this->instance->note === null && empty($this->data['note']) && $this->data['status'] === 5) {
+                return response()->json(['check' => false, 'message' => 'Vui lòng nhập ghi chú!'], 400);
+            }
+
             $this->instance->update($this->data);
 
             DB::commit();

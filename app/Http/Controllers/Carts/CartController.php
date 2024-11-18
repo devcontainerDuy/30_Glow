@@ -8,6 +8,7 @@ use App\Models\Carts;
 use App\Models\Customers;
 use App\Models\Products;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Validator;
 
 class CartController extends Controller
 {
@@ -202,5 +203,42 @@ class CartController extends Controller
         } catch (\Exception $e) {
             return response()->json(['check' => false, 'message' => 'Lỗi xảy ra khi xóa!', 'error' => $e->getMessage()], 500);
         }
+    }
+
+    public function loadCart(Request $request)
+    {
+        $validation = Validator::make($request->all(), [
+            'cartItems' => 'required|array',
+            'cartItems.*.id' => 'required|integer',
+            'cartItems.*.quantity' => 'required|integer'
+        ]);
+
+        if ($validation->fails()) {
+            return response()->json(['check' => false, 'message' => $validation->errors()->first()], 400);
+        }
+
+        $cartItems = $request->only('cartItems')['cartItems'];
+        $cart = [];
+
+        foreach ($cartItems as $key => $value) {
+            $cart = Products::with('gallery')->find($value['id']);
+
+            if ($cart) {
+                $cart[] = [
+                    'id' => $cart->id,
+                    'name' => $cart->name,
+                    'slug' => $cart->slug,
+                    'price' => $cart->price,
+                    'discount' => $cart->discount,
+                    'in_stock' => $cart->in_stock,
+                    'highlighted' => $cart->highlighted,
+                    'image' => asset('storage/gallery/' . $cart->gallery->firstWhere('status', 1)->image),
+                    'quantity' => $value['quantity']
+
+                ];
+            }
+        }
+
+        return response()->json(['check' => true, 'data' => $cart], 200);
     }
 }

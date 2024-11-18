@@ -19,7 +19,6 @@ class BookingRequest extends BaseRequest
             'email' => ['required', 'string', 'email', 'max:255'],
             'phone' => ['required', 'numeric'],
             'time' => ['required', 'date_format:Y-m-d H:i:s'],
-            'note' => ['nullable', 'string'],
             'service' => ['required', 'exists:services,id', 'array'],
             'service.*' => ['required', 'exists:services,id'],
         ];
@@ -33,6 +32,7 @@ class BookingRequest extends BaseRequest
         return [
             'id_user' => ['nullable', 'exists:users,uid'],
             'status' => ['nullable', 'in:0,1,2,3,4,5'],
+            'note' => ['nullable', 'string'],
         ];
     }
 }

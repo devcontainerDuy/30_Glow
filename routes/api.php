@@ -30,6 +30,8 @@ Route::middleware('api')->group(function () {
         Route::post('login-manager', 'loginManager')->middleware('throttle:5,1');
     });
 
+    Route::post('/carts/loadCart', [App\Http\Controllers\Carts\CartController::class, 'loadCart']);
+
     Route::middleware(['auth:sanctum', 'auth.session'])->group(function () {
         Route::apiResource('carts', App\Http\Controllers\Carts\CartController::class);
         Route::controller(App\Http\Controllers\Customers\CustomerController::class)->group(function () {

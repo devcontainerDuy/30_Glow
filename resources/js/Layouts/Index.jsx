@@ -183,22 +183,8 @@ function Layout({ children }) {
 
                             <Navbar.Collapse className="justify-content-center">
                                 <Container fluid>
-                                    <marquee
-                                        direction="right"
-                                        behavior="alternate"
-                                        scrollamount="5"
-                                        style={{
-                                            background: "linear-gradient(to right,#ff8983 17.85%,#7f0e7f 53.28%,#007a65 100%)",
-                                            WebkitBackgroundClip: "text",
-                                            color: "transparent",
-                                            fontSize: "20px",
-                                            fontWeight: "bold",
-                                            textTransform: "uppercase",
-                                            letterSpacing: "2px",
-                                            width: "100%",
-                                        }}
-                                    >
-                                        🌟 Mọi cố gắng sẽ được đền đáp 🌟
+                                    <marquee direction="right" behavior="alternate" scrollamount="5">
+                                        🌟 <span className="marquee-text">Mọi cố gắng sẽ được đền đáp</span> 🌟
                                     </marquee>
                                 </Container>
                             </Navbar.Collapse>

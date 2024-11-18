@@ -31,3 +31,16 @@
         border-color: orange;
     }
 }
+
+.marquee-text {
+    background: linear-gradient(to right, #ff8983 17.85%, #7f0e7f 53.28%, #007a65 100%);
+    background-clip: text;
+    color: transparent;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    font-size: 20px;
+    font-weight: bold;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    width: 100%;
+}
