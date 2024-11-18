@@ -131,8 +131,8 @@ function Index({ bookings, crumbs }) {
 
     useEffect(() => {
         var channel = pusher.subscribe("channelBookings");
-        channel.bind("BookingCreated", function (data) {
-            setData(data.bookingData);
+        channel.bind("BookingCreated", function (response) {
+            setData((prevData) => [response.bookingData, ...prevData]);
         });
     }, []);
 

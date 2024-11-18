@@ -42,7 +42,7 @@ class BookingController extends Controller
      */
     public function create()
     {
-        $this->data = $this->model::with('user', 'customer', 'service')->inActive()->orderBy('id', 'desc')->get();
+        $this->data = $this->model::with('user', 'customer', 'service')->recent()->orderBy('id', 'desc')->get();
         $this->instance = $this->data->map(function ($item) {
             return [
                 'id' => $item->id,
@@ -98,8 +98,11 @@ class BookingController extends Controller
                 }
             }
 
+            $newBooking = $this->model::with('user', 'customer', 'service')->findOrFail($booking);
+            // dd($newBooking);
+            broadcast(new BookingEvent($newBooking))->toOthers();
+
             DB::commit();
-            broadcast(new BookingEvent($this->model::with('user', 'customer', 'service')->recent()->orderBy('id', 'desc')->get()))->toOthers();
             return response()->json(['check' => true, 'message' => 'Đặt lịch thành công!'], 200);
         } catch (\Throwable $e) {
             DB::rollBack();
@@ -193,8 +196,8 @@ class BookingController extends Controller
 
             $this->instance->update($this->data);
 
+            broadcast(new BookingEvent($this->instance))->toOthers();
             DB::commit();
-            broadcast(new BookingEvent($this->model::with('user', 'customer', 'service')->recent()->orderBy('id', 'desc')->get()))->toOthers();
             return response()->json(['check' => true, 'message' => 'Cập nhật lịch thành công!'], 200);
         } catch (\Throwable $e) {
             DB::rollBack();
