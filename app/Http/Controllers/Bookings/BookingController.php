@@ -8,6 +8,8 @@ use App\Http\Requests\Bookings\BookingRequest;
 use App\Models\BookingHasService;
 use App\Models\Bookings;
 use App\Models\Customers;
+use App\Models\ServiceBills;
+use App\Models\ServiceBillsDetails;
 use App\Models\User;
 use App\Traits\GeneratesUniqueId;
 use Illuminate\Http\Request;
@@ -98,6 +100,23 @@ class BookingController extends Controller
                 }
             }
 
+            $serviceBillId = ServiceBills::insertGetId([
+                'uid' => $this->createCodeOrderService(),
+                'id_customer' => $customerId,
+                'id_booking' => $booking,
+                'status' => 1,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ]);
+
+            foreach ($this->data['service'] as $item) {
+                ServiceBillsDetails::create([
+                    'id_service_bill' => $serviceBillId,
+                    'id_service' => $item,
+                    'created_at' => now(),
+                    'updated_at' => now(),
+                ]);
+            }
             $newBooking = $this->model::with('user', 'customer', 'service')->findOrFail($booking);
             // dd($newBooking);
             broadcast(new BookingEvent($newBooking))->toOthers();

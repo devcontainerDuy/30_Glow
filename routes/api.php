@@ -98,3 +98,6 @@ Route::middleware('api')->controller(App\Http\Controllers\Slides\SlidesControlle
 Route::middleware('api')->controller(App\Http\Controllers\Contacts\ContactsController::class)->group(function () {
     Route::post('/addContacts', 'addContacts');
 });
+Route::middleware('api')->controller(App\Http\Controllers\BillServices\BillServicesController::class)->group(function () {
+    Route::get('/billservices', 'apiIndex');
+});
