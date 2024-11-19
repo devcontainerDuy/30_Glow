@@ -64,6 +64,10 @@ function Edit({ bookings, crumbs }) {
                 <section className="container">
                     <Row>
                         <BreadcrumbComponent props={crumbs}>
+                        <Button className="ms-2" variant="secondary" onClick={handleBack}>
+                                <i className="bi bi-box-arrow-right" />
+                                <span className="ms-2">Quay lại</span>
+                            </Button>
                         </BreadcrumbComponent>
 
                         {/* Start DataGrid */}
