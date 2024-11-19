@@ -7,6 +7,7 @@ import { Helmet } from "react-helmet";
 import BreadcrumbComponent from "@/Components/BreadcrumbComponent";
 import Echo from "laravel-echo";
 import axios from "axios";
+import { router } from "@inertiajs/react";
 import Pusher from "pusher-js";
 
 function Index({ bookings, crumbs }) {
@@ -16,9 +17,9 @@ function Index({ bookings, crumbs }) {
     const handleView = (id) => {
         console.log("Hello: ", id);
 
-        // router.visit("/admin/bookings/" + id + "/edit", {
-        //     method: "get",
-        // });
+        router.visit("/admin/bookings/" + id + "/edit", {
+            method: "get",
+        });
     };
 
     const columns = useMemo(() => [
