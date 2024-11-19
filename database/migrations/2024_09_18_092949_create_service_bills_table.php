@@ -14,6 +14,7 @@ return new class extends Migration
         Schema::create('service_bills', function (Blueprint $table) {
             $table->id();
             $table->bigInteger('id_customer')->unsigned();
+            $table->bigInteger('id_booking')->unsigned()->unique();
             $table->tinyInteger('status')->default(0);
             $table->timestamps();
         });
@@ -21,6 +22,9 @@ return new class extends Migration
         Schema::table('service_bills', function (Blueprint $table) {
             if (Schema::hasColumn('service_bills', 'id_customer')) {
                 $table->foreign('id_customer')->references('id')->on('customers')->onDelete('restrict');
+            }
+            if (Schema::hasColumn('service_bills', 'id_booking')) {
+                $table->foreign('id_booking')->references('id')->on('bookings')->onDelete('restrict');
             }
         });
     }
@@ -30,6 +34,11 @@ return new class extends Migration
      */
     public function down(): void
     {
+        Schema::table('service_bills', function (Blueprint $table) {
+            $table->dropForeign(['id_customer']);
+            $table->dropForeign(['id_booking']);
+        });
+
         Schema::dropIfExists('service_bills');
     }
 };

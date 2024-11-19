@@ -108,14 +108,18 @@ class ProductController extends Controller
     public function update(ProductRequest $request, string $id)
     {
         $this->data = $request->validated();
-        if (isset($this->data['name'])) $this->data['slug'] = Str::slug($this->data['name']);
-        $this->instance = $this->model::findOrFail($id)->update($this->data);
-        if ($this->instance) {
-            $this->data = $this->model::with('category', 'brand', 'gallery')->orderBy('id', 'desc')->get();
-            $categories = Categories::with('parent')->withCount('products')->get();
-            return response()->json(['check' => true, 'message' => 'Cập nhật thành công!', 'data' => $this->data, 'categories' => $categories], 200);
+        try {
+            if (isset($this->data['name'])) $this->data['slug'] = Str::slug($this->data['name']);
+            $this->instance = $this->model::findOrFail($id)->update($this->data);
+            if ($this->instance) {
+                $this->data = $this->model::with('category', 'brand', 'gallery')->orderBy('id', 'desc')->get();
+                $categories = Categories::with('parent')->withCount('products')->get();
+                return response()->json(['check' => true, 'message' => 'Cập nhật thành công!', 'data' => $this->data, 'categories' => $categories], 200);
+            }
+            return response()->json(['check' => false, 'message' => 'Cập nhật thất bại!'], 400);
+        } catch (\Throwable $th) {
+            return response()->json(['check' => false, 'message' => 'Sản phẩm phải có danh mục!'], 400);
         }
-        return response()->json(['check' => false, 'message' => 'Cập nhật thất bại!'], 400);
     }
 
     /**

@@ -18,8 +18,8 @@ return new class extends Migration
 
         if (Schema::hasTable('booking_has_services')) {
             Schema::table('booking_has_services', function (Blueprint $table) {
-                $table->foreign('id_booking')->references('id')->on('bookings')->onDelete('cascade');
-                $table->foreign('id_service')->references('id')->on('services')->onDelete('cascade');
+                $table->foreign('id_booking')->references('id')->on('bookings')->onDelete('restrict');
+                $table->foreign('id_service')->references('id')->on('services')->onDelete('restrict');
             });
         }
     }
@@ -29,6 +29,11 @@ return new class extends Migration
      */
     public function down(): void
     {
+        Schema::table('booking_has_services', function (Blueprint $table) {
+            $table->dropForeign(['id_booking']);
+            $table->dropForeign(['id_service']);
+        });
+
         Schema::dropIfExists('booking_has_services');
     }
 };

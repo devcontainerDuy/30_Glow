@@ -15,7 +15,6 @@ return new class extends Migration
             $table->id();
             $table->bigInteger('id_service_bill')->unsigned();
             $table->bigInteger('id_service')->unsigned();
-            $table->bigInteger('id_booking')->unsigned();
             $table->timestamps();
         });
 
@@ -25,9 +24,6 @@ return new class extends Migration
             }
             if (Schema::hasColumn('service_bills_details', 'id_service')) {
                 $table->foreign('id_service')->references('id')->on('services')->onDelete('restrict');
-            }
-            if (Schema::hasColumn('service_bills_details', 'id_booking')) {
-                $table->foreign('id_booking')->references('id')->on('bookings')->onDelete('restrict');
             }
         });
     }

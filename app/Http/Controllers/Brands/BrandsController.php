@@ -84,12 +84,16 @@ class BrandsController extends Controller
      */
     public function destroy(string $id)
     {
-        $this->instance = $this->model::findOrFail($id)->delete();
-        if ($this->instance) {
-            $this->data = $this->model::orderBy('id', 'desc')->get();
-            return response()->json(['check' => true, 'message' => 'Xoá thành công!', 'data' => $this->data], 200);
+        try {
+            $this->instance = $this->model::findOrFail($id)->delete();
+            if ($this->instance) {
+                $this->data = $this->model::orderBy('id', 'desc')->get();
+                return response()->json(['check' => true, 'message' => 'Xoá thành công!', 'data' => $this->data], 200);
+            }
+            return response()->json(['check' => false, 'message' => 'Xoá thất bại!'], 400);
+        } catch (\Throwable $th) {
+            return response()->json(['check' => false, 'message' => 'Thương hiệu có sản phẩm!'], 400);
         }
-        return response()->json(['check' => false, 'message' => 'Xoá thất bại!'], 400);
     }
 
     /**
