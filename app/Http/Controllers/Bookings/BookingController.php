@@ -171,7 +171,12 @@ class BookingController extends Controller
      */
     public function edit(string $id)
     {
-        // 
+        $this->crumbs = [
+            ['name' => 'Dịch vụ', 'url' => '/admin/services'],
+            ['name' => 'Chi tiết lịch đặt', 'url' => '/admin/bookings' . $id . '/edit'],
+        ];
+        $this->data = $this->model::with('user', 'customer', 'service')->findOrFail($id);
+        return Inertia::render('Bookings/Edit', ['bookings' => $this->data, 'crumbs' => $this->crumbs]);
     }
 
     /**
