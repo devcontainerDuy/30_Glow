@@ -11,6 +11,7 @@ use App\Models\Customers;
 use App\Models\User;
 use App\Traits\GeneratesUniqueId;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
@@ -42,7 +43,11 @@ class BookingController extends Controller
      */
     public function create()
     {
-        $this->data = $this->model::with('user', 'customer', 'service')->recent()->orderBy('id', 'desc')->get();
+        $user = Auth::user()->load('roles');
+
+        $user->roles->pluck('name')[0] === "Staff" ? $this->data = $this->model::with('user', 'customer', 'service')->where('id_user', $user->id)->recent()->orderBy('id', 'desc')->get()
+            : $this->data = $this->model::with('user', 'customer', 'service')->recent()->orderBy('id', 'desc')->get();
+
         $this->instance = $this->data->map(function ($item) {
             return [
                 'id' => $item->id,
