@@ -17,7 +17,6 @@ class ServiceBillsDetails extends Model
     protected $fillable = [
         'id_service_bill',
         'id_service',
-        'id_booking',
         'created_at',
         'updated_at',
     ];
@@ -30,10 +29,5 @@ class ServiceBillsDetails extends Model
     public function service(): BelongsTo
     {
         return $this->belongsTo(Services::class, 'id_service', 'id');
-    }
-
-    public function booking(): BelongsTo
-    {
-        return $this->belongsTo(Bookings::class, 'id_booking', 'id');
     }
 }

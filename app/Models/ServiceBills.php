@@ -18,11 +18,11 @@ class ServiceBills extends Model
     protected $fillable = [
         'uid',
         "id_customer",
+        "id_booking",
         "status",
         "created_at",
         "updated_at"
     ];
-
 
     public function customer(): BelongsTo
     {
@@ -37,8 +37,6 @@ class ServiceBills extends Model
     {
         return $this->hasMany(ServiceBillsDetails::class, 'id_service_bill', 'id');
     }
-
-
 
     public function scopeActive($query)
     {

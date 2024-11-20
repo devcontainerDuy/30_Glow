@@ -34,10 +34,15 @@ Route::middleware('api')->group(function () {
 
     Route::middleware(['auth:sanctum', 'auth.session'])->group(function () {
         Route::apiResource('carts', App\Http\Controllers\Carts\CartController::class);
+
         Route::controller(App\Http\Controllers\Customers\CustomerController::class)->group(function () {
             Route::get('/customers/{id}', 'show');
             Route::put('/customers/{id}', 'edit');
             Route::post('/customers/{id}/change-password', 'changePassword');
+        });
+
+        Route::controller(App\Http\Controllers\Bills\BillController::class)->group(function () {
+            Route::post('/bills', 'store');
         });
     });
 
@@ -46,10 +51,6 @@ Route::middleware('api')->group(function () {
         Route::post('/bookings', 'store');
         Route::get('/bookings/{id}', 'show')->middleware(['auth:sanctum', 'auth.session']);
         Route::put('/bookings/{id}', 'update')->middleware(['auth:sanctum', 'auth.session']);
-    });
-
-    Route::controller(App\Http\Controllers\Bills\BillController::class)->middleware(['auth:sanctum', 'auth.session'])->group(function () {
-        Route::post('/bills', 'store');
     });
 
     Route::middleware('api')->controller(App\Http\Controllers\BillServices\BillServicesController::class)->group(function () {

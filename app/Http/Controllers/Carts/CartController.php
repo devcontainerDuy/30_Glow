@@ -5,9 +5,9 @@ namespace App\Http\Controllers\Carts;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Carts\CartRequest;
 use App\Models\Carts;
-use App\Models\Customers;
 use App\Models\Products;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
 
 class CartController extends Controller
@@ -21,7 +21,31 @@ class CartController extends Controller
      */
     public function index()
     {
-        // 
+        $this->data = $this->model::with('customer', 'product.gallery')->where('id_customer', Auth::user()->id)->get();
+
+        if ($this->data->isEmpty()) {
+            return response()->json(['check' => false, 'message' => 'Giỏ hàng trống!', 'data' => []], 404);
+        }
+
+        $this->instance = $this->data->map(function ($item) {
+
+            return [
+                'id' => $item->id,
+                'product' => [
+                    'id' => $item->product->id,
+                    'name' => $item->product->name,
+                    'slug' => $item->product->slug,
+                    'price' => $item->product->price,
+                    'discount' => $item->product->discount,
+                    'in_stock' => $item->product->in_stock,
+                    'highlighted' => $item->product->highlighted,
+                    'image' => $item->product->gallery ? asset('storage/gallery/' . $item->product->gallery->firstWhere('status', 1)->image) : null,
+                ],
+                'quantity' => $item->quantity
+            ];
+        });
+
+        return response()->json(['check' => true, 'data' => $this->instance], 200);
     }
 
 
@@ -39,8 +63,7 @@ class CartController extends Controller
     public function store(CartRequest $request)
     {
         $this->data = $request->validated();
-        $idCustomer = Customers::where("uid", $this->data['id_customer'])->first();
-        $this->instance = $this->model::where('id_customer', $idCustomer->id)->where('id_product', $this->data['id_product'])->first();
+        $this->instance = $this->model::where('id_customer', Auth::user()->id)->where('id_product', $this->data['id_product'])->first();
 
         if ($this->instance) {
             $qty = $this->data['quantity'] + $this->instance->quantity;
@@ -49,30 +72,12 @@ class CartController extends Controller
             }
             $this->instance->update(['quantity' => $qty]);
         } else {
-            $this->data['id_customer'] = $idCustomer->id;
+            $this->data['id_customer'] = Auth::user()->id;
             if (!$this->model::create($this->data)) {
                 return response()->json(['check' => false, 'message' => 'Thêm thất bại!'], 401);
             }
         }
-        $this->data = $this->model::where('id_customer', $idCustomer->id)->get();
-        $this->instance = $this->data->map(function ($item) {
-            $galleryImg = $item->product->gallery->firstWhere('status', 1);
-            return [
-                'id' => $item->id,
-                'product' => [
-                    'id' => $item->product->id,
-                    'name' => $item->product->name,
-                    'slug' => $item->product->slug,
-                    'price' => $item->product->price,
-                    'discount' => $item->product->discount,
-                    'in_stock' => $item->product->in_stock,
-                    'highlighted' => $item->product->highlighted,
-                    'gallery' => $galleryImg ? asset('storage/gallery/' . $galleryImg->image) : null,
-                ],
-                'quantity' => $item->quantity
-            ];
-        });
-        return response()->json(['check' => true, 'message' => 'Thêm thành công!', 'data' => $this->instance], 201);
+        return response()->json(['check' => true, 'message' => 'Thêm thành công!'], 201);
     }
 
     private function checkInStock($id, $quantity)
@@ -90,32 +95,7 @@ class CartController extends Controller
      */
     public function show(string $id)
     {
-        $idCustomer = Customers::where("uid", $id)->first();
-        $this->data = $this->model::with('customer', 'product.gallery')->where('id_customer', $idCustomer->id)->get();
-
-        if ($this->data->isEmpty()) {
-            return response()->json(['check' => false, 'message' => 'Giỏ hàng trống!'], 404);
-        }
-
-        $this->instance = $this->data->map(function ($item) {
-            $galleryImg = $item->product->gallery->firstWhere('status', 1);
-            return [
-                'id' => $item->id,
-                'product' => [
-                    'id' => $item->product->id,
-                    'name' => $item->product->name,
-                    'slug' => $item->product->slug,
-                    'price' => $item->product->price,
-                    'discount' => $item->product->discount,
-                    'in_stock' => $item->product->in_stock,
-                    'highlighted' => $item->product->highlighted,
-                    'image' => $galleryImg ? asset('storage/gallery/' . $galleryImg->image) : null,
-                ],
-                'quantity' => $item->quantity
-            ];
-        });
-
-        return response()->json(['check' => true, 'data' => $this->instance], 200);
+        // 
     }
 
     /**
@@ -133,36 +113,15 @@ class CartController extends Controller
     public function update(CartRequest $request, string $id)
     {
         $this->data = $request->validated();
-        $idCustomer = Customers::where("uid", $this->data['id_customer'])->first();
-        $this->instance = $this->model::where('id', $id)->where('id_customer', $idCustomer->id)->where('id_product', $this->data['id_product'])->first();
+        $this->instance = $this->model::where('id', $id)->where('id_customer', Auth::user()->id)->where('id_product', $this->data['id_product'])->first();
 
         if ($this->instance) {
             if (!$this->checkInStock($this->data['id_product'], $this->data['quantity'])) {
                 return response()->json(['check' => false, 'message' => 'Số lượng mua đạt tối đa!'], 401);
             }
-            $this->data['id_customer'] = $idCustomer->id;
+
             $this->instance->update($this->data);
-
-            $this->data = $this->model::with('customer', 'product.gallery')->where('id_customer', $idCustomer->id)->get();
-
-            $this->instance = $this->data->map(function ($item) {
-                $galleryImg = $item->product->gallery->firstWhere('status', 1);
-                return [
-                    'id' => $item->id,
-                    'product' => [
-                        'id' => $item->product->id,
-                        'name' => $item->product->name,
-                        'slug' => $item->product->slug,
-                        'price' => $item->product->price,
-                        'discount' => $item->product->discount,
-                        'in_stock' => $item->product->in_stock,
-                        'highlighted' => $item->product->highlighted,
-                        'image' => $galleryImg ? asset('storage/gallery/' . $galleryImg->image) : null,
-                    ],
-                    'quantity' => $item->quantity
-                ];
-            });
-            return response()->json(['check' => true, 'message' => 'Cập nhật thành công!', 'data' => $this->instance], 200);
+            return response()->json(['check' => true, 'message' => 'Cập nhật thành công!'], 200);
         }
 
         return response()->json(['check' => false, 'message' => 'Cập nhật thất bại! Không tìm thấy sản phẩm.'], 404);
@@ -177,31 +136,10 @@ class CartController extends Controller
     {
         try {
             $this->instance = $this->model::findOrFail($id);
-
-            if ($this->instance->delete()) {
-                $this->data = $this->model::with('customer', 'product.gallery')->where('id', $id)->get();
-                $this->instance = $this->data->map(function ($item) {
-                    $galleryImg = $item->product->gallery->firstWhere('status', 1);
-                    return [
-                        'id' => $item->id,
-                        'product' => [
-                            'id' => $item->product->id,
-                            'name' => $item->product->name,
-                            'slug' => $item->product->slug,
-                            'price' => $item->product->price,
-                            'discount' => $item->product->discount,
-                            'in_stock' => $item->product->in_stock,
-                            'highlighted' => $item->product->highlighted,
-                            'image' => $galleryImg ? asset('storage/gallery/' . $galleryImg->image) : null,
-                        ],
-                        'quantity' => $item->quantity
-                    ];
-                });
-                return response()->json(['check' => true, 'message' => 'Xóa thành công!', 'data' => $this->instance], 200);
-            }
-            return response()->json(['check' => false, 'message' => 'Xóa thất bại!'], 400);
+            $this->instance->delete();
+            return response()->json(['check' => true, 'message' => 'Xóa thành công!'], 200);
         } catch (\Exception $e) {
-            return response()->json(['check' => false, 'message' => 'Lỗi xảy ra khi xóa!', 'error' => $e->getMessage()], 500);
+            return response()->json(['check' => false, 'message' => 'Xóa thất bại!'], 400);
         }
     }
 
@@ -217,22 +155,22 @@ class CartController extends Controller
             return response()->json(['check' => false, 'message' => $validation->errors()->first()], 400);
         }
 
-        $cartItems = $request->only('cartItems')['cartItems'];
+        $this->data = $request->only('cartItems')['cartItems'];
         $cart = [];
 
-        foreach ($cartItems as $value) {
-            $cartItem = Products::with(['gallery', 'category', 'brand'])->active()->findOrFail($value['id']);
+        foreach ($this->data as $value) {
+            $this->instance = Products::with(['gallery', 'category', 'brand'])->active()->findOrFail($value['id']);
 
-            if ($cartItem) {
+            if ($this->instance) {
                 $cart[] = [
-                    'id' => $cartItem->id,
-                    'name' => $cartItem->name,
-                    'slug' => $cartItem->slug,
-                    'price' => $cartItem->price,
-                    'discount' => $cartItem->discount,
-                    'in_stock' => $cartItem->in_stock,
-                    'highlighted' => $cartItem->highlighted,
-                    'gallery' => asset('storage/gallery/' . $cartItem->gallery->firstWhere('status', 1)->image),
+                    'id' => $this->instance->id,
+                    'name' => $this->instance->name,
+                    'slug' => $this->instance->slug,
+                    'price' => $this->instance->price,
+                    'discount' => $this->instance->discount,
+                    'in_stock' => $this->instance->in_stock,
+                    'highlighted' => $this->instance->highlighted,
+                    'gallery' => asset('storage/gallery/' . $this->instance->gallery->firstWhere('status', 1)->image),
                     'quantity' => $value['quantity']
                 ];
             } else {

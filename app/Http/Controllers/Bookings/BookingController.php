@@ -104,8 +104,8 @@ class BookingController extends Controller
                     BookingHasService::create(['id_booking' => $booking, 'id_service' => $item,]);
                 }
             }
+
             $newBooking = $this->model::with('user', 'customer', 'service')->findOrFail($booking);
-            // dd($newBooking);
             broadcast(new BookingEvent($newBooking))->toOthers();
 
             DB::commit();
