@@ -137,25 +137,24 @@ class BillServicesController extends Controller
     {
         $this->data = $this->model::with('customer', 'booking', 'serviceBillDetails.service')->findOrFail($id);
 
-        $this->instance = $this->data->map(function ($bill) {
-            return [
-                'id' => $bill->id,
-                'uid' => $bill->uid,
-                'customer' => $bill->customer ? [
-                    'uid' => $bill->customer->uid,
-                    'name' => $bill->customer->name,
-                    'email' => $bill->customer->email,
-                    'phone' => $bill->customer->phone,
-                    'address' => $bill->customer->address,
+        $this->instance =  [
+                'id' => $this->data->id,
+                'uid' => $this->data->uid,
+                'customer' => $this->data->customer ? [
+                    'uid' => $this->data->customer->uid,
+                    'name' => $this->data->customer->name,
+                    'email' => $this->data->customer->email,
+                    'phone' => $this->data->customer->phone,
+                    'address' => $this->data->customer->address,
                 ] : null,
-                'booking' => $bill->booking ? [
-                    'id' => $bill->booking->id,
-                    'time' => $bill->booking->time,
-                    'note' => $bill->booking->note,
-                    'status' => $bill->booking->status,
+                'booking' => $this->data->booking ? [
+                    'id' => $this->data->booking->id,
+                    'time' => $this->data->booking->time,
+                    'note' => $this->data->booking->note,
+                    'status' => $this->data->booking->status,
                 ] : null,
-                'status' => $bill->status,
-                'service_details' => $bill->serviceBillDetails->map(function ($detail) {
+                'status' => $this->data->status,
+                'service_details' => $this->data->serviceBillDetails->map(function ($detail) {
                     return [
                         'id' => $detail->id,
                         'service' => $detail->service ? [
@@ -167,7 +166,6 @@ class BillServicesController extends Controller
                     ];
                 })->toArray(),
             ];
-        });
 
         return response()->json([
             'check' => true,
