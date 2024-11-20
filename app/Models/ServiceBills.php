@@ -28,12 +28,17 @@ class ServiceBills extends Model
     {
         return $this->belongsTo(Customers::class, 'id_customer', 'id');
     }
-
+    public function booking(): BelongsTo
+    {
+        return $this->belongsTo(Bookings::class, 'id_booking', 'id');
+    }
 
     public function serviceBillDetails(): HasMany
     {
         return $this->hasMany(ServiceBillsDetails::class, 'id_service_bill', 'id');
     }
+
+
 
     public function scopeActive($query)
     {

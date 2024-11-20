@@ -8,6 +8,8 @@ use App\Http\Requests\Bookings\BookingRequest;
 use App\Models\BookingHasService;
 use App\Models\Bookings;
 use App\Models\Customers;
+use App\Models\ServiceBills;
+use App\Models\ServiceBillsDetails;
 use App\Models\User;
 use App\Traits\GeneratesUniqueId;
 use Illuminate\Http\Request;
@@ -102,7 +104,6 @@ class BookingController extends Controller
                     BookingHasService::create(['id_booking' => $booking, 'id_service' => $item,]);
                 }
             }
-
             $newBooking = $this->model::with('user', 'customer', 'service')->findOrFail($booking);
             // dd($newBooking);
             broadcast(new BookingEvent($newBooking))->toOthers();

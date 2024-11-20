@@ -52,6 +52,12 @@ Route::middleware('api')->group(function () {
         Route::post('/bills', 'store');
     });
 
+    Route::middleware('api')->controller(App\Http\Controllers\BillServices\BillServicesController::class)->group(function () {
+        Route::post('/add_billservices/{id}', 'store');
+        Route::get('/billservices', 'apiIndex');
+        Route::get('/billservices/{id}', 'apiShow');
+    });
+
     Route::controller(App\Http\Controllers\Users\UserController::class)->group(function () {
         Route::get('/staff', 'apiIndex');
     });
