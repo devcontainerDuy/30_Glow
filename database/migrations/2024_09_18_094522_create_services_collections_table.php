@@ -19,6 +19,12 @@ return new class extends Migration
             $table->tinyInteger('highlighted')->default(1);
             $table->timestamps();
         });
+
+        Schema::table('services', function (Blueprint $table) {
+            if (Schema::hasColumn('services', 'id_collection')) {
+                $table->foreign('id_collection')->references('id')->on('services_collections')->onDelete('restrict');
+            }
+        });
     }
 
     /**

@@ -17,6 +17,7 @@ return new class extends Migration
             $table->bigInteger('id_parent')->nullable()->unsigned()->index();
             $table->tinyInteger('status')->default(1);
             $table->timestamps();
+            $table->softDeletes();
         });
 
         Schema::table('gallery', function (Blueprint $table) {

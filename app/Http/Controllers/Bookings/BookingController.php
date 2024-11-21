@@ -48,10 +48,10 @@ class BookingController extends Controller
     {
         $user = Auth::user()->load('roles');
 
-        $user->roles->pluck('name')[0] === "Staff" ? $this->data = $this->model::with('user', 'customer', 'service')->where('id_user', $user->id)->recent()->orderBy('id', 'desc')->get()
-            : $this->data = $this->model::with('user', 'customer', 'service')->recent()->orderBy('id', 'desc')->get();
+        $user->roles->pluck('name')[0] === "Staff" ? $this->data = $this->model::with('user', 'customer', 'service')->where('id_user', $user->id)->recent()->orderBy('id', 'desc')->paginate(20)
+            : $this->data = $this->model::with('user', 'customer', 'service')->recent()->orderBy('id', 'desc')->paginate(20);
 
-        $this->instance = $this->data->map(function ($item) {
+        $this->instance = $this->data->getCollection()->map(function ($item) {
             return [
                 'id' => $item->id,
                 'user' => $item->user ? [
@@ -73,7 +73,21 @@ class BookingController extends Controller
                 'status' => $item->status,
             ];
         });
-        return response()->json(['check' => true, 'data' => $this->instance], 200);
+        return response()->json(['check' => true, 'data' => [
+            'current_page' => $this->data->currentPage(),
+            'data' => $this->instance,
+            'first_page_url' => $this->data->url(1),
+            'from' => $this->data->firstItem(),
+            'last_page' => $this->data->lastPage(),
+            'last_page_url' => $this->data->url($this->data->lastPage()),
+            'links' => $this->data->links(),
+            'next_page_url' => $this->data->nextPageUrl(),
+            'path' => $this->data->path(),
+            'per_page' => $this->data->perPage(),
+            'prev_page_url' => $this->data->previousPageUrl(),
+            'to' => $this->data->lastItem(),
+            'total' => $this->data->total(),
+        ]], 200);
     }
 
     /**
@@ -86,9 +100,9 @@ class BookingController extends Controller
             $this->data = $request->validated();
             $this->instance = Customers::where('email', $this->data['email'])->where('phone', $this->data['phone'])->active()->first();
 
-            if (!empty($this->data['id_user'])) {
+            if (!empty($this->data['id_user'] && $this->data['id_user'] !== 'null')) {
                 $idUser = User::where('uid', $this->data['id_user'])->first();
-                $this->data['status'] = 2;
+                $this->data['status'] = 1;
             }
 
             if ($this->instance) {
@@ -98,7 +112,7 @@ class BookingController extends Controller
                 $customerId = Customers::insertGetId(['uid' => $this->createCodeCustomer(), 'name' => $this->data['name'], 'email' => $this->data['email'], 'phone' => $this->data['phone'], 'password' => Hash::make($password),]);
             }
 
-            $booking = $this->model::insertGetId(['id_user' => $idUser->id ?? null, 'id_customer' => $customerId, 'time' => $this->data['time'], 'status' => $this->data['status'] ?? 1, 'created_at' => now(), 'updated_at' => now(),]);
+            $booking = $this->model::insertGetId(['id_user' => $idUser->id ?? null, 'id_customer' => $customerId, 'time' => $this->data['time'], 'status' => $this->data['status'] ?? 0, 'created_at' => now(), 'updated_at' => now(),]);
 
             if ($booking) {
                 foreach ($this->data['service'] as $item) {
@@ -194,7 +208,6 @@ class BookingController extends Controller
 
             if (!empty($this->data['id_user'])) {
                 $this->data['id_user'] = User::where('uid', $this->data['id_user'])->first()->id;
-                $this->data['status'] = 2;
             }
 
             $this->instance = $this->model::findOrFail($id);
@@ -203,6 +216,10 @@ class BookingController extends Controller
                 return response()->json(['check' => false, 'message' => 'Vui lòng chọn nhân viên!'], 400);
             } elseif ($this->instance->note === null && empty($this->data['note']) && $this->data['status'] === 5) {
                 return response()->json(['check' => false, 'message' => 'Vui lòng nhập ghi chú!'], 400);
+            } elseif ($this->instance->status === 0 && isset($this->data['id_user']) && $this->data['status'] !== 1) {
+                return response()->json(['check' => false, 'message' => 'Lịch chưa sắp xếp nhân viên thực hiện!'], 400);
+            } elseif ($this->instance->status === 3 && $this->data['status'] !== 3) {
+                return response()->json(['check' => false, 'message' => 'Lịch đã hoàn thành! Không thể thay đổi'], 400);
             } elseif ($this->instance->status === 3 && $this->data['status'] === 5) {
                 return response()->json(['check' => false, 'message' => 'Lịch được hoàn thành! Không thể hủy'], 400);
             } elseif ($this->instance->status === 4 && $this->data['status'] === 5) {

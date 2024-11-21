@@ -19,12 +19,12 @@ return new class extends Migration
             $table->bigInteger('id_service')->unsigned()->nullable();
             $table->text('comment');
             $table->tinyInteger('status')->nullable()->default(0); // 0 = off, 1 = active
-            $table->bigInteger('likes')->nullable()->default(0);
-            $table->bigInteger('dislikes')->nullable()->default(0);
-            $table->bigInteger('heart')->nullable()->default(0);
+            // $table->bigInteger('likes')->nullable()->default(0);
+            // $table->bigInteger('dislikes')->nullable()->default(0);
+            // $table->bigInteger('heart')->nullable()->default(0);
             $table->bigInteger('id_parent')->unsigned()->nullable();
-            $table->softDeletes();
             $table->timestamps();
+            $table->softDeletes();
         });
 
         Schema::table('comment', function (Blueprint $table) {

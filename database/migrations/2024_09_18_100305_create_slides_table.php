@@ -20,6 +20,7 @@ return new class extends Migration
             $table->string('desktop')->nullable();
             $table->string('mobile')->nullable();
             $table->timestamps();
+            $table->softDeletes();
         });
     }
 

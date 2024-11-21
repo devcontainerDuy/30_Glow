@@ -41,7 +41,7 @@ class BillServicesController extends Controller
      * Store a newly created resource in storage.
      * status: 0 - Chưa thanh toán, 1 - Đã thanh toán, 2 - Thanh toán thất bại
      */
-    public function store(BillServiceRequest $request, $id)
+    public function store(BillServiceRequest $request)
     {
         DB::beginTransaction();
         try {
@@ -51,14 +51,13 @@ class BillServicesController extends Controller
             $booking->status < 3 ??  response()->json(['check' => false, 'message' => 'Không thể thanh toán! Dịch vụ chưa hoàn thành.'], 400);
             $booking->status > 3 ?? response()->json(['check' => false, 'message' => 'Không thể thanh toán! Dịch vụ đã thanh toán.'], 400);
 
-
             $idCustomer = Customers::where("uid", $this->data['customer_id'])->first();
             $existingBill = $this->model::where('id_booking', $this->data['booking_id'])->first();
             if ($existingBill) {
                 return response()->json(['check' => false, 'message' => 'Hóa đơn cho booking này đã tồn tại!'], 400);
             }
 
-            $this->instance = $this->model::insertGetId(['uid' => $this->createCodeOrderService(), 'id_customer' => $idCustomer->id, 'id_booking' => $id, 'status' => 0, 'created_at' => now(), 'updated_at' => now()]);
+            $this->instance = $this->model::insertGetId(['uid' => $this->createCodeOrderService(), 'id_customer' => $idCustomer->id, 'id_booking' => $this->data['booking_id'], 'total' => $this->data['total'], 'status' => 0, 'created_at' => now(), 'updated_at' => now()]);
 
             $services_cart = BookingHasService::where('id_booking', $this->data['booking_id'])->get();
 

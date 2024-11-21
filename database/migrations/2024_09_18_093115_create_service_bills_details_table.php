@@ -15,6 +15,7 @@ return new class extends Migration
             $table->id();
             $table->bigInteger('id_service_bill')->unsigned();
             $table->bigInteger('id_service')->unsigned();
+            $table->decimal('unit_price', 10, 2)->default(0);
             $table->timestamps();
         });
 

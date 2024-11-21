@@ -22,6 +22,7 @@ return new class extends Migration
             $table->tinyInteger('status')->default(1);
             $table->tinyInteger('highlighted')->default(0);
             $table->timestamps();
+            $table->softDeletes();
         });
 
         Schema::table('posts', function (Blueprint $table) {

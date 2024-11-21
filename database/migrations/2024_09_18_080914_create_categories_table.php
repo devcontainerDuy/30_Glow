@@ -18,6 +18,7 @@ return new class extends Migration
             $table->unsignedBigInteger('id_parent')->nullable()->index();
             $table->tinyInteger('status')->default(1);
             $table->timestamps();
+            $table->softDeletes();
         });
 
         if (Schema::hasTable('categories')) {

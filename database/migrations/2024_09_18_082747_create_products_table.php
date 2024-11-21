@@ -24,6 +24,7 @@ return new class extends Migration
             $table->bigInteger('id_brand')->unsigned();
             $table->bigInteger('in_stock')->default(0);
             $table->timestamps();
+            $table->softDeletes();
         });
 
         Schema::table('products', function (Blueprint $table) {
