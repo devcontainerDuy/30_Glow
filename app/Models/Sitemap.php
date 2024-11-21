@@ -4,10 +4,11 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Sitemap extends Model
 {
-    use HasFactory;
+    use HasFactory, SoftDeletes;
 
     protected $table = 'sitemaps';
 
@@ -22,6 +23,8 @@ class Sitemap extends Model
         'created_at',
         'updated_at',
     ];
+
+    protected $dates = ['deleted_at'];
 
     public function scopeStaticPage($query)
     {

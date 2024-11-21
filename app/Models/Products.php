@@ -6,10 +6,11 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Products extends Model
 {
-    use HasFactory;
+    use HasFactory, SoftDeletes;
 
     protected $table = 'products';
 
@@ -32,6 +33,8 @@ class Products extends Model
 
     protected $hidden = ['created_at', 'updated_at'];
     // protected $appends = ['category_data', 'brand_data', 'gallery_data'];
+
+    protected $dates = ['deleted_at'];
 
     public function category(): BelongsTo
     {

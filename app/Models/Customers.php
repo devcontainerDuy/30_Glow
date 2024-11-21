@@ -5,13 +5,14 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 
 class Customers extends Authenticatable
 {
-    use HasApiTokens, HasFactory, Notifiable;
+    use HasApiTokens, HasFactory, Notifiable, SoftDeletes;
 
     protected $table = 'customers';
 
@@ -23,9 +24,9 @@ class Customers extends Authenticatable
         'address',
         'phone',
         'email',
+        'email_verified_at',
         'password',
         'status',
-        'remember_token',
         'created_at',
         'updated_at'
     ];
@@ -34,6 +35,17 @@ class Customers extends Authenticatable
         'password',
         'remember_token'
     ];
+
+    /**
+     * The attributes that should be cast.
+     *
+     * @var array<string, string>
+     */
+    protected $casts = [
+        'email_verified_at' => 'datetime',
+    ];
+
+    protected $dates = ['deleted_at'];
 
     public function bookings(): HasMany
     {

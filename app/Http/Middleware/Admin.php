@@ -31,6 +31,6 @@ class Admin
             return redirect()->route('forbidden');
         }
 
-        return redirect()->route('auth.login');
+        return redirect()->intended(route('auth.login'));
     }
 }

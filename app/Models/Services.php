@@ -32,6 +32,8 @@ class Services extends Model
         'updated_at',
     ];
 
+    protected $dates = ['deleted_at'];
+
     public function collection(): BelongsTo
     {
         return $this->belongsTo(ServicesCollections::class, 'id_collection', 'id');
