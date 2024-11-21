@@ -2,23 +2,24 @@
 
 namespace App\Http\Controllers\Bookings;
 
-use App\Events\Bookings\BookingEvent;
-use App\Http\Controllers\Controller;
-use App\Http\Requests\Bookings\BookingRequest;
-use App\Models\BookingHasService;
+use App\Models\User;
+use Inertia\Inertia;
 use App\Models\Bookings;
 use App\Models\Customers;
-use App\Models\ServiceBills;
-use App\Models\ServiceBillsDetails;
-use App\Models\User;
-use App\Traits\GeneratesUniqueId;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
+use App\Models\ServiceBills;
+use Illuminate\Http\Request;
+use App\Models\BookingHasService;
+use App\Traits\GeneratesUniqueId;
+use Illuminate\Support\Facades\DB;
+use App\Models\ServiceBillsDetails;
 use Illuminate\Support\Facades\Log;
-use Inertia\Inertia;
+use App\Http\Controllers\Controller;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Hash;
+use App\Events\Bookings\BookingCreatedEvent;
+use App\Events\Bookings\BookingUpdatedEvent;
+use App\Http\Requests\Bookings\BookingRequest;
 
 class BookingController extends Controller
 {
@@ -106,7 +107,7 @@ class BookingController extends Controller
             }
 
             $newBooking = $this->model::with('user', 'customer', 'service')->findOrFail($booking);
-            broadcast(new BookingEvent($newBooking))->toOthers();
+            broadcast(new BookingCreatedEvent($newBooking))->toOthers();
 
             DB::commit();
             return response()->json(['check' => true, 'message' => 'Đặt lịch thành công!'], 200);
@@ -174,7 +175,8 @@ class BookingController extends Controller
     {
         $this->crumbs = [
             ['name' => 'Dịch vụ', 'url' => '/admin/services'],
-            ['name' => 'Chi tiết lịch đặt', 'url' => '/admin/bookings' . $id . '/edit'],
+            ['name' => 'Danh sách dịch vụ đặt lịch', 'url' => '/admin/bookings'],
+            ['name' => 'Chi tiết lịch đặt', 'url' => '/admin/bookings/' . $id . '/edit'],
         ];
         $this->data = $this->model::with('user', 'customer', 'service')->findOrFail($id);
         return Inertia::render('Bookings/Edit', ['bookings' => $this->data, 'crumbs' => $this->crumbs]);
@@ -199,15 +201,23 @@ class BookingController extends Controller
 
             if ($this->instance->id_user === null && empty($this->data['id_user']) && $this->data['status'] >= 2) {
                 return response()->json(['check' => false, 'message' => 'Vui lòng chọn nhân viên!'], 400);
-            }
-
-            if ($this->instance->note === null && empty($this->data['note']) && $this->data['status'] === 5) {
+            } elseif ($this->instance->note === null && empty($this->data['note']) && $this->data['status'] === 5) {
                 return response()->json(['check' => false, 'message' => 'Vui lòng nhập ghi chú!'], 400);
+            } elseif ($this->instance->status === 3 && $this->data['status'] === 5) {
+                return response()->json(['check' => false, 'message' => 'Lịch được hoàn thành! Không thể hủy'], 400);
+            } elseif ($this->instance->status === 4 && $this->data['status'] === 5) {
+                return response()->json(['check' => false, 'message' => 'Lịch đã được thanh toán! Không thể hủy'], 400);
+            } elseif ($this->instance->status === 4 && $this->data['status'] !== 4) {
+                return response()->json(['check' => false, 'message' => 'Lịch đã được thanh toán! Không thể thay đổi'], 400);
+            } elseif ($this->instance->status === 5 && $this->data['status'] !== 5) {
+                return response()->json(['check' => false, 'message' => 'Lịch đã bị hủy! Không thể thay đổi'], 400);
+            } elseif ($this->instance->status === $this->data['status']) {
+                return response()->json(['check' => false, 'message' => 'Trạng thái không thay đổi!'], 400);
             }
 
             $this->instance->update($this->data);
 
-            broadcast(new BookingEvent($this->instance))->toOthers();
+            broadcast(new BookingUpdatedEvent($this->instance))->toOthers();
             DB::commit();
             return response()->json(['check' => true, 'message' => 'Cập nhật lịch thành công!'], 200);
         } catch (\Throwable $e) {

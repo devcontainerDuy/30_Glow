@@ -13,6 +13,7 @@ class BillServiceRequest extends BaseRequest
     public function methodPost()
     {
         return [
+            'booking_id' => ['required', 'exists:bookings,id'],
             'customer_id' => ['required', 'exists:customers,uid'],
         ];
     }

@@ -33,10 +33,13 @@ function Edit({ bookings, crumbs }) {
     };
 
     const handleBack = () => {
-        setName("");
-        setPrice(0);
-        setDiscount(0);
-        setContent("");
+        setCustomer({});
+        setUser({});
+        setServices([]);
+        setStatus(0);
+        setNote("");
+        setArrivalDate("");
+        setBookingDate("");
         router.visit("/admin/bookings", {
             method: "get",
         });
@@ -50,13 +53,10 @@ function Edit({ bookings, crumbs }) {
             setServices(bookings.service);
             setStatus(bookings.status);
             setNote(bookings.note);
-            setArrivalDate(bookings.time ? formatDateTime(bookings.time) : '');
+            setArrivalDate(bookings.time ? formatDateTime(bookings.time) : "");
             setBookingDate(formatDateTime(bookings.created_at));
         }
     }, [bookings]);
-
-
-
 
     return (
         <>
@@ -64,7 +64,7 @@ function Edit({ bookings, crumbs }) {
                 <section className="container">
                     <Row>
                         <BreadcrumbComponent props={crumbs}>
-                        <Button className="ms-2" variant="secondary" onClick={handleBack}>
+                            <Button className="ms-2" variant="secondary" onClick={handleBack}>
                                 <i className="bi bi-box-arrow-right" />
                                 <span className="ms-2">Quay lại</span>
                             </Button>
@@ -85,25 +85,17 @@ function Edit({ bookings, crumbs }) {
                                                     <Card.Title className="text-primary">Thông tin Booking</Card.Title>
                                                     <Form.Group className="mb-3" controlId="note">
                                                         <Form.Label>Ghi chú</Form.Label>
-                                                        <Form.Control
-                                                            as="textarea"
-                                                            rows={3}
-                                                            value={note}
-                                                            onChange={(e) => setNote(e.target.value)}
-                                                            placeholder="Nhập ghi chú..."
-                                                        />
+                                                        <Form.Control as="textarea" rows={3} value={note} onChange={(e) => setNote(e.target.value)} placeholder="Nhập ghi chú..." disabled />
                                                     </Form.Group>
                                                     <Form.Group className="mb-3" controlId="status">
                                                         <Form.Label>Trạng thái</Form.Label>
-                                                        <Form.Select
-                                                            value={status}
-                                                            onChange={(e) => setStatus(Number(e.target.value))}
-                                                        >
-                                                            <option value={1}>Chưa xếp nhân viên</option>
-                                                            <option value={2}>Đã xếp nhân viên</option>
-                                                            <option value={3}>Đang thực hiện</option>
-                                                            <option value={4}>Đã xong</option>
-                                                            <option value={5}>Hủy</option>
+                                                        <Form.Select value={status} onChange={(e) => setStatus(Number(e.target.value))} disabled>
+                                                            <option value={0}>Chưa xếp nhân viên</option>
+                                                            <option value={1}>Đã xếp nhân viên</option>
+                                                            <option value={2}>Đang thực hiện</option>
+                                                            <option value={3}>Đã xong</option>
+                                                            <option value={4}>Đã thanh toán</option>
+                                                            <option value={5}>Lịch đã hủy</option>
                                                         </Form.Select>
                                                     </Form.Group>
                                                     <Row className="mb-3">
@@ -111,24 +103,14 @@ function Edit({ bookings, crumbs }) {
                                                         <Col md={6}>
                                                             <Form.Group controlId="bookingDate">
                                                                 <Form.Label>Ngày đặt</Form.Label>
-                                                                <Form.Control
-                                                                    type="date"
-                                                                    value={bookingDate ? bookingDate.split(' ')[0] : ''}
-                                                                    readOnly
-                                                                    disabled
-                                                                />
+                                                                <Form.Control type="date" value={bookingDate ? bookingDate.split(" ")[0] : ""} readOnly disabled />
                                                             </Form.Group>
                                                         </Col>
                                                         {/* Giờ đặt */}
                                                         <Col md={6}>
                                                             <Form.Group controlId="bookingTime">
                                                                 <Form.Label>Giờ đặt</Form.Label>
-                                                                <Form.Control
-                                                                    type="time"
-                                                                    value={bookingDate ? bookingDate.split(' ')[1] : ''}
-                                                                    readOnly
-                                                                    disabled
-                                                                />
+                                                                <Form.Control type="time" value={bookingDate ? bookingDate.split(" ")[1] : ""} readOnly disabled />
                                                             </Form.Group>
                                                         </Col>
                                                     </Row>
@@ -137,24 +119,14 @@ function Edit({ bookings, crumbs }) {
                                                         <Col md={6}>
                                                             <Form.Group controlId="arrivalDate">
                                                                 <Form.Label>Ngày đến</Form.Label>
-                                                                <Form.Control
-                                                                    type="date"
-                                                                    value={arrivalDate ? arrivalDate.split(' ')[0] : ''}
-                                                                    readOnly
-                                                                    disabled
-                                                                />
+                                                                <Form.Control type="date" value={arrivalDate ? arrivalDate.split(" ")[0] : ""} readOnly disabled />
                                                             </Form.Group>
                                                         </Col>
                                                         {/* Giờ đến */}
                                                         <Col md={6}>
                                                             <Form.Group controlId="arrivalTime">
                                                                 <Form.Label>Giờ đến</Form.Label>
-                                                                <Form.Control
-                                                                    type="time"
-                                                                    value={arrivalDate ? arrivalDate.split(' ')[1] : ''}
-                                                                    readOnly
-                                                                    disabled
-                                                                />
+                                                                <Form.Control type="time" value={arrivalDate ? arrivalDate.split(" ")[1] : ""} readOnly disabled />
                                                             </Form.Group>
                                                         </Col>
                                                     </Row>
@@ -164,7 +136,9 @@ function Edit({ bookings, crumbs }) {
 
                                         {/* Thông tin Khách hàng & nhân viên */}
                                         <Col xs={12} md={4} className="mb-4">
-                                            <Card className="mb-4"> {/* Thêm margin-bottom ở đây để tạo khoảng cách */}
+                                            <Card className="mb-4">
+                                                {" "}
+                                                {/* Thêm margin-bottom ở đây để tạo khoảng cách */}
                                                 <Card.Body>
                                                     <Card.Title className="text-primary">Thông tin Khách hàng</Card.Title>
                                                     {customer ? (
@@ -173,10 +147,7 @@ function Edit({ bookings, crumbs }) {
                                                                 <strong>Tên:</strong> {customer.name}
                                                             </p>
                                                             <p>
-                                                                <strong>Email:</strong>{" "}
-                                                                <a href={`mailto:${customer.email}`}>
-                                                                    {customer.email}
-                                                                </a>
+                                                                <strong>Email:</strong> <a href={`mailto:${customer.email}`}>{customer.email}</a>
                                                             </p>
                                                             <p>
                                                                 <strong>Số điện thoại:</strong> {customer.phone || "Không có"}
@@ -192,7 +163,9 @@ function Edit({ bookings, crumbs }) {
                                             </Card>
 
                                             {status !== 0 && (
-                                                <Card className="mb-4"> {/* Thêm margin-bottom ở đây */}
+                                                <Card className="mb-4">
+                                                    {" "}
+                                                    {/* Thêm margin-bottom ở đây */}
                                                     <Card.Body>
                                                         <Card.Title className="text-primary">Thông tin Nhân viên</Card.Title>
                                                         {user ? (
@@ -201,8 +174,7 @@ function Edit({ bookings, crumbs }) {
                                                                     <strong>Tên:</strong> {user.name}
                                                                 </p>
                                                                 <p>
-                                                                    <strong>Email:</strong>{" "}
-                                                                    <a href={`mailto:${user.email}`}>{user.email}</a>
+                                                                    <strong>Email:</strong> <a href={`mailto:${user.email}`}>{user.email}</a>
                                                                 </p>
                                                                 <p>
                                                                     <strong>Số điện thoại:</strong> {user.phone || "Không có"}

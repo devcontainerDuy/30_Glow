@@ -94,6 +94,7 @@ class ProductController extends Controller
     {
         $this->crumbs = [
             ['name' => 'Sản phẩm', 'url' => '/admin/products'],
+            ['name' => 'Danh sách sản phẩm', 'url' => '/admin/products'],
             ['name' => 'Chi tiết sản phẩm', 'url' => '/admin/products/' . $id . '/edit'],
         ];
         $this->data = $this->model::with('category', 'brand', 'gallery')->findOrFail($id);

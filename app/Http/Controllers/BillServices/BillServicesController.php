@@ -39,6 +39,7 @@ class BillServicesController extends Controller
 
     /**
      * Store a newly created resource in storage.
+     * status: 0 - Chưa thanh toán, 1 - Đã thanh toán, 2 - Thanh toán thất bại
      */
     public function store(BillServiceRequest $request, $id)
     {
@@ -46,45 +47,31 @@ class BillServicesController extends Controller
         try {
             $this->data = $request->validated();
 
-            $booking = Bookings::findOrFail($id);
-            if ($booking->status != 3) {
-                return response()->json(['check' => false, 'message' => 'Không thể thanh toán! Trạng thái không hợp lệ.'], 400);
-            }
+            $booking = Bookings::findOrFail($this->data['booking_id']);
+            $booking->status < 3 ??  response()->json(['check' => false, 'message' => 'Không thể thanh toán! Dịch vụ chưa hoàn thành.'], 400);
+            $booking->status > 3 ?? response()->json(['check' => false, 'message' => 'Không thể thanh toán! Dịch vụ đã thanh toán.'], 400);
+
 
             $idCustomer = Customers::where("uid", $this->data['customer_id'])->first();
-            $existingBill = $this->model::where('id_booking', $id)->first();
+            $existingBill = $this->model::where('id_booking', $this->data['booking_id'])->first();
             if ($existingBill) {
-                return response()->json([
-                    'check' => false,
-                    'message' => 'Hóa đơn cho booking này đã tồn tại!'
-                ], 400);
+                return response()->json(['check' => false, 'message' => 'Hóa đơn cho booking này đã tồn tại!'], 400);
             }
 
-            $this->instance = $this->model::insertGetId([
-                'uid' => $this->createCodeOrderService(),
-                'id_customer' => $idCustomer->id,
-                'id_booking' => $id,
-                'status' => 1,
-                'created_at' => now(),
-                'updated_at' => now()
-            ]);
+            $this->instance = $this->model::insertGetId(['uid' => $this->createCodeOrderService(), 'id_customer' => $idCustomer->id, 'id_booking' => $id, 'status' => 0, 'created_at' => now(), 'updated_at' => now()]);
 
-            $services_cart = BookingHasService::where('id_booking', $id)->get();
+            $services_cart = BookingHasService::where('id_booking', $this->data['booking_id'])->get();
+
             foreach ($services_cart as $item) {
-                ServiceBillsDetails::create([
-                    'id_service_bill' => $this->instance,
-                    'id_service' => $item->id_service,
-                ]);
+                ServiceBillsDetails::create(['id_service_bill' => $this->instance, 'id_service' => $item->id_service,]);
             }
-
-            $booking->update(['status' => 4]);
 
             DB::commit();
-            return response()->json(['check' => true, 'message' => 'Thanh toán booking thành công!'], 201);
+            return response()->json(['check' => true, 'message' => 'Tạo hóa đơn thành công!'], 201);
         } catch (\Throwable $e) {
             DB::rollBack();
             Log::error("Error: " . $e->getMessage());
-            return response()->json(['check' => false, 'message' => 'Thanh toán booking thất bại!'], 401);
+            return response()->json(['check' => false, 'message' => 'Tạo hóa đơn thất bại!'], 401);
         }
     }
 
@@ -138,34 +125,34 @@ class BillServicesController extends Controller
         $this->data = $this->model::with('customer', 'booking', 'serviceBillDetails.service')->findOrFail($id);
 
         $this->instance =  [
-                'id' => $this->data->id,
-                'uid' => $this->data->uid,
-                'customer' => $this->data->customer ? [
-                    'uid' => $this->data->customer->uid,
-                    'name' => $this->data->customer->name,
-                    'email' => $this->data->customer->email,
-                    'phone' => $this->data->customer->phone,
-                    'address' => $this->data->customer->address,
-                ] : null,
-                'booking' => $this->data->booking ? [
-                    'id' => $this->data->booking->id,
-                    'time' => $this->data->booking->time,
-                    'note' => $this->data->booking->note,
-                    'status' => $this->data->booking->status,
-                ] : null,
-                'status' => $this->data->status,
-                'service_details' => $this->data->serviceBillDetails->map(function ($detail) {
-                    return [
-                        'id' => $detail->id,
-                        'service' => $detail->service ? [
-                            'name' => $detail->service->name,
-                            'price' => $detail->service->price,
-                            'summary' => $detail->service->summary,
-                            'image' => asset('storage/services/' . $detail->service->image),
-                        ] : null,
-                    ];
-                })->toArray(),
-            ];
+            'id' => $this->data->id,
+            'uid' => $this->data->uid,
+            'customer' => $this->data->customer ? [
+                'uid' => $this->data->customer->uid,
+                'name' => $this->data->customer->name,
+                'email' => $this->data->customer->email,
+                'phone' => $this->data->customer->phone,
+                'address' => $this->data->customer->address,
+            ] : null,
+            'booking' => $this->data->booking ? [
+                'id' => $this->data->booking->id,
+                'time' => $this->data->booking->time,
+                'note' => $this->data->booking->note,
+                'status' => $this->data->booking->status,
+            ] : null,
+            'status' => $this->data->status,
+            'service_details' => $this->data->serviceBillDetails->map(function ($detail) {
+                return [
+                    'id' => $detail->id,
+                    'service' => $detail->service ? [
+                        'name' => $detail->service->name,
+                        'price' => $detail->service->price,
+                        'summary' => $detail->service->summary,
+                        'image' => asset('storage/services/' . $detail->service->image),
+                    ] : null,
+                ];
+            })->toArray(),
+        ];
 
         return response()->json([
             'check' => true,

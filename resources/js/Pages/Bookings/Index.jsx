@@ -62,29 +62,36 @@ function Index({ bookings, crumbs }) {
             width: 180,
             renderCell: (params) => {
                 let statusText = "";
+                let statusClass = "";
                 switch (params.row.status) {
                     case 0:
                         statusText = "Đang chờ xếp nhân viên";
+                        statusClass = "text-warning";
                         break;
                     case 1:
                         statusText = "Đã xếp nhân viên";
+                        statusClass = "text-primary";
                         break;
                     case 2:
                         statusText = "Đang thực hiện";
+                        statusClass = "text-info";
                         break;
                     case 3:
                         statusText = "Thành công";
+                        statusClass = "text-success";
                         break;
                     case 4:
                         statusText = "Đã thanh toán";
+                        statusClass = "text-success";
                         break;
                     case 5:
                         statusText = "Thất bại";
+                        statusClass = "text-danger";
                         break;
                     default:
                         statusText = "Chưa xác định";
                 }
-                return <span>{statusText}</span>;
+                return <span className={statusClass}>{statusText}</span>;
             },
         },
         {
@@ -132,8 +139,16 @@ function Index({ bookings, crumbs }) {
 
     useEffect(() => {
         var channel = pusher.subscribe("channelBookings");
+
         channel.bind("BookingCreated", function (response) {
             setData((prevData) => [response.bookingData, ...prevData]);
+        });
+
+        channel.bind("BookingUpdated", function (response) {
+            setData((prevData) => {
+                return prevData.map((booking) => (booking.id === response.bookingData.id ? response.bookingData : booking));
+            });
+            console.log("BookingUpdated: ", { ...response.bookingData });
         });
     }, []);
 
