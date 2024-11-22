@@ -9,6 +9,8 @@ use App\Models\Categories;
 use App\Models\Gallery;
 use App\Models\Products;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use Inertia\Inertia;
 use Illuminate\Support\Str;
@@ -30,9 +32,11 @@ class ProductController extends Controller
             ['name' => 'Danh sách sản phẩm', 'url' => '/admin/products'],
         ];
         $this->data = $this->model::with('category', 'brand', 'gallery')->orderBy('id', 'desc')->get();
+        $trashs = $this->model::with('category', 'brand', 'gallery')->orderBy('id', 'desc')->onlyTrashed()->get();
+        // dd($trashs);
         $category = Categories::active()->select('id', 'name')->get();
         $brand = Brands::active()->select('id', 'name')->get();
-        return Inertia::render('Products/Index', ['products' => $this->data, 'crumbs' => $this->crumbs, 'categories' => $category, 'brands' => $brand]);
+        return Inertia::render('Products/Index', ['products' => $this->data, 'trashs' => $trashs, 'crumbs' => $this->crumbs, 'categories' => $category, 'brands' => $brand]);
     }
 
     /**
@@ -40,7 +44,7 @@ class ProductController extends Controller
      */
     public function create()
     {
-        //
+        // 
     }
 
     /**
@@ -48,33 +52,39 @@ class ProductController extends Controller
      */
     public function store(ProductRequest $request)
     {
-        $this->data = $request->validated();
-        $this->data['slug'] = Str::slug($this->data['name']);
-        $this->instance = $this->model::create($this->data);
+        DB::beginTransaction();
+        try {
+            $this->data = $request->validated();
+            $this->data['slug'] = Str::slug($this->data['name']);
+            $this->instance = $this->model::create($this->data);
 
-        if ($request->hasFile('image')) {
-            $galleryData = [];
+            if ($request->hasFile('image')) {
+                $galleryData = [];
 
-            foreach ($request->file('image') as $key => $item) {
-                $image = time() . '_' . $item->getClientOriginalName();
-                Storage::putFileAs('public/gallery', $item, $image);
+                foreach ($request->file('image') as $key => $item) {
+                    $image = time() . '_' . $item->getClientOriginalName();
+                    Storage::putFileAs('public/gallery', $item, $image);
 
-                $status = $key === 0 ? 1 : 0;
-                $galleryData[] = [
-                    'image' => $image,
-                    'id_parent' => $this->instance->id,
-                    'status' => $status,
-                ];
+                    $status = $key === 0 ? 1 : 0;
+                    $galleryData[] = [
+                        'image' => $image,
+                        'id_parent' => $this->instance->id,
+                        'status' => $status,
+                    ];
+                }
+                Gallery::insert($galleryData);
             }
-            Gallery::insert($galleryData);
-        }
 
-        if ($this->instance) {
-            $this->data = $this->model::with('category', 'brand', 'gallery')->orderBy('id', 'desc')->get();
-            return response()->json(['check' => true, 'message' => 'Tạo thành công!', 'data' => $this->data], 201);
+            if ($this->instance) {
+                DB::commit();
+                $this->data = $this->model::with('category', 'brand', 'gallery')->orderBy('id', 'desc')->get();
+                return response()->json(['check' => true, 'message' => 'Tạo thành công!', 'data' => $this->data], 201);
+            }
+        } catch (\Throwable $e) {
+            DB::rollBack();
+            Log::error("Error: " . $e->getMessage());
+            return response()->json(['check' => false, 'message' => 'Tạo thất bại!'], 400);
         }
-
-        return response()->json(['check' => false, 'message' => 'Tạo thất bại!'], 400);
     }
 
 
@@ -130,24 +140,51 @@ class ProductController extends Controller
     public function destroy(string $id)
     {
         $this->instance = $this->model::with('gallery')->findOrFail($id);
-
-        foreach ($this->instance->gallery as $image) {
-            $imagePath = "public/gallery/{$image->image}";
-            if (Storage::exists($imagePath)) {
-                Storage::delete($imagePath);
-            }
-            $image->delete();
-        }
-
+        $this->instance->update(['status' => 0, 'highlighted' => 0]);
         $this->instance = $this->instance->delete();
 
         if ($this->instance) {
             $this->data = $this->model::with('category', 'brand', 'gallery')->orderBy('id', 'desc')->get();
+            $trashs = $this->model::with('category', 'brand', 'gallery')->orderBy('id', 'desc')->onlyTrashed()->get();
             $categories = Categories::with('parent')->withCount('products')->get();
-            return response()->json(['check' => true, 'message' => 'Xoá thành công!', 'data' => $this->data, 'categories' => $categories], 200);
+            return response()->json(['check' => true, 'message' => 'Xoá thành công!', 'data' => $this->data, 'trashs' => $trashs, 'categories' => $categories], 200);
         }
 
         return response()->json(['check' => false, 'message' => 'Xoá thất bại!'], 400);
+    }
+
+    public function restore(string $id)
+    {
+        $this->instance = $this->model::with('gallery')->withTrashed()->findOrFail($id);
+        $this->instance->restore();
+        $this->data = $this->model::with('category', 'brand', 'gallery')->orderBy('id', 'desc')->get();
+        $trashs = $this->model::with('category', 'brand', 'gallery')->orderBy('id', 'desc')->onlyTrashed()->get();
+        $categories = Categories::with('parent')->withCount('products')->get();
+        return response()->json(['check' => true, 'message' => 'Khôi phục thành công!', 'data' => $this->data, 'trashs' => $trashs, 'categories' => $categories], 200);
+    }
+
+    public function permanent(string $id)
+    {
+        $this->instance = $this->model::with('gallery')->withTrashed()->findOrFail($id);
+        if ($this->instance->gallery->isEmpty()) {
+            return response()->json(['check' => false, 'message' => 'Không có ảnh liên quan để xóa'], 404);
+        }
+
+        foreach ($this->instance->gallery as $item) {
+            $imagePath = "public/gallery/{$item->image}";
+            if (Storage::exists($imagePath)) {
+                Storage::delete($imagePath);
+            }
+            $item->forceDelete();
+        }
+
+        $this->instance->forceDelete();
+
+        $this->data = $this->model::with('category', 'brand', 'gallery')->orderBy('id', 'desc')->get();
+        $trashs = $this->model::with('category', 'brand', 'gallery')->orderBy('id', 'desc')->onlyTrashed()->get();
+        $categories = Categories::with('parent')->withCount('products')->get();
+
+        return response()->json(['check' => true, 'message' => 'Đã xóa vĩnh viễn thành công!', 'data' => $this->data, 'trashs' => $trashs, 'categories' => $categories], 200);
     }
 
     /**
