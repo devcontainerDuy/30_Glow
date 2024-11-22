@@ -2,8 +2,7 @@ import React, { useEffect, useMemo, useState } from "react";
 import { Box, FormControlLabel, Select, Switch } from "@mui/material";
 import { DataGrid, GridToolbar } from "@mui/x-data-grid";
 import Layout from "@/Layouts/Index";
-
-import { Button, Col, Form, Image, InputGroup, Modal, Row, Spinner } from "react-bootstrap";
+import { Button, Col, Form, Image, InputGroup, Modal, Row, Spinner, Tab, Tabs } from "react-bootstrap";
 import { FormControl, MenuItem } from "@mui/material";
 import Swal from "sweetalert2";
 import CKEditor from "@/Containers/CKEditor";
@@ -12,8 +11,9 @@ import BreadcrumbComponent from "@/Components/BreadcrumbComponent";
 import { router } from "@inertiajs/react";
 import { toast } from "react-toastify";
 
-function Index({ products, crumbs, categories, brands }) {
+function Index({ products, trashs, crumbs, categories, brands }) {
     const [data, setData] = useState([]);
+    const [trash, setTrash] = useState([]);
     const [category, setCategory] = useState([]);
     const [brand, setBrand] = useState([]);
     const [editingCells, setEditingCells] = useState({});
@@ -138,6 +138,7 @@ function Index({ products, crumbs, categories, brands }) {
                         if (res.data.check === true) {
                             toast.success(res.data.message);
                             setData(res.data.data);
+                            setTrash(res.data.trashs);
                         } else {
                             toast.warning(res.data.message);
                         }
@@ -147,6 +148,40 @@ function Index({ products, crumbs, categories, brands }) {
                     });
             }
         });
+    };
+
+    const handleRestore = (id) => {
+        window.axios
+            .post("/admin/products/" + id + "/restore")
+            .then((res) => {
+                if (res.data.check === true) {
+                    toast.success(res.data.message);
+                    setData(res.data.data);
+                    setTrash(res.data.trashs);
+                } else {
+                    toast.warning(res.data.message);
+                }
+            })
+            .catch((error) => {
+                toast.error(error.response.data.message);
+            });
+    };
+
+    const handleDeletePermanent = (id) => {
+        window.axios
+            .delete("/admin/products/" + id + "/permanent")
+            .then((res) => {
+                if (res.data.check === true) {
+                    toast.success(res.data.message);
+                    setData(res.data.data);
+                    setTrash(res.data.trashs);
+                } else {
+                    toast.warning(res.data.message);
+                }
+            })
+            .catch((error) => {
+                toast.error(error.response.data.message);
+            });
     };
 
     const handleView = (id) => {
@@ -279,15 +314,104 @@ function Index({ products, crumbs, categories, brands }) {
         },
     ]);
 
+    const columnsTrash = useMemo(() => [
+        {
+            field: "name",
+            headerName: "Tên sản phẩm",
+            width: 220,
+            editable: true,
+        },
+        {
+            field: "price",
+            headerName: "Giá",
+            width: 120,
+            editable: true,
+            valueFormatter: formatPrice,
+        },
+        {
+            field: "gallery",
+            headerName: "Ảnh sản phẩm",
+            width: 120,
+            renderCell: (params) => {
+                const mainImage = params.row.gallery.find((image) => image.status === 1);
+
+                return <>{mainImage && <Image fluid className="rounded-1 h-100 p-0 m-0" src={"/storage/gallery/" + mainImage.image} alt={mainImage.image} />}</>;
+            },
+        },
+
+        {
+            field: "in_stock",
+            headerName: "Số lượng",
+            editable: true,
+            width: 100,
+        },
+        {
+            field: "status",
+            headerName: "Trạng thái",
+            width: 160,
+            renderCell: (params) => (
+                <>
+                    <FormControlLabel control={<Switch checked={params.row.status === 1} disabled />} label={params.row.status ? "Mặc định" : "Không"} />
+                </>
+            ),
+        },
+        {
+            field: "highlighted",
+            headerName: "Nổi bật",
+            width: 150,
+            renderCell: (params) => (
+                <>
+                    <FormControlLabel control={<Switch checked={params.row.highlighted === 1} disabled />} label={params.row.highlighted ? "Hiện" : "Không"} />
+                </>
+            ),
+        },
+        {
+            field: "id_category",
+            headerName: "Danh mục",
+            width: 200,
+            renderCell: (params) => {
+                let categoryId = params.row.id_category || "";
+                return (
+                    <FormControl fullWidth>
+                        <Select id="category-select" value={categoryId} displayEmpty disabled>
+                            <MenuItem value="">Chọn danh mục</MenuItem>
+                            {category.map((item) => (
+                                <MenuItem key={item.id} value={item.id}>
+                                    {item.name || "Lỗi"}
+                                </MenuItem>
+                            ))}
+                        </Select>
+                    </FormControl>
+                );
+            },
+        },
+        {
+            field: "action",
+            headerName: "Thao tác",
+            width: 160,
+            renderCell: (params) => (
+                <>
+                    <Button type="button" variant="outline-success" title="Khôi phục sản phẩm" onClick={() => handleRestore(params.row.id)}>
+                        <i className="bi bi-arrow-clockwise" />
+                    </Button>
+                    <Button className="ms-2" type="button" variant="outline-danger" title="Xóa vĩnh viễn sản phẩm" onClick={() => handleDeletePermanent(params.row.id)}>
+                        <i className="bi bi-trash-fill" />
+                    </Button>
+                </>
+            ),
+        },
+    ]);
+
     const handleEditorBlur = (data) => {
         setContent(data);
     };
 
     useEffect(() => {
         setData(products);
+        setTrash(trashs);
         setCategory(categories);
         setBrand(brands);
-    }, [products, categories, brands]);
+    }, [products, trashs, categories, brands]);
 
     return (
         <>
@@ -421,42 +545,78 @@ function Index({ products, crumbs, categories, brands }) {
 
                         {/* Start DataGrid */}
                         <Col xs="12">
-                            <Box sx={{ height: "70vh", width: "100%" }}>
-                                <div className="text-start">
-                                    <h4>Danh sách sản phẩm </h4>
-                                </div>
-                                <DataGrid
-                                    rows={data}
-                                    columns={columns}
-                                    slots={{
-                                        toolbar: GridToolbar,
-                                    }}
-                                    slotProps={{
-                                        toolbar: {
-                                            showQuickFilter: true,
-                                            quickFilterProps: {
-                                                debounceMs: 500,
-                                            },
-                                        },
-                                    }}
-                                    initialState={{
-                                        pagination: {
-                                            paginationModel: {
-                                                pageSize: 20,
-                                            },
-                                        },
-                                    }}
-                                    onCellEditStop={(params, e) => {
-                                        handleCellEditStop(params.row.id, params.field, e.target.value);
-                                    }}
-                                    onCellEditStart={(params, e) => {
-                                        handleCellEditStart(params.row.id, params.field, e.target.value);
-                                    }}
-                                    pageSizeOptions={[20, 40, 60, 80, 100]}
-                                    checkboxSelection
-                                    disableRowSelectionOnClick
-                                />
-                            </Box>
+                            <Tabs defaultActiveKey="list" id="uncontrolled-tab-example">
+                                <Tab eventKey="list" title={"Danh sách sản phẩm" + " (" + data.length + ")"}>
+                                    <Box sx={{ height: "70vh", width: "100%" }}>
+                                        <DataGrid
+                                            rows={data}
+                                            columns={columns}
+                                            slots={{
+                                                toolbar: GridToolbar,
+                                            }}
+                                            slotProps={{
+                                                toolbar: {
+                                                    showQuickFilter: true,
+                                                    quickFilterProps: {
+                                                        debounceMs: 500,
+                                                    },
+                                                },
+                                            }}
+                                            initialState={{
+                                                pagination: {
+                                                    paginationModel: {
+                                                        pageSize: 20,
+                                                    },
+                                                },
+                                            }}
+                                            onCellEditStop={(params, e) => {
+                                                handleCellEditStop(params.row.id, params.field, e.target.value);
+                                            }}
+                                            onCellEditStart={(params, e) => {
+                                                handleCellEditStart(params.row.id, params.field, e.target.value);
+                                            }}
+                                            pageSizeOptions={[20, 40, 60, 80, 100]}
+                                            checkboxSelection
+                                            disableRowSelectionOnClick
+                                        />
+                                    </Box>
+                                </Tab>
+                                <Tab eventKey="trash" title={"Thùng rác" + " (" + trash.length + ")"}>
+                                    <Box sx={{ height: "70vh", width: "100%" }}>
+                                        <DataGrid
+                                            rows={trash}
+                                            columns={columnsTrash}
+                                            slots={{
+                                                toolbar: GridToolbar,
+                                            }}
+                                            slotProps={{
+                                                toolbar: {
+                                                    showQuickFilter: true,
+                                                    quickFilterProps: {
+                                                        debounceMs: 500,
+                                                    },
+                                                },
+                                            }}
+                                            initialState={{
+                                                pagination: {
+                                                    paginationModel: {
+                                                        pageSize: 20,
+                                                    },
+                                                },
+                                            }}
+                                            onCellEditStop={(params, e) => {
+                                                handleCellEditStop(params.row.id, params.field, e.target.value);
+                                            }}
+                                            onCellEditStart={(params, e) => {
+                                                handleCellEditStart(params.row.id, params.field, e.target.value);
+                                            }}
+                                            pageSizeOptions={[20, 40, 60, 80, 100]}
+                                            checkboxSelection
+                                            disableRowSelectionOnClick
+                                        />
+                                    </Box>
+                                </Tab>
+                            </Tabs>
                         </Col>
                         {/* End DataGrid */}
                     </Row>

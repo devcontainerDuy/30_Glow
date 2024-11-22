@@ -50,6 +50,10 @@ Route::middleware(['auth', 'auth.session', 'web', 'authen:Super Admin,Manager'])
     Route::resource('brands', App\Http\Controllers\Brands\BrandsController::class)->names('brands');
     // Module Product
     Route::resource('products', App\Http\Controllers\Products\ProductController::class)->names('products');
+    Route::controller(App\Http\Controllers\Products\ProductController::class)->group(function () {
+        Route::post('/products/{id}/restore', 'restore')->name('products.restore');
+        Route::delete('/products/{id}/permanent', 'permanent')->name('products.permanent');
+    });
     // Module Gallery
     Route::resource('galleries', App\Http\Controllers\Gallery\GalleryController::class)->names('gallery');
     // Module Service Collection
