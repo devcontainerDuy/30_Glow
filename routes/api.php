@@ -105,3 +105,10 @@ Route::middleware('api')->controller(App\Http\Controllers\Slides\SlidesControlle
 Route::middleware('api')->controller(App\Http\Controllers\Contacts\ContactsController::class)->group(function () {
     Route::post('/addContacts', 'addContacts');
 });
+
+Route::middleware('api')->controller(App\Http\Controllers\Revenue\RevenueController::class)->group(function () {
+    Route::get('/revenue/service', 'getRevenueAllServices');
+    Route::get('/revenue/service/{id}', 'getRevenueByService');
+    Route::get('/revenue/customer/service/{id}', 'getRevenueByCustomer');
+    Route::get('/revenue/user/service/{id}', 'getRevenueByUser');
+});
