@@ -9,7 +9,9 @@ use App\Models\BillsDetail;
 use App\Models\Customers;
 use App\Traits\GeneratesUniqueId;
 use Illuminate\Http\Request;
+use Illuminate\Support\Str;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
 
 class BillController extends Controller
@@ -17,7 +19,6 @@ class BillController extends Controller
     use GeneratesUniqueId;
     public function __construct()
     {
-        $this->middleware('auth');
         $this->model = Bills::class;
     }
 
@@ -26,7 +27,10 @@ class BillController extends Controller
      */
     public function index()
     {
-        //
+        $this->crumbs = [
+            ['name' => 'Danh sách hóa đơn', 'url' => '/admin/bills']
+        ];
+        $this->data = $this->model::with('customer')->orderBy('created_at', 'desc')->get();
     }
 
     /**
@@ -39,16 +43,57 @@ class BillController extends Controller
 
     /**
      * Store a newly created resource in storage.
+     * status: 0 - Đã thanh toán, 1 - Đang chờ xử lý, 2 - Đã xác nhận, 3 - Đang giao hàng, 4 - Đã giao hàng, 5 - Đã hủy
      */
     public function store(BillRequest $request)
     {
         DB::beginTransaction();
         try {
             $this->data = $request->validated();
-            $idCustomer = Customers::where("uid", $this->data['customer_id'])->first();
+            $this->instance = Customers::where('email', $this->data['email'] ?? null)->where('phone', $this->data['phone'] ?? null)->first();
 
-            if ($idCustomer->address === null && $idCustomer->phone === null) {
-                $idCustomer->update(['address' => $this->data['address'], 'phone' => $this->data['phone']]);
+            if ($this->instance) {
+                $idCustomer = $this->instance->load('carts.product');
+
+                if (
+                    $idCustomer->name !== $this->data['name'] ||
+                    $idCustomer->email !== $this->data['email'] ||
+                    (!empty($idCustomer->phone) && $idCustomer->phone !== $this->data['phone']) ||
+                    (!empty($idCustomer->address) && $idCustomer->address !== $this->data['address'])
+                ) {
+                    return response()->json(['check' => false, 'message' => 'Thông tin khách hàng không chính xác!'], 401);
+                }
+
+                if (is_null($idCustomer->address)) {
+                    $idCustomer->update(['address' => $this->data['address']]);
+                } elseif ($idCustomer->address !== $this->data['address']) {
+                    return response()->json(['check' => false, 'message' => 'Địa chỉ không khớp!'], 401);
+                }
+
+                if (is_null($idCustomer->phone)) {
+                    $idCustomer->update(['phone' => $this->data['phone']]);
+                } elseif ($idCustomer->phone !== $this->data['phone']) {
+                    return response()->json(['check' => false, 'message' => 'Số điện thoại không khớp!'], 401);
+                }
+
+                if ($idCustomer->carts->isEmpty()) {
+                    return response()->json(['check' => false, 'message' => 'Giỏ hàng trống!'], 401);
+                }
+
+                $this->data['cart'] = $idCustomer->carts->map(function ($item) {
+                    if (!$item->product) {
+                        return response()->json(['check' => false, 'message' => 'Sản phẩm không tồn tại!'], 401);
+                    }
+                    return [
+                        'id_product' => $item->id_product,
+                        'quantity' => $item->quantity,
+                        'unit_price' => $item->product->price * (1 - $item->product->discount / 100),
+                    ];
+                })->toArray();
+            } else {
+                $password = Str::random(10);
+                $idCustomer = Customers::create(['uid' => $this->createCodeCustomer(), 'name' => $this->data['name'], 'email' => $this->data['email'], 'phone' => $this->data['phone'], 'address' => $this->data['address'], 'password' => Hash::make($password)]);
+                $idCustomer->carts()->createMany($this->data['cart']);
             }
 
             $this->instance = $this->model::insertGetId([
@@ -73,6 +118,8 @@ class BillController extends Controller
             foreach ($this->data['cart'] as $item) {
                 BillsDetail::create(['id_bill' => $this->instance, 'id_product' => $item['id_product'], 'quantity' => $item['quantity'], 'unit_price' => $item['unit_price']]);
             }
+
+            $idCustomer->carts()->delete();
 
             DB::commit();
             return response()->json(['check' => true, 'message' => 'Đặt hàng thành công!'], 201);

@@ -13,7 +13,6 @@ class BillRequest extends BaseRequest
     public function methodPost()
     {
         return [
-            'customer_id' => ['required', 'exists:customers,uid'],
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'string', 'email', 'max:255'],
             'phone' => ['required', 'numeric'],
@@ -27,7 +26,10 @@ class BillRequest extends BaseRequest
             'payment_method' => ['required', 'numeric', 'in:1,2,3'],
             'transaction_id' => ['nullable', 'sometimes', 'string', 'max:255'],
             'total' => ['required', 'numeric'],
-            'cart' => ['required', 'array',],
+            'cart' => ['sometimes', 'array'],
+            'cart.*.product_id' => ['required_with:cart', 'integer'],
+            'cart.*.quantity' => ['required_with:cart', 'integer', 'min:1'],
+            'cart.*.unit_price' => ['required_with:cart', 'numeric', 'min:0'],
         ];
     }
 }

@@ -40,10 +40,10 @@ Route::middleware('api')->group(function () {
             Route::put('/customers/{id}', 'edit');
             Route::post('/customers/{id}/change-password', 'changePassword');
         });
+    });
 
-        Route::controller(App\Http\Controllers\Bills\BillController::class)->group(function () {
-            Route::post('/bills', 'store');
-        });
+    Route::controller(App\Http\Controllers\Bills\BillController::class)->group(function () {
+        Route::post('/bills', 'store');
     });
 
     Route::controller(App\Http\Controllers\Bookings\BookingController::class)->group(function () {
@@ -54,7 +54,7 @@ Route::middleware('api')->group(function () {
     });
 
     Route::middleware('api')->controller(App\Http\Controllers\BillServices\BillServicesController::class)->group(function () {
-        Route::post('/add_billservices/{id}', 'store');
+        Route::post('/add_billservices', 'store');
         Route::get('/billservices', 'apiIndex');
         Route::get('/billservices/{id}', 'apiShow');
     });
