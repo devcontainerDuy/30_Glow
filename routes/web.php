@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Pusher\PusherController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
@@ -13,6 +14,8 @@ use Inertia\Inertia;
 | be assigned to the "web" middleware group. Make something great!
 |
 */
+
+Route::post('/pusher/user-auth', [PusherController::class, 'pusherAuth']);
 
 Route::get('/', function () {
     return redirect()->route('admin.home');

@@ -10,7 +10,7 @@ import Swal from "sweetalert2";
 import CKEditor from "@/Containers/CKEditor";
 import BreadcrumbComponent from "@/Components/BreadcrumbComponent";
 import { Helmet } from "react-helmet";
-import Pusher from 'pusher-js';
+import Pusher from "pusher-js";
 import { toast } from "react-toastify";
 
 function Index({ contacts, crumbs }) {
@@ -120,21 +120,8 @@ function Index({ contacts, crumbs }) {
             headerName: "Trạng thái",
             width: 180,
             renderCell: (params) => (
-                <div
-                    onClick={() =>
-                        handleCellEditStop(
-                            params.row.id,
-                            "status",
-                            params.row.status === 1 ? 0 : 1
-                        )
-                    }
-                    style={{ cursor: "pointer" }}
-                >
-                    {params.row.status === 1 ? (
-                        <CheckCircle style={{ color: green[500], marginRight: 8 }} />
-                    ) : (
-                        <Error style={{ color: blue[500], marginRight: 8 }} />
-                    )}
+                <div onClick={() => handleCellEditStop(params.row.id, "status", params.row.status === 1 ? 0 : 1)} style={{ cursor: "pointer" }}>
+                    {params.row.status === 1 ? <CheckCircle style={{ color: green[500], marginRight: 8 }} /> : <Error style={{ color: blue[500], marginRight: 8 }} />}
                     <span>{params.row.status === 1 ? "Đã trả lời" : "Mới"}</span>
                 </div>
             ),
@@ -152,21 +139,10 @@ function Index({ contacts, crumbs }) {
             width: 160,
             renderCell: (params) => (
                 <>
-                    <Button
-                        type="button"
-                        variant="outline-info"
-                        title="Xem chi tiết liên hệ"
-                        onClick={() => handleShow(params.row.id)}
-                    >
+                    <Button type="button" variant="outline-info" title="Xem chi tiết liên hệ" onClick={() => handleShow(params.row.id)}>
                         <i className="bi bi-envelope" />
                     </Button>
-                    <Button
-                        className="ms-2"
-                        type="button"
-                        variant="outline-danger"
-                        title="Xóa liên hệ"
-                        onClick={() => handleDelete(params.row.id)}
-                    >
+                    <Button className="ms-2" type="button" variant="outline-danger" title="Xóa liên hệ" onClick={() => handleDelete(params.row.id)}>
                         <i className="bi bi-trash-fill" />
                     </Button>
                 </>
@@ -180,19 +156,9 @@ function Index({ contacts, crumbs }) {
     };
 
     useEffect(() => {
-        const pusher = new Pusher("a41649538081bc522756", {
-            cluster: "ap1",
-            wsHost: "ws-ap1.pusher.com",
-            wsPort: 443,
-            wssPort: 443,
-            forceTLS: true,
-            enabledTransports: ["ws", "wss"],
-            disableStats: true,
-            encrypted: true,
-        });
         const channel = pusher.subscribe("channelContacts");
+
         channel.bind("ContactsCreated", function (data) {
-            console.log("Received data:", data);
             setData(data.ContactsData);
         });
     }, []);
@@ -206,16 +172,13 @@ function Index({ contacts, crumbs }) {
             <Layout>
                 <section className="container">
                     <Row>
-                        <BreadcrumbComponent props={crumbs}>
-                        </BreadcrumbComponent>
+                        <BreadcrumbComponent props={crumbs}></BreadcrumbComponent>
 
                         {/* Start Modal */}
                         <Modal show={show} onHide={handleClose} size="lg">
                             <Form onSubmit={handleSubmit}>
                                 <Modal.Header closeButton>
-                                    <Modal.Title>
-                                        Trả lời liên hệ của người dùng
-                                    </Modal.Title>
+                                    <Modal.Title>Trả lời liên hệ của người dùng</Modal.Title>
                                 </Modal.Header>
                                 <Modal.Body>
                                     <Row>
@@ -258,11 +221,7 @@ function Index({ contacts, crumbs }) {
                                         Đóng
                                     </Button>
                                     <Button variant="primary" type="submit" disabled={loading}>
-                                        {loading ? (
-                                            <Spinner animation="border" size="sm" />
-                                        ) : (
-                                            "Gửi"
-                                        )}
+                                        {loading ? <Spinner animation="border" size="sm" /> : "Gửi"}
                                     </Button>
                                 </Modal.Footer>
                             </Form>
@@ -297,18 +256,10 @@ function Index({ contacts, crumbs }) {
                                         },
                                     }}
                                     onCellEditStop={(params, e) => {
-                                        handleCellEditStop(
-                                            params.row.id,
-                                            params.field,
-                                            e.target.value
-                                        );
+                                        handleCellEditStop(params.row.id, params.field, e.target.value);
                                     }}
                                     onCellEditStart={(params, e) => {
-                                        handleCellEditStart(
-                                            params.row.id,
-                                            params.field,
-                                            e.target.value
-                                        );
+                                        handleCellEditStart(params.row.id, params.field, e.target.value);
                                     }}
                                     pageSizeOptions={[20, 40, 60, 80, 100]}
                                     checkboxSelection
@@ -319,7 +270,6 @@ function Index({ contacts, crumbs }) {
                         {/* End DataGrid */}
                     </Row>
                 </section>
-
             </Layout>
         </>
     );

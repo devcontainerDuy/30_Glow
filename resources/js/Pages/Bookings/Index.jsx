@@ -5,10 +5,7 @@ import { Box } from "@mui/material";
 import { DataGrid, GridToolbar } from "@mui/x-data-grid";
 import { Helmet } from "react-helmet";
 import BreadcrumbComponent from "@/Components/BreadcrumbComponent";
-import Echo from "laravel-echo";
-import axios from "axios";
 import { router } from "@inertiajs/react";
-import Pusher from "pusher-js";
 
 function Index({ bookings, crumbs }) {
     const [data, setData] = useState(bookings || []);
@@ -63,35 +60,51 @@ function Index({ bookings, crumbs }) {
             renderCell: (params) => {
                 let statusText = "";
                 let statusClass = "";
+                let statusIcon = "";
                 switch (params.row.status) {
                     case 0:
                         statusText = "Đang chờ xếp nhân viên";
                         statusClass = "text-warning";
+                        statusIcon = "bi bi-clock";
                         break;
                     case 1:
                         statusText = "Đã xếp nhân viên";
                         statusClass = "text-primary";
+                        statusIcon = "bi bi-person-fill-check";
                         break;
                     case 2:
                         statusText = "Đang thực hiện";
                         statusClass = "text-info";
+                        statusIcon = "bi bi-chat-right-dots-fill";
                         break;
                     case 3:
                         statusText = "Thành công";
                         statusClass = "text-success";
+                        statusIcon = "bi bi-check-circle-fill";
                         break;
                     case 4:
                         statusText = "Đã thanh toán";
                         statusClass = "text-success";
+                        statusIcon = "bi bi-clipboard2-check-fill";
                         break;
                     case 5:
                         statusText = "Thất bại";
                         statusClass = "text-danger";
+                        statusIcon = "bi bi-x-circle";
                         break;
                     default:
                         statusText = "Chưa xác định";
+                        statusClass = "text-muted";
+                        statusIcon = "bi bi-question-circle";
                 }
-                return <span className={statusClass}>{statusText}</span>;
+                return (
+                    <>
+                        <div className={statusClass}>
+                            <i class={statusIcon + " me-1"} width="24" height="16" />
+                            <span>{statusText}</span>
+                        </div>
+                    </>
+                );
             },
         },
         {
@@ -126,29 +139,17 @@ function Index({ bookings, crumbs }) {
         },
     ]);
 
-    const pusher = new Pusher("a41649538081bc522756", {
-        cluster: "ap1",
-        wsHost: "ws-ap1.pusher.com",
-        wsPort: 443,
-        wssPort: 443,
-        forceTLS: true,
-        enabledTransports: ["ws", "wss"],
-        disableStats: true,
-        encrypted: true,
-    });
-
     useEffect(() => {
-        var channel = pusher.subscribe("channelBookings");
+        const channel = pusher.subscribe("channelBookings");
 
-        channel.bind("BookingCreated", function (response) {
+        channel.bind("BookingCreated", (response) => {
             setData((prevData) => [response.bookingData, ...prevData]);
         });
 
-        channel.bind("BookingUpdated", function (response) {
+        channel.bind("BookingUpdated", (response) => {
             setData((prevData) => {
                 return prevData.map((booking) => (booking.id === response.bookingData.id ? response.bookingData : booking));
             });
-            console.log("BookingUpdated: ", { ...response.bookingData });
         });
     }, []);
 

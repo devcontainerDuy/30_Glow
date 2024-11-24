@@ -2,28 +2,8 @@ import React from "react";
 import Layout from "../Layouts/Index";
 import { Helmet } from "react-helmet";
 import { toast } from "react-toastify";
-import {
-    Badge,
-    Button,
-    Card,
-    Col,
-    Container,
-    ListGroup,
-    ProgressBar,
-    Row,
-} from "react-bootstrap";
-import {
-    LineChart,
-    Line,
-    XAxis,
-    YAxis,
-    CartesianGrid,
-    Tooltip,
-    Legend,
-    PieChart,
-    Pie,
-    Cell,
-} from "recharts";
+import { Badge, Button, Card, Col, Container, ListGroup, ProgressBar, Row } from "react-bootstrap";
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, PieChart, Pie, Cell } from "recharts";
 
 function Home() {
     const data = [
@@ -41,27 +21,13 @@ function Home() {
     const COLORS = ["#0088FE", "#00C49F", "#FFBB28"];
 
     const RADIAN = Math.PI / 180;
-    const renderCustomizedLabel = ({
-        cx,
-        cy,
-        midAngle,
-        innerRadius,
-        outerRadius,
-        percent,
-        index,
-    }) => {
+    const renderCustomizedLabel = ({ cx, cy, midAngle, innerRadius, outerRadius, percent, index }) => {
         const radius = innerRadius + (outerRadius - innerRadius) * 0.5;
         const x = cx + radius * Math.cos(-midAngle * RADIAN);
         const y = cy + radius * Math.sin(-midAngle * RADIAN);
 
         return (
-            <text
-                x={x}
-                y={y}
-                fill="white"
-                textAnchor={x > cx ? "start" : "end"}
-                dominantBaseline="central"
-            >
+            <text x={x} y={y} fill="white" textAnchor={x > cx ? "start" : "end"} dominantBaseline="central">
                 {`${(percent * 100).toFixed(0)}%`}
             </text>
         );
@@ -96,9 +62,7 @@ function Home() {
                             <Card>
                                 <Card.Body>
                                     <Card.Title>Doanh thu tháng này</Card.Title>
-                                    <Card.Text className="h3">
-                                        $12,500
-                                    </Card.Text>
+                                    <Card.Text className="h3">$12,500</Card.Text>
                                 </Card.Body>
                             </Card>
                         </Col>
@@ -123,9 +87,7 @@ function Home() {
                         <Col xs={12} md={4}>
                             <Card>
                                 <Card.Body>
-                                    <Card.Title>
-                                        Danh sách đơn hàng mới
-                                    </Card.Title>
+                                    <Card.Title>Danh sách đơn hàng mới</Card.Title>
                                     {/* Thay thế bằng component bảng dữ liệu thực tế */}
                                     <ul>
                                         <li>Đơn hàng #123</li>
@@ -143,12 +105,9 @@ function Home() {
                                     <Card.Title>Hoạt động gần đây</Card.Title>
                                     <ListGroup variant="flush">
                                         <ListGroup.Item>
-                                            Người dùng mới đăng ký{" "}
-                                            <Badge bg="success">Mới</Badge>
+                                            Người dùng mới đăng ký <Badge bg="success">Mới</Badge>
                                         </ListGroup.Item>
-                                        <ListGroup.Item>
-                                            Đơn hàng #123 đã được thanh toán
-                                        </ListGroup.Item>
+                                        <ListGroup.Item>Đơn hàng #123 đã được thanh toán</ListGroup.Item>
                                     </ListGroup>
                                 </Card.Body>
                             </Card>
@@ -182,12 +141,8 @@ function Home() {
                                 <Card.Body>
                                     <Row>
                                         <Col>
-                                            <Card.Text className="text-uppercase text-muted mb-1">
-                                                Earnings (Monthly)
-                                            </Card.Text>
-                                            <Card.Title className="h5 mb-0">
-                                                $40,000
-                                            </Card.Title>
+                                            <Card.Text className="text-uppercase text-muted mb-1">Earnings (Monthly)</Card.Text>
+                                            <Card.Title className="h5 mb-0">$40,000</Card.Title>
                                         </Col>
                                         <Col className="col-auto">
                                             <i className="fas fa-calendar fa-2x text-gray-300"></i>
@@ -201,21 +156,13 @@ function Home() {
                             <Card className="shadow-sm">
                                 <Card.Body>
                                     <Card.Title>Earnings Overview</Card.Title>
-                                    <LineChart
-                                        width={730}
-                                        height={250}
-                                        data={data}
-                                    >
+                                    <LineChart width={730} height={250} data={data}>
                                         <CartesianGrid strokeDasharray="3 3" />
                                         <XAxis dataKey="name" />
                                         <YAxis />
                                         <Tooltip />
                                         <Legend />
-                                        <Line
-                                            type="monotone"
-                                            dataKey="value"
-                                            stroke="#8884d8"
-                                        />
+                                        <Line type="monotone" dataKey="value" stroke="#8884d8" />
                                     </LineChart>
                                 </Card.Body>
                             </Card>
@@ -226,26 +173,9 @@ function Home() {
                                 <Card.Body>
                                     <Card.Title>Revenue Sources</Card.Title>
                                     <PieChart width={300} height={250}>
-                                        <Pie
-                                            data={pieData}
-                                            cx="50%"
-                                            cy="50%"
-                                            labelLine={false}
-                                            label={renderCustomizedLabel}
-                                            outerRadius={80}
-                                            fill="#8884d8"
-                                            dataKey="value"
-                                        >
+                                        <Pie data={pieData} cx="50%" cy="50%" labelLine={false} label={renderCustomizedLabel} outerRadius={80} fill="#8884d8" dataKey="value">
                                             {pieData.map((entry, index) => (
-                                                <Cell
-                                                    key={`cell-${index}`}
-                                                    fill={
-                                                        COLORS[
-                                                            index %
-                                                                COLORS.length
-                                                        ]
-                                                    }
-                                                />
+                                                <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                                             ))}
                                         </Pie>
                                         <Legend />

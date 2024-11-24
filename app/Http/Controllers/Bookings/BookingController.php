@@ -218,7 +218,8 @@ class BookingController extends Controller
                 return response()->json(['check' => false, 'message' => 'Vui lòng nhập ghi chú!'], 400);
             } elseif ($this->instance->status === 0 && isset($this->data['id_user']) && $this->data['status'] !== 1) {
                 return response()->json(['check' => false, 'message' => 'Lịch chưa sắp xếp nhân viên thực hiện!'], 400);
-            } elseif ($this->instance->status === 3 && $this->data['status'] < 3 || $this->data['status'] > 4) {
+            } elseif ($this->instance->status === 3 && $this->data['status'] < 3) {
+                dd($this->instance->status, $this->data['status']);
                 return response()->json(['check' => false, 'message' => 'Lịch đã hoàn thành! Không thể thay đổi'], 400);
             } elseif ($this->instance->status === 3 && $this->data['status'] === 5) {
                 return response()->json(['check' => false, 'message' => 'Lịch được hoàn thành! Không thể hủy'], 400);
