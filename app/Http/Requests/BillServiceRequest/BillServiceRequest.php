@@ -14,7 +14,6 @@ class BillServiceRequest extends BaseRequest
     {
         return [
             'booking_id' => ['required', 'exists:bookings,id'],
-            'customer_id' => ['required', 'exists:customers,uid'],
         ];
     }
 }

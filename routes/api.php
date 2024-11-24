@@ -27,7 +27,7 @@ Route::middleware('api')->group(function () {
     });
 
     Route::controller(App\Http\Controllers\Auth\Admin\AuthenController::class)->group(function () {
-        Route::post('login-manager', 'loginManager')->middleware('throttle:5,1');
+        Route::post('login-manager', 'loginManager')->middleware(['throttle:5,1']);
     });
 
     Route::post('/carts/loadCart', [App\Http\Controllers\Carts\CartController::class, 'loadCart']);
@@ -47,16 +47,17 @@ Route::middleware('api')->group(function () {
     });
 
     Route::controller(App\Http\Controllers\Bookings\BookingController::class)->group(function () {
-        Route::get('/bookings', 'create')->middleware(['auth:sanctum', 'auth.session']);
         Route::post('/bookings', 'store');
-        Route::get('/bookings/{id}', 'show')->middleware(['auth:sanctum', 'auth.session']);
-        Route::put('/bookings/{id}', 'update')->middleware(['auth:sanctum', 'auth.session']);
+
+        Route::middleware(['auth:sanctum', 'auth.session', 'role:Manager|Staff'])->group(function () {
+            Route::get('/bookings', 'create');
+            Route::get('/bookings/{id}', 'show');
+            Route::put('/bookings/{id}', 'update');
+        });
     });
 
-    Route::middleware('api')->controller(App\Http\Controllers\BillServices\BillServicesController::class)->group(function () {
-        Route::post('/add_billservices', 'store');
-        Route::get('/billservices', 'apiIndex');
-        Route::get('/billservices/{id}', 'apiShow');
+    Route::middleware(['auth:sanctum', 'auth.session', 'role:Manager|Staff'])->group(function () {
+        Route::resource('/bill-services', App\Http\Controllers\BillServices\BillServicesController::class);
     });
 
     Route::controller(App\Http\Controllers\Users\UserController::class)->group(function () {

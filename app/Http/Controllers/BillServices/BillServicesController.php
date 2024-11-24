@@ -34,7 +34,32 @@ class BillServicesController extends Controller
      */
     public function create()
     {
-        //
+        $this->data = $this->model::with('serviceBillDetails.service', 'booking.user', 'customer')->get();
+
+        $this->instance = $this->data->map(function ($bill) {
+            return [
+                'uid' => $bill->uid,
+                'user' => $bill->booking->user ? [
+                    'name' => $bill->booking->user->name,
+                    'phone' => $bill->booking->user->phone,
+                ] : null,
+                'customer' => $bill->customer ? [
+                    'name' => $bill->customer->name,
+                    'phone' => $bill->customer->phone,
+                ] : null,
+                'service' => $bill->serviceBillDetails->map(function ($item) {
+                    return [
+                        'name' => $item->service->name,
+                        'slug' => $item->service->slug,
+                        'unit_price' => $item->unit_price,
+                    ];
+                })->toArray(),
+                'total' => $bill->total,
+                'status' => $bill->status,
+            ];
+        });
+
+        return response()->json(['check' => true, 'data' => $this->instance], 200);
     }
 
     /**
@@ -47,22 +72,31 @@ class BillServicesController extends Controller
         try {
             $this->data = $request->validated();
 
-            $booking = Bookings::findOrFail($this->data['booking_id']);
-            $booking->status < 3 ??  response()->json(['check' => false, 'message' => 'Không thể thanh toán! Dịch vụ chưa hoàn thành.'], 400);
-            $booking->status > 3 ?? response()->json(['check' => false, 'message' => 'Không thể thanh toán! Dịch vụ đã thanh toán.'], 400);
+            $booking = Bookings::findOrFail($this->data['booking_id'])->load('user', 'customer', 'service', 'service.collection');
 
-            $idCustomer = Customers::where("uid", $this->data['customer_id'])->first();
-            $existingBill = $this->model::where('id_booking', $this->data['booking_id'])->first();
-            if ($existingBill) {
+            if ($booking->status < 3) {
+                return response()->json(['check' => false, 'message' => 'Không thể thanh toán! Dịch vụ chưa hoàn thành.'], 400);
+            } elseif ($booking->status > 3) {
+                return response()->json(['check' => false, 'message' => 'Không thể thanh toán! Dịch vụ đã thanh toán.'], 400);
+            } elseif ($booking->status === 5) {
+                return response()->json(['check' => false, 'message' => 'Không thể thanh toán! Dịch vụ đã bị hủy.'], 400);
+            }
+
+            if ($this->model::where('id_booking', $this->data['booking_id'])->first()) {
                 return response()->json(['check' => false, 'message' => 'Hóa đơn cho booking này đã tồn tại!'], 400);
             }
 
-            $this->instance = $this->model::insertGetId(['uid' => $this->createCodeOrderService(), 'id_customer' => $idCustomer->id, 'id_booking' => $this->data['booking_id'], 'total' => $this->data['total'], 'status' => 0, 'created_at' => now(), 'updated_at' => now()]);
+            $this->data['total'] = $booking->service->reduce(function ($carry, $item) {
+                $price = $item->price ?? $item->compare_price;
+                return $carry + $price;
+            }, 0);
 
-            $services_cart = BookingHasService::where('id_booking', $this->data['booking_id'])->get();
+            $this->instance = $this->model::insertGetId(['uid' => $this->createCodeOrderService(), 'id_customer' => $booking->customer->id, 'id_booking' => $this->data['booking_id'], 'total' => $this->data['total'], 'status' => 0, 'created_at' => now(), 'updated_at' => now()]);
 
-            foreach ($services_cart as $item) {
-                ServiceBillsDetails::create(['id_service_bill' => $this->instance, 'id_service' => $item->id_service,]);
+            if ($this->instance) {
+                foreach ($booking->service as $item) {
+                    ServiceBillsDetails::create(['id_service_bill' => $this->instance, 'id_service' => $item->id, 'unit_price' => $item->price ?? $item->compare_price]);
+                }
             }
 
             DB::commit();
@@ -74,58 +108,23 @@ class BillServicesController extends Controller
         }
     }
 
-
     /**
      * Display the specified resource.
+     * status: 0 - Chưa thanh toán, 1 - Đã thanh toán, 2 - Thanh toán thất bại
+     * @param  string  $id : uid of bill
      */
-    public function apiIndex()
+    public function show(string $id)
     {
-        $this->data = $this->model::with('customer', 'booking', 'serviceBillDetails.service')->get();
-
-        $this->instance = $this->data->map(function ($bill) {
-            return [
-                'id' => $bill->id,
-                'uid' => $bill->uid,
-                'customer' => $bill->customer ? [
-                    'uid' => $bill->customer->uid,
-                    'name' => $bill->customer->name,
-                    'email' => $bill->customer->email,
-                    'phone' => $bill->customer->phone,
-                    'address' => $bill->customer->address,
-                ] : null,
-                'booking' => $bill->booking ? [
-                    'id' => $bill->booking->id,
-                    'time' => $bill->booking->time,
-                    'note' => $bill->booking->note,
-                    'status' => $bill->booking->status,
-                ] : null,
-                'status' => $bill->status,
-                'service_details' => $bill->serviceBillDetails->map(function ($detail) {
-                    return [
-                        'id' => $detail->id,
-                        'service' => $detail->service ? [
-                            'name' => $detail->service->name,
-                            'price' => $detail->service->price,
-                            'summary' => $detail->service->summary,
-                            'image' => asset('storage/services/' . $detail->service->image),
-                        ] : null,
-                    ];
-                })->toArray(),
-            ];
-        });
-
-        return response()->json([
-            'check' => true,
-            'data' => $this->instance,
-        ], 200);
-    }
-    public function apiShow($id)
-    {
-        $this->data = $this->model::with('customer', 'booking', 'serviceBillDetails.service')->findOrFail($id);
-
-        $this->instance =  [
-            'id' => $this->data->id,
+        $this->data = $this->model::with('serviceBillDetails.service', 'booking.user', 'customer')->where('uid', $id)->first();
+        $this->instance = [
             'uid' => $this->data->uid,
+            'user' => $this->data->user ? [
+                'uid' => $this->data->user->uid,
+                'name' => $this->data->user->name,
+                'email' => $this->data->user->email,
+                'phone' => $this->data->user->phone,
+                'address' => $this->data->user->address,
+            ] : null,
             'customer' => $this->data->customer ? [
                 'uid' => $this->data->customer->uid,
                 'name' => $this->data->customer->name,
@@ -133,33 +132,21 @@ class BillServicesController extends Controller
                 'phone' => $this->data->customer->phone,
                 'address' => $this->data->customer->address,
             ] : null,
-            'booking' => $this->data->booking ? [
-                'id' => $this->data->booking->id,
-                'time' => $this->data->booking->time,
-                'note' => $this->data->booking->note,
-                'status' => $this->data->booking->status,
-            ] : null,
-            'status' => $this->data->status,
-            'service_details' => $this->data->serviceBillDetails->map(function ($detail) {
+            'time' => $this->data->booking->time,
+            'service' => $this->data->serviceBillDetails ? $this->data->serviceBillDetails->map(function ($item) {
                 return [
-                    'id' => $detail->id,
-                    'service' => $detail->service ? [
-                        'name' => $detail->service->name,
-                        'price' => $detail->service->price,
-                        'summary' => $detail->service->summary,
-                        'image' => asset('storage/services/' . $detail->service->image),
-                    ] : null,
+                    'name' => $item->service->name,
+                    'slug' => $item->service->slug,
+                    'unit_price' => $item->unit_price,
                 ];
-            })->toArray(),
+            })->toArray() : null,
+            'total' => $this->data->total,
+            'status' => $this->data->status,
+            'created_at' => $this->data->created_at,
         ];
 
-        return response()->json([
-            'check' => true,
-            'data' => $this->instance,
-        ], 200);
+        return response()->json(['check' => true, 'data' => $this->instance], 200);
     }
-
-
 
     /**
      * Show the form for editing the specified resource.

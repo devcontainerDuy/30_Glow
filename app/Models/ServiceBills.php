@@ -19,6 +19,7 @@ class ServiceBills extends Model
         'uid',
         "id_customer",
         "id_booking",
+        "total",
         "status",
         "created_at",
         "updated_at"

@@ -73,16 +73,3 @@ window.Pusher = new Pusher("a41649538081bc522756", {
 //     disableStats: true,
 //     encrypted: true,
 // });
-
-// window.Echo = new Echo({
-//     broadcaster: "pusher",
-//     key: "a41649538081bc522756",
-//     cluster: "ap1",
-//     wsHost: "ws-ap1.pusher.com",
-//     wsPort: 443,
-//     wssPort: 443,
-//     forceTLS: true,
-//     enabledTransports: ["ws", "wss"],
-//     disableStats: true,
-//     encrypted: true,
-// });

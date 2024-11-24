@@ -17,6 +17,7 @@ class ServiceBillsDetails extends Model
     protected $fillable = [
         'id_service_bill',
         'id_service',
+        'unit_price',
         'created_at',
         'updated_at',
     ];
