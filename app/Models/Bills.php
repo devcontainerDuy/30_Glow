@@ -30,6 +30,7 @@ class Bills extends Model
         'address_order',
         'note_order',
         'payment_method',
+        'payment_status',
         'total',
         'transaction_id',
         'status',

@@ -46,7 +46,8 @@ class BillController extends Controller
 
     /**
      * Store a newly created resource in storage.
-     * status: 0 - Đã thanh toán online, 1 - Đang chờ xử lý, 2 - Đã xác nhận, 3 - Đang giao hàng, 4 - Đã giao hàng, 5 - Đã thanh toán tiền mặt, 6 - Đã hủy
+     * payment_method: 0 - Thanh toán khi nhận hàng, 1 - Thanh toán qua thẻ ngân hàng, 2 - Thanh toán qua ví điện tử
+     * status: 0 - Đang chờ xử lý, 1 - Đã xác nhận, 2 - Đã giao đơn vị vận chuyển, 3 - Đang giao hàng, 4 - Đã giao hàng, 5 - Khách hàng từ chối nhận hàng, 6 - Đã hoàn trả
      */
     public function store(BillRequest $request)
     {
@@ -113,6 +114,7 @@ class BillController extends Controller
                 'address_other' => $this->data['address_other'] ?? null,
                 'note_other' => $this->data['note_other'] ?? null,
                 'payment_method' => $this->data['payment_method'],
+                'payment_status' => $this->data['payment_status'] ?? 0,
                 'transaction_id' => $this->data['transaction_id'] ?? null,
                 'total' => $this->data['total'],
                 'status' => 1,

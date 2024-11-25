@@ -19,6 +19,19 @@ function Edit({ bill, crumbs }) {
         });
     };
 
+    const paymentMethod = (method) => {
+        switch (Number(method)) {
+            case 0:
+                return "Thanh toán khi nhân hàng";
+            case 1:
+                return "Thanh toán qua thẻ ngân hàng";
+            case 2:
+                return "Thanh toán qua ví điện tử";
+            default:
+                return "Thanh toán lỗi";
+        }
+    };
+
     useEffect(() => {
         setData(bill);
         setProduct(bill.bill_detail);
@@ -33,6 +46,10 @@ function Edit({ bill, crumbs }) {
                             <Button className="ms-2" variant="secondary" onClick={handleBack}>
                                 <i className="bi bi-box-arrow-right" />
                                 <span className="ms-2">Quay lại</span>
+                            </Button>
+                            <Button className="ms-2" variant="success" type="submit">
+                                <i className="bi bi-floppy-fill" />
+                                <span className="ms-2">Lưu lại</span>
                             </Button>
                         </BreadcrumbComponent>
 
@@ -51,6 +68,14 @@ function Edit({ bill, crumbs }) {
                                                     <Card>
                                                         <Card.Body>
                                                             <Card.Title className="text-primary">Thông tin chi tiết hóa đơn</Card.Title>
+                                                            <Form.Group className="mb-3" controlId="code">
+                                                                <Form.Label>Mã hóa đơn</Form.Label>
+                                                                <Form.Control type="text" value={data.uid || "Không có mã hóa đơn"} readOnly disabled />
+                                                            </Form.Group>
+                                                            <Form.Group className="mb-3" controlId="payment">
+                                                                <Form.Label>Phương thức thanh toán</Form.Label>
+                                                                <Form.Control type="text" value={paymentMethod(data.payment_method)} readOnly disabled />
+                                                            </Form.Group>
                                                             <Form.Group className="mb-3" controlId="note">
                                                                 <Form.Label>Ghi chú</Form.Label>
                                                                 <Form.Control as="textarea" rows={3} value={data.note || "Không có nhập ghi chú"} placeholder="Ghi chú..." disabled />
@@ -58,13 +83,13 @@ function Edit({ bill, crumbs }) {
                                                             <Form.Group className="mb-3" controlId="status">
                                                                 <Form.Label>Trạng thái đơn hàng</Form.Label>
                                                                 <Form.Select value={data.status} onChange={(e) => setStatus(Number(e.target.value))}>
-                                                                    <option value={0}>Đã thanh toán online</option>
-                                                                    <option value={1}>Đang chờ xử lý</option>
-                                                                    <option value={2}>Đã xác nhận</option>
+                                                                    <option value={0}>Đang chờ xử lý</option>
+                                                                    <option value={1}>Đã xác nhận</option>
+                                                                    <option value={2}>Đã giao đơn vị vận chuyển</option>
                                                                     <option value={3}>Đang giao hàng</option>
                                                                     <option value={4}>Đã giao hàng</option>
-                                                                    <option value={5}>Đã thanh toán tiền mặt</option>
-                                                                    <option value={6}>Đã hủy</option>
+                                                                    <option value={5}>Khách hàng từ chối nhận</option>
+                                                                    <option value={6}>Đã hoàn trả</option>
                                                                 </Form.Select>
                                                             </Form.Group>
                                                             <Row className="mb-3">
@@ -141,7 +166,6 @@ function Edit({ bill, crumbs }) {
                                         <Col xs={12} md={4}>
                                             <Row className="row-gap-3">
                                                 <Col xs={12}>
-                                                    {" "}
                                                     <Card>
                                                         <Card.Body>
                                                             <Card.Title className="text-primary">Thông tin Khách hàng</Card.Title>

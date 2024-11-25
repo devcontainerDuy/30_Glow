@@ -115,11 +115,22 @@ class CategoriesController extends Controller
 
     public function apiShow($slug)
     {
-        $this->data = $this->model::with("products.gallery", "products.brand", "products.category")->active()->select('id', 'name', 'slug', 'id_parent', 'status')->whereHas('products.gallery')->where('slug', $slug)->firstOrFail();
+        $this->data = $this->model::with("products.gallery", "products.brand", "products.category", "children.products")->active()->select('id', 'name', 'slug', 'id_parent', 'status')->where('slug', $slug)->first();
 
         if (!$this->data) {
             return response()->json(['check' => false, 'message' => 'Không tìm thấy phân loại sản phẩm'], 404);
         }
+
+        if (!$this->data->products) {
+            return response()->json(['check' => false, 'message' => 'Không tìm thấy sản phẩm nào'], 404);
+        }
+
+        $this->data->parent = $this->data->parent ? [
+            'id' => $this->data->parent->id,
+            'name' => $this->data->parent->name,
+            'slug' => $this->data->parent->slug,
+            'status' => $this->data->parent->status,
+        ] : null;
 
         $this->data->products->transform(function ($item) {
             return [
@@ -146,7 +157,40 @@ class CategoriesController extends Controller
                 'gallery' => $item->gallery->map(function ($galleryItem) {
                     return [
                         'id' => $galleryItem->id,
-                        'image' => asset('storage/gallery/' . $galleryItem->image),
+                        'image' => asset("storage/gallery/{$galleryItem->image}"),
+                        'id_parent' => $galleryItem->id_parent,
+                        'status' => $galleryItem->status,
+                    ];
+                }),
+            ];
+        });
+
+        $this->data->children->pluck('products')->flatten()->transform(function ($item) {
+            return [
+                'id' => $item->id,
+                'name' => $item->name,
+                'slug' => $item->slug,
+                'price' => $item->price,
+                'discount' => $item->discount,
+                'in_stock' => $item->in_stock,
+                'content' => $item->content,
+                'status' => $item->status,
+                'category' => $item->category ? [
+                    'id' => $item->category->id,
+                    'name' => $item->category->name,
+                    'slug' => $item->category->slug,
+                    'status' => $item->category->status,
+                ] : null,
+                'brand' => $item->brand ? [
+                    'id' => $item->brand->id,
+                    'name' => $item->brand->name,
+                    'slug' => $item->brand->slug,
+                    'status' => $item->brand->status,
+                ] : null,
+                'gallery' => $item->gallery->map(function ($galleryItem) {
+                    return [
+                        'id' => $galleryItem->id,
+                        'image' => asset("storage/gallery/{$galleryItem->image}"),
                         'id_parent' => $galleryItem->id_parent,
                         'status' => $galleryItem->status,
                     ];
