@@ -292,7 +292,7 @@ class RevenueController extends Controller
         $startDate = $request->input('startDate');
         $endDate = $request->input('endDate');
     
-        $this->data = Bills::with(['bill_detail.product.gallery' => function ($query) {
+        $this->data = Bills::with(['billDetail.product.gallery' => function ($query) {
             $query->where('status', 1);
         }])
         ->whereBetween('created_at', [$startDate, $endDate])
@@ -308,7 +308,7 @@ class RevenueController extends Controller
         $this->instance = [
             'total_revenue' => $this->data->sum('total'),
             'products' => $this->data->flatMap(function ($bill) {
-                return $bill->bill_detail->map(function ($detail) use ($bill) {
+                return $bill->billDetail->map(function ($detail) use ($bill) {
                     $product = $detail->product;
                     if (!$product) {
                         return null;
