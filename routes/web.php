@@ -49,8 +49,16 @@ Route::middleware(['auth', 'auth.session', 'web', 'authen:Super Admin,Manager'])
     Route::post('/customers/{id}/reset-password', [App\Http\Controllers\Customers\CustomerController::class, 'resetPassword']);
     // Module Category
     Route::resource('categories', App\Http\Controllers\Categories\CategoriesController::class)->names('categories');
+    Route::controller(App\Http\Controllers\Categories\CategoriesController::class)->group(function () {
+        Route::post('/categories/{id}/restore', 'restore')->name('products.restore');
+        Route::delete('/categories/{id}/permanent', 'permanent')->name('products.permanent');
+    });
     //Module Brand
     Route::resource('brands', App\Http\Controllers\Brands\BrandsController::class)->names('brands');
+    Route::controller(App\Http\Controllers\Brands\BrandsController::class)->group(function () {
+        Route::post('/brands/{id}/restore', 'restore')->name('products.restore');
+        Route::delete('/brands/{id}/permanent', 'permanent')->name('products.permanent');
+    });
     // Module Product
     Route::resource('products', App\Http\Controllers\Products\ProductController::class)->names('products');
     Route::controller(App\Http\Controllers\Products\ProductController::class)->group(function () {

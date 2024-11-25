@@ -23,8 +23,9 @@ class CategoriesController extends Controller
             ['name' => 'Sản phẩm', 'url' => '/admin/products'],
             ['name' => 'Danh sách danh mục', 'url' => '/admin/categories'],
         ];
-        $this->data = $this->model::with('parent', 'products', 'products.gallery')->active()->select('id', 'name', 'slug', 'id_parent', 'status')->withCount('products')->orderBy('id', 'desc')->get();
-        return Inertia::render('Categories/Index', ['categories' => $this->data, 'crumbs' => $this->crumbs]);
+        $this->data = $this->model::with('parent', 'products', 'products.gallery')->active()->select('id', 'name', 'slug', 'id_parent', 'status')->withCount('products')->get();
+        $trashs = $this->model::with('parent', 'products', 'products.gallery')->active()->select('id', 'name', 'slug', 'id_parent', 'status')->withCount('products')->onlyTrashed()->get();
+        return Inertia::render('Categories/Index', ['categories' => $this->data, 'trashs' => $trashs, 'crumbs' => $this->crumbs,]);
     }
     public function store(CategoriesRequest $request)
     {
@@ -32,7 +33,7 @@ class CategoriesController extends Controller
         $this->data['slug'] = Str::slug($this->data['name']);
         $this->instance = $this->model::create($this->data);
         if ($this->instance) {
-            $this->data = $this->model::with('parent')->orderBy('id', 'desc')->get();
+            $this->data = $this->model::with('parent')->get();
             return response()->json(['check' => true, 'message' => 'Tạo thành công!', 'data' => $this->data], 201);
         }
         return response()->json(['check' => false, 'message' => 'Tạo thất bại!'], status: 400);
@@ -56,23 +57,48 @@ class CategoriesController extends Controller
         if (isset($this->data['name'])) $this->data['slug'] = Str::slug($this->data['name']);
         $this->instance = $this->model::findOrFail($id)->update($this->data);
         if ($this->instance) {
-            $this->data = $this->model::with('parent')->orderBy('id', 'desc')->get();
+            $this->data = $this->model::with('parent')->get();
             return response()->json(['check' => true, 'message' => 'Cập nhật thành công!', 'data' => $this->data], 200);
         }
         return response()->json(['check' => false, 'message' => 'Cập nhật thất bại!'], 400);
     }
-
     public function destroy($id)
     {
-        try {
-            $this->instance = $this->model::findOrFail($id)->delete();
-            if ($this->instance) {
-                $this->data = $this->model::with('parent')->orderBy('id', 'desc')->get();
-                return response()->json(['check' => true, 'message' => 'Xoá thành công!', 'data' => $this->data], 200);
-            }
-            return response()->json(['check' => false, 'message' => 'Xoá thất bại!'], 400);
-        } catch (\Exception $e) {
-            return response()->json(['check' => false, 'message' => 'Doanh mục có sản phẩm!'], 400);
+        $this->instance = $this->model::findOrFail($id);
+        if ($this->instance->products()->count() > 0) {
+            return response()->json(['check' => false, 'message' => 'Danh mục có sản phẩm, không thể xóa!'], 400);
+        }
+        if ($this->model::where('id_parent', $id)->count() > 0) {
+            return response()->json(['check' => false, 'message' => 'Danh mục đang là cha, không thể xóa!'], 400);
+        }
+        $this->instance = $this->instance->delete();
+
+        if ($this->instance) {
+            $this->data = $this->model::with('parent', 'products', 'products.gallery')->active()->select('id', 'name', 'slug', 'id_parent', 'status')->withCount('products')->get();
+            $trashs = $this->model::with('parent', 'products', 'products.gallery')->active()->select('id', 'name', 'slug', 'id_parent', 'status')->withCount('products')->onlyTrashed()->get();
+            return response()->json(['check' => true, 'message' => 'Xoá thành công!', 'data' => $this->data, 'trashs' => $trashs,], 200);
+        }
+
+        return response()->json(['check' => false, 'message' => 'Có lỗi xảy ra khi xóa!'], 500);
+    }
+    public function restore($id)
+    {
+        $this->instance = $this->model::withTrashed()->findOrFail($id);
+        $this->instance->restore();
+        if ($this->instance) {
+            $this->data = $this->model::with('parent', 'products', 'products.gallery')->active()->select('id', 'name', 'slug', 'id_parent', 'status')->withCount('products')->get();
+            $trashs = $this->model::with('parent', 'products', 'products.gallery')->active()->select('id', 'name', 'slug', 'id_parent', 'status')->withCount('products')->onlyTrashed()->get();
+            return response()->json(['check' => true, 'message' => 'Khôi phục thành công!', 'data' => $this->data, 'trashs' => $trashs], 200);
+        }
+    }
+    public function permanent(string $id)
+    {
+        $this->instance = $this->model::withTrashed()->findOrFail($id);
+        $this->instance->forceDelete();
+        if ($this->instance) {
+            $this->data = $this->model::with('parent', 'products', 'products.gallery')->active()->select('id', 'name', 'slug', 'id_parent', 'status')->withCount('products')->get();
+            $trashs = $this->model::with('parent', 'products', 'products.gallery')->active()->select('id', 'name', 'slug', 'id_parent', 'status')->withCount('products')->onlyTrashed()->get();
+            return response()->json(['check' => true, 'message' => 'Đã xóa vĩnh viễn thành công!', 'data' => $this->data, 'trashs' => $trashs], 200);
         }
     }
 
