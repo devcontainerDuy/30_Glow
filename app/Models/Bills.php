@@ -46,11 +46,6 @@ class Bills extends Model
         return $this->belongsTo(Customers::class, 'customer_id');
     }
 
-    public function customer(): BelongsTo
-    {
-        return $this->belongsTo(Customers::class, 'customer_id', 'id');
-    }
-
     public function scopeActive($query)
     {
         return $query->where('status', 1);
