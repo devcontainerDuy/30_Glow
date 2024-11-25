@@ -369,7 +369,6 @@ function Index({ categories, trashs, products, crumbs }) {
             ),
         },
     ]);
-
     useEffect(() => {
         setData(categories);
         setTrash(trashs);
@@ -447,7 +446,7 @@ function Index({ categories, trashs, products, crumbs }) {
                                                                 className="mb-1 rounded-1 w-100"
                                                                 style={{ maxHeight: "182.75px" }}
                                                                 src={`/storage/gallery/${item.gallery.find((image) => image.status === 1).image}`}
-                                                                alt={item.name}
+                                                                alt={item.gallery.find((image) => image.status === 1).image}
                                                             />
                                                         )}
                                                         <span className="mt-2">{item.name}</span>

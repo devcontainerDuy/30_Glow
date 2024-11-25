@@ -66,7 +66,10 @@ class Customers extends Authenticatable
     {
         return $this->hasMany(ServiceBills::class, 'id_customer', 'id');
     }
-
+    public function bills()
+    {
+        return $this->hasMany(Bills::class, 'customer_id');
+    }
     public function scopeActive($query)
     {
         return $query->where('status', 1);

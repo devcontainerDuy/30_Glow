@@ -4,8 +4,14 @@ namespace App\Http\Controllers\Revenue;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Revenue\RevenueRequest;
+use App\Models\Bills;
+use App\Models\BillsDetail;
+use App\Models\Bookings;
+use App\Models\Customers;
 use App\Models\ServiceBills;
 use App\Models\ServiceBillsDetails;
+use App\Models\Services;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
@@ -13,25 +19,54 @@ class RevenueController extends Controller
 {
     public function __construct()
     {
-        $this->model = ServiceBillsDetails::class;
+        $this->model = ServiceBills::class;
     }
+    //doanh thi cho bill services
     public function getRevenueAllServices()
     {
-        $this->data = $this->model::join('service_bills', 'service_bills_details.id_service_bill', '=', 'service_bills.id')
-            ->join('services', 'service_bills_details.id_service', '=', 'services.id')
-            ->selectRaw('MONTH(service_bills.created_at) as month, SUM(services.price) as revenue')
-            ->groupBy('month')
-            ->orderBy('month', 'asc')
-            ->get()
-            ->keyBy('month');
+        $data = $this->model::monthlyRevenue()->get()->keyBy('month');
+        $instance = [];
+        $totalRevenueYear = 0;
+
+        for ($month = 1; $month <= 12; $month++) {
+            $totalRevenue = $data->get($month)->revenue ?? 0;
+            $instance[] = [
+                'month' => $month,
+                'revenue' => $totalRevenue,
+            ];
+            $totalRevenueYear += $totalRevenue;
+        }
+
+        return response()->json(['status' => 'success', 'data' => ['monthly_revenue' => $instance, 'revenue_year' => $totalRevenueYear,],], 200);
+    }
+    public function getRevenueByService($id)
+    {
+        $this->data = ServiceBillsDetails::with(['serviceBill', 'service'])
+            ->where('id_service', $id)
+            ->get();
+
+        if ($this->data->isEmpty()) {
+            return response()->json([
+                'check' => false,
+                'message' => 'Dịch vụ chưa có bất kỳ booking nào!!!',
+            ], 404);
+        }
 
         $this->instance = [];
         $totalRevenueYear = 0;
+        $service = $this->data->first()->service->only(['id', 'name', 'slug', 'price', 'image']);
+
         for ($month = 1; $month <= 12; $month++) {
-            $totalRevenue = $this->data->get($month)->revenue ?? 0;
+            $monthlyRevenue = $this->data->filter(function ($item) use ($month) {
+                return $item->serviceBill->created_at->month == $month;
+            });
+            $totalRevenue = $monthlyRevenue->sum('unit_price');
+            $totalCount = $monthlyRevenue->count();
+
             $this->instance[] = [
                 'month' => $month,
-                'revenue' => $this->data->get($month)->revenue ?? 0
+                'revenue' => $totalRevenue,
+                'quantity' => $totalCount,
             ];
             $totalRevenueYear += $totalRevenue;
         }
@@ -39,172 +74,274 @@ class RevenueController extends Controller
         return response()->json([
             'status' => 'success',
             'data' => [
+                'service' => $service,
                 'monthly_revenue' => $this->instance,
-                'revenue_year' => $totalRevenueYear
-            ]
-        ], 200);
-    }
-    public function getRevenueByService($id)
-    {
-        $this->data = $this->model::join('services as s', 'service_bills_details.id_service', '=', 's.id')
-            ->select(
-                'service_bills_details.id_service',
-                's.name',
-                's.slug',
-                's.price',
-                's.image',
-                DB::raw('SUM(s.price) AS revenue'),
-                DB::raw('COUNT(service_bills_details.id_service) AS quantity')
-            )
-            ->where('service_bills_details.id_service', $id)
-            ->groupBy('service_bills_details.id_service', 's.id')
-            ->first();
-
-        if (!$this->data) {
-            return response()->json([
-                'status' => 'error',
-                'message' => 'Sản phảm này chưa có hóa đơn!!'
-            ], 404);
-        }
-
-        $this->instance = [
-            'id' => $this->data->id_service,
-            'name' => $this->data->name,
-            'slug' => $this->data->slug,
-            'price' => $this->data->price,
-            'image' => asset('storage/services/' . $this->data->image),
-            'revenue' => $this->data->revenue,
-            'quantity' => $this->data->quantity,
-        ];
-
-        return response()->json([
-            'status' => 'success',
-            'data' => $this->instance,
-        ]);
-    }
-    public function getRevenueByUser($id)
-    {
-        $this->data = DB::table('bookings as b')
-            ->join('users as u', 'b.id_user', '=', 'u.id')
-            ->select(
-                'u.id as user_id',
-                'u.name as user_name',
-                'u.email as user_email',
-                'b.id as booking_id',
-                'b.time as booking_time',
-                'b.status as booking_status'
-            )
-            ->where('b.id_user', $id)
-            ->get();
-
-        if ($this->data->isEmpty()) {
-            return response()->json([
-                'status' => 'error',
-                'message' => 'Chưa có booking nào cho nhân vgiên này!!'
-            ], 404);
-        }
-
-        $this->instance = [
-            'user' => [
-                'id' => $this->data[0]->user_id,
-                'name' => $this->data[0]->user_name,
-                'email' => $this->data[0]->user_email,
+                'revenue_year' => $totalRevenueYear,
             ],
-            'bookings' => $this->data->map(function ($item) {
-                return [
-                    'booking' => [
-                        'id' => $item->booking_id,
-                        'time' => $item->booking_time,
-                        'status' => $item->booking_status,
-                    ],
-                ];
-            }),
-        ];
-
-        return response()->json([
-            'status' => 'success',
-            'data' => $this->instance,
-        ]);
+        ], 200);
     }
     public function getRevenueByCustomer($id)
     {
-        $this->data = $this->model::join('service_bills as sb', 'service_bills_details.id_service_bill', '=', 'sb.id')
-            ->join('services as s', 'service_bills_details.id_service', '=', 's.id')
-            ->join('customers as c', 'sb.id_customer', '=', 'c.id')
-            ->select(
-                'c.uid as bill_uid',
-                'sb.id as bill_id',
-                'sb.id_booking',
-                'sb.status as bill_status',
-                'sb.created_at as bill_created_at',
-                's.id as service_id',
-                's.name as service_name',
-                's.slug',
-                's.price',
-                's.image',
-                'c.name as customer_name',
-                'c.email as customer_email',
-                'c.phone as customer_phone',
-                DB::raw('SUM(s.price) AS revenue'),
-                DB::raw('COUNT(service_bills_details.id_service) AS quantity')
-            )
-            ->where('sb.id_customer', $id)
-            ->groupBy('sb.id', 's.id', 'c.id')
+        $this->data = $this->model::with(['customer'])
+            ->where('id_customer', $id)
             ->get();
-    
+
+        if ($this->data->isEmpty()) {
+            return response()->json([
+                'check' => false,
+                'message' => 'Khách hàng này chưa có bất kỳ bill nào!!',
+            ], 404);
+        }
+
+        $customer = $this->data->first()->customer->only(['uid', 'name', 'email']);
+        $this->instance = [];
+        $totalRevenueYear = 0;
+
+        for ($month = 1; $month <= 12; $month++) {
+            $monthlyRevenue = $this->data->filter(function ($item) use ($month) {
+                return $item->created_at->month == $month;
+            });
+            $totalRevenue = $monthlyRevenue->sum('total');
+            $totalCount = $monthlyRevenue->count();
+
+            $this->instance[] = [
+                'month' => $month,
+                'revenue' => $totalRevenue,
+                'quantity' => $totalCount,
+            ];
+            $totalRevenueYear += $totalRevenue;
+        }
+
+        return response()->json([
+            'status' => 'success',
+            'data' => [
+                'customer' => $customer,
+                'monthly_revenue' => $this->instance,
+                'revenue_year' => $totalRevenueYear,
+            ],
+        ], 200);
+    }
+    public function getRevenueByDateRange(RevenueRequest $request)
+    {
+        $request->validated();
+        $startDate = $request->input('startDate');
+        $endDate = $request->input('endDate');
+
+        $this->data = $this->model::with(['serviceBillDetails.service'])
+            ->whereBetween('created_at', [$startDate, $endDate])
+            ->get();
+
+        if ($this->data->isEmpty()) {
+            return response()->json([
+                'check' => false,
+                'message' => 'Không có hóa đơn nào trong khoảng thời gian này!',
+            ], 404);
+        }
+
+        $this->instance = [
+            'total_revenue' => $this->data->sum('total'),
+            'services' => $this->data->flatMap(function ($bill) {
+                return $bill->serviceBillDetails->map(function ($detail) {
+                    $service = $detail->service;
+                    return [
+                        'name' => $service->name,
+                        'slug' => $service->slug,
+                        'price' => $service->price,
+                        'unit_price' => (float) $detail->unit_price,
+                        'image' => asset('storage/services/' . $service->image),
+                    ];
+                });
+            })
+                ->groupBy('slug')
+                ->map(function ($group) {
+                    $service = $group->first();
+                    $count = $group->count();
+                    $total_price = $count * $service['price'];
+                    return [
+                        'name' => $service['name'],
+                        'slug' => $service['slug'],
+                        'unit_price' => $service['unit_price'],
+                        'total_price' => $total_price,
+                        'image' => $service['image'],
+                        'count' => $group->count(),
+                    ];
+                })
+                ->values(),
+        ];
+
+        return response()->json(['status' => 'success', 'data' => $this->instance,], 200);
+    }
+    //doanh thi cho bill products
+    public function getRevenueAllProducts()
+    {
+        $data = Bills::monthlyRevenue()->get()->keyBy('month');
+        $instance = [];
+        $totalRevenueYear = 0;
+
+        for ($month = 1; $month <= 12; $month++) {
+            $totalRevenue = $data->get($month)->revenue ?? 0;
+            $instance[] = [
+                'month' => $month,
+                'revenue' => $totalRevenue,
+            ];
+            $totalRevenueYear += $totalRevenue;
+        }
+
+        return response()->json(['status' => 'success', 'data' => ['monthly_revenue' => $instance, 'revenue_year' => $totalRevenueYear]], 200);
+    }
+    public function getRevenueByProduct($id)
+    {
+        $this->data = BillsDetail::with('product', 'product.gallery')
+            ->where('id_product', $id)
+            ->get();
+
         if ($this->data->isEmpty()) {
             return response()->json([
                 'status' => 'error',
-                'message' => 'Người dùng chưa có bất kỳ hóa đơn nào'
+                'message' => 'Không có dữ liệu cho sản phẩm này!',
+            ], 404);
+        }
+
+        $product = $this->data->first()->product;
+        $totalQuantity = $this->data->sum('quantity');
+
+        $monthlyRevenue = [];
+        for ($month = 1; $month <= 12; $month++) {
+            $monthlyData = $this->data->filter(function ($item) use ($month) {
+                return date('m', strtotime($item->created_at)) == $month; // Lọc dữ liệu theo tháng
+            });
+            $totalRevenue = $monthlyData->sum(function ($item) {
+                return $item->quantity * $item->unit_price;
+            });
+            $monthlyRevenue[] = [
+                'month' => $month,
+                'revenue' => $totalRevenue,
+            ];
+        }
+
+        $totalRevenue = $this->data->sum(function ($item) {
+            return $item->quantity * $item->unit_price;
+        });
+
+        $this->data = [
+            'product' => [
+                'id' => $product->id,
+                'name' => $product->name,
+                'slug' => $product->slug,
+                'price' => $product->price,
+                'quantity' => $totalQuantity,
+                'gallery' => $product->gallery->filter(function ($galleryItem) {
+                    return $galleryItem->status == 1;
+                })->map(function ($galleryItem) {
+                    return [
+                        'id' => $galleryItem->id,
+                        'image' => asset('storage/gallery/' . $galleryItem->image),
+                        'id_parent' => $galleryItem->id_parent,
+                        'status' => $galleryItem->status,
+                    ];
+                }),
+                'monthly_revenue' => $monthlyRevenue,
+                'total_revenue' => $totalRevenue,
+            ]
+        ];
+
+        return response()->json(['check' => true, 'data' => $this->data], 200);
+    }
+    public function getRevenueProductByCustomer($id)
+    {
+        $this->data = Bills::with('customer')
+            ->where('customer_id', $id)
+            ->get();
+
+        if ($this->data->isEmpty()) {
+            return response()->json([
+                'check' => false,
+                'message' => 'Khách hàng này chưa có bất kỳ hóa đơn nào!!',
+            ], 404);
+        }
+        $customer = $this->data->first()->customer->only(['uid', 'name', 'email', 'phone']);
+
+        $this->instance = [];
+        $totalRevenueYear = 0;
+
+        for ($month = 1; $month <= 12; $month++) {
+            $monthlyRevenue = $this->data->filter(function ($item) use ($month) {
+                return $item->created_at->month == $month;
+            });
+            $totalRevenue = $monthlyRevenue->sum('total');
+            $totalCount = $monthlyRevenue->count();
+            $this->instance[] = [
+                'month' => $month,
+                'revenue' => $totalRevenue,
+                'quantity' => $totalCount,
+            ];
+            $totalRevenueYear += $totalRevenue;
+        }
+
+        $this->data = [
+            'customer' => $customer,
+            'monthly_revenue' => $this->instance,
+            'revenue_year' => $totalRevenueYear,
+        ];
+
+        return response()->json(['check' => true, 'data' => $this->data], 200);
+    }
+    public function getRevenueByDateRangeProduct(RevenueRequest $request)
+    {
+        $request->validated();
+        $startDate = $request->input('startDate');
+        $endDate = $request->input('endDate');
+    
+        $this->data = Bills::with(['bill_detail.product.gallery' => function ($query) {
+            $query->where('status', 1);
+        }])
+        ->whereBetween('created_at', [$startDate, $endDate])
+        ->get();
+    
+        if ($this->data->isEmpty()) {
+            return response()->json([
+                'check' => false,
+                'message' => 'Không có hóa đơn nào trong khoảng thời gian này!',
             ], 404);
         }
     
-        $services = $this->data->groupBy('service_id')->map(function ($group) {
-            return [
-                'id' => $group[0]->service_id,
-                'name' => $group[0]->service_name,
-                'slug' => $group[0]->slug,
-                'price' => $group[0]->price,
-                'image' => asset('storage/services/' . $group[0]->image),
-                'revenue' => $group->sum('revenue'),
-                'quantity' => $group->sum('quantity'),
-            ];
-        });
-    
         $this->instance = [
-            'customer' => [
-                'id' => $id,
-                'name' => $this->data[0]->customer_name,
-                'email' => $this->data[0]->customer_email,
-                'phone' => $this->data[0]->customer_phone,
-            ],
-            'bills' => $this->data->groupBy('bill_id')->map(function ($group) {
+            'total_revenue' => $this->data->sum('total'),
+            'products' => $this->data->flatMap(function ($bill) {
+                return $bill->bill_detail->map(function ($detail) use ($bill) {
+                    $product = $detail->product;
+                    if (!$product) {
+                        return null;
+                    }
+                    $productImage = $product->gallery->first();
+                    $imageUrl = $productImage ? asset('storage/products/' . $productImage->image) : null;
+    
+                    return [
+                        'name' => $product->name,
+                        'slug' => $product->slug,
+                        'price' =>(float) $product->price,
+                        'unit_price' => (float) $detail->unit_price,
+                        'image' => $imageUrl,
+                    ];
+                })->filter();
+            })
+            ->groupBy('slug')
+            ->map(function ($group) {
+                $product = $group->first();
+                $count = $group->count();
+                $total_price = $count * $product['unit_price']; 
                 return [
-                    'id' => $group[0]->bill_uid,
-                    'id_booking' => $group[0]->id_booking,
-                    'status' => $group[0]->bill_status,
-                    'created_at' => $group[0]->bill_created_at,
-                    'services' => $group->map(function ($item) {
-                        return [
-                            'id' => $item->service_id,
-                            'name' => $item->service_name,
-                            'slug' => $item->slug,
-                            'price' => $item->price,
-                            'image' => asset('storage/services/' . $item->image),
-                            'revenue' => $item->revenue,
-                            'quantity' => $item->quantity,
-                        ];
-                    })
+                    'name' => $product['name'],
+                    'slug' => $product['slug'],
+                    'unit_price' => $product['price'],
+                    'total_price' => $total_price,
+                    'image' => $product['image'],
+                    'quantity' => $group->count(),
                 ];
-            }),
+            })
+            ->values(),
         ];
     
-        // Trả về kết quả
-        return response()->json([
-            'status' => 'success',
-            'data' => $this->instance,
-        ]);
-    }    
+        return response()->json(['status' => 'success', 'data' => $this->instance], 200);
+    }
 }
-
-

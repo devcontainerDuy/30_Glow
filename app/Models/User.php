@@ -62,6 +62,10 @@ class User extends Authenticatable
     // {
     //     return $this->belongsTo(Bookings::class, 'id_user', 'id');
     // }
+    public function bookings()
+    {
+        return $this->hasMany(Bookings::class, 'id_user');
+    }
 
     public function scopeActive($query)
     {

@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -42,5 +43,11 @@ class ServiceBills extends Model
     public function scopeActive($query)
     {
         return $query->where('status', 1);
+    }
+    public function scopeMonthlyRevenue(Builder $query)
+    {
+        return $query->selectRaw('MONTH(created_at) as month, SUM(total) as revenue')
+            ->groupBy('month')
+            ->orderBy('month', 'asc');
     }
 }

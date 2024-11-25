@@ -111,5 +111,10 @@ Route::middleware('api')->controller(App\Http\Controllers\Revenue\RevenueControl
     Route::get('/revenue/service', 'getRevenueAllServices');
     Route::get('/revenue/service/{id}', 'getRevenueByService');
     Route::get('/revenue/customer/service/{id}', 'getRevenueByCustomer');
-    Route::get('/revenue/user/service/{id}', 'getRevenueByUser');
+    Route::post('/revenue/dateRange/service', 'getRevenueByDateRange');
+    //
+    Route::get('/revenue/products', 'getRevenueAllProducts');
+    Route::get('/revenue/products/{id}', 'getRevenueByProduct');
+    Route::get('/revenue/customer/products/{id}', 'getRevenueProductByCustomer');
+    Route::post('/revenue/dateRange/products', 'getRevenueByDateRangeProduct');
 });
