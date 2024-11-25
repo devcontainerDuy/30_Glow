@@ -224,42 +224,30 @@ function Index({ brands, trashs, crumbs }) {
             renderCell: (params) => (
                 <>
                     <FormControlLabel
-                        control={
-                            <Switch
-                                checked={params.row.status === 1}
-                                onClick={() =>
-                                    handleCellEditStop(
-                                        params.row.id,
-                                        "status",
-                                        params.row.status === 1 ? 0 : 1
-                                    )
-                                }
-                            />
-                        }
+                        control={<Switch checked={params.row.status === 1} onClick={() => handleCellEditStop(params.row.id, "status", params.row.status === 1 ? 0 : 1)} />}
                         label={params.row.status ? "Hoạt động" : "Ẩn"}
                     />
                 </>
             ),
         },
         {
+            field: "created_at",
+            headerName: "Ngày tạo",
+            width: 200,
+            renderCell: (params) => new Date(params.row.created_at).toLocaleString(),
+        },
+        {
             field: "updated_at",
             headerName: "Ngày cập nhật",
             width: 200,
-            renderCell: (params) =>
-                new Date(params.row.updated_at).toLocaleString(),
+            renderCell: (params) => new Date(params.row.updated_at).toLocaleString(),
         },
         {
             field: "action",
             headerName: "Thao tác",
             width: 160,
             renderCell: (params) => (
-                <Button
-                    type="button"
-                    variant="outline-danger"
-                    className="ms-2"
-                    title="Xóa danh mục"
-                    onClick={() => handleDelete(params.row.id)}
-                >
+                <Button type="button" variant="outline-danger" className="ms-2" title="Xóa danh mục" onClick={() => handleDelete(params.row.id)}>
                     <i className="bi bi-trash-fill" />
                 </Button>
             ),
@@ -335,15 +323,9 @@ function Index({ brands, trashs, crumbs }) {
                 <section className="container">
                     <Row>
                         <BreadcrumbComponent props={crumbs}>
-                            <Button
-                                type="button"
-                                variant="primary"
-                                onClick={handleShow}
-                            >
+                            <Button type="button" variant="primary" onClick={handleShow}>
                                 <i className="bi bi-plus-circle" />
-                                <span className="ms-2">
-                                    Thêm thương hiệu mới
-                                </span>
+                                <span className="ms-2">Thêm thương hiệu mới</span>
                             </Button>
                         </BreadcrumbComponent>
 
@@ -351,46 +333,20 @@ function Index({ brands, trashs, crumbs }) {
                         <Modal show={show} onHide={handleClose}>
                             <Form onSubmit={handleSubmit}>
                                 <Modal.Header closeButton>
-                                    <Modal.Title>
-                                        Thêm thương hiệu sản phẩm mới
-                                    </Modal.Title>
+                                    <Modal.Title>Thêm thương hiệu sản phẩm mới</Modal.Title>
                                 </Modal.Header>
                                 <Modal.Body>
-                                    <Form.Group
-                                        className="mb-3"
-                                        controlId="name"
-                                    >
+                                    <Form.Group className="mb-3" controlId="name">
                                         <Form.Label>Tên Thương hiệu</Form.Label>
-                                        <Form.Control
-                                            type="text"
-                                            placeholder="Nhập tên thương hiệu"
-                                            onChange={(e) =>
-                                                setName(e.target.value)
-                                            }
-                                            required
-                                        />
+                                        <Form.Control type="text" placeholder="Nhập tên thương hiệu" onChange={(e) => setName(e.target.value)} required />
                                     </Form.Group>
                                 </Modal.Body>
                                 <Modal.Footer>
-                                    <Button
-                                        variant="secondary"
-                                        onClick={handleClose}
-                                    >
+                                    <Button variant="secondary" onClick={handleClose}>
                                         Đóng
                                     </Button>
-                                    <Button
-                                        variant="primary"
-                                        type="submit"
-                                        disabled={loading}
-                                    >
-                                        {loading ? (
-                                            <Spinner
-                                                animation="border"
-                                                size="sm"
-                                            />
-                                        ) : (
-                                            "Lưu lại"
-                                        )}
+                                    <Button variant="primary" type="submit" disabled={loading}>
+                                        {loading ? <Spinner animation="border" size="sm" /> : "Lưu lại"}
                                     </Button>
                                 </Modal.Footer>
                             </Form>

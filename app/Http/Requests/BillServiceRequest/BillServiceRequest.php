@@ -16,4 +16,11 @@ class BillServiceRequest extends BaseRequest
             'booking_id' => ['required', 'exists:bookings,id'],
         ];
     }
+
+    public function methodPut()
+    {
+        return [
+            'status' => ['required', 'in:1,2'],
+        ];
+    }
 }

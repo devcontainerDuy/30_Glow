@@ -159,9 +159,30 @@ class BillServicesController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, string $id)
+    public function update(BillServiceRequest $request, string $id)
     {
-        //
+        DB::beginTransaction();
+        try {
+            $this->data = $request->validated();
+            $this->instance  = $this->model::with('serviceBillDetails.service', 'booking.user', 'customer')->where('uid', $id)->first();
+
+            if (!$this->instance) {
+                return response()->json(['check' => false, 'message' => 'Hóa đơn không tồn tại!'], 400);
+            } elseif ($this->instance->status === 1 && $this->data['status'] !== 1) {
+                return response()->json(['check' => false, 'message' => 'Hóa đơn đã thanh toán! Không thể thay đổi'], 400);
+            } elseif ($this->instance->status === 1 && $this->data['status'] === 1) {
+                return response()->json(['check' => false, 'message' => 'Hóa đơn đã thanh toán!'], 400);
+            }
+
+            $this->instance->update(['status' => $this->data['status']]);
+
+            DB::commit();
+            return response()->json(['check' => true, 'message' => 'Thanh toán hóa đơn thành công!'], 200);
+        } catch (\Throwable $e) {
+            DB::rollBack();
+            Log::error("Error: " . $e->getMessage());
+            return response()->json(['check' => false, 'message' => 'Thanh toán hóa đơn thất bại!'], 400);
+        }
     }
 
     /**

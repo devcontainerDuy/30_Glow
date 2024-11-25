@@ -13,6 +13,7 @@ use Illuminate\Support\Str;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
+use Inertia\Inertia;
 
 class BillController extends Controller
 {
@@ -28,9 +29,11 @@ class BillController extends Controller
     public function index()
     {
         $this->crumbs = [
+            ['name' => 'Sản phẩm', 'url' => '/admin/products'],
             ['name' => 'Danh sách hóa đơn', 'url' => '/admin/bills']
         ];
-        $this->data = $this->model::with('customer')->orderBy('created_at', 'desc')->get();
+        $this->data = $this->model::with('customer', 'billDetail.product')->orderBy('created_at', 'desc')->get();
+        return Inertia::render('Bills/Index', ['bills' => $this->data, 'crumbs' => $this->crumbs]);
     }
 
     /**
@@ -43,7 +46,7 @@ class BillController extends Controller
 
     /**
      * Store a newly created resource in storage.
-     * status: 0 - Đã thanh toán, 1 - Đang chờ xử lý, 2 - Đã xác nhận, 3 - Đang giao hàng, 4 - Đã giao hàng, 5 - Đã hủy
+     * status: 0 - Đã thanh toán online, 1 - Đang chờ xử lý, 2 - Đã xác nhận, 3 - Đang giao hàng, 4 - Đã giao hàng, 5 - Đã thanh toán tiền mặt, 6 - Đã hủy
      */
     public function store(BillRequest $request)
     {
@@ -113,6 +116,8 @@ class BillController extends Controller
                 'transaction_id' => $this->data['transaction_id'] ?? null,
                 'total' => $this->data['total'],
                 'status' => 1,
+                'created_at' => now(),
+                'updated_at' => now(),
             ]);
 
             foreach ($this->data['cart'] as $item) {
@@ -135,7 +140,7 @@ class BillController extends Controller
      */
     public function show(string $id)
     {
-        //
+        // 
     }
 
     /**
@@ -143,7 +148,14 @@ class BillController extends Controller
      */
     public function edit(string $id)
     {
-        //
+        $this->crumbs = [
+            ['name' => 'Sản phẩm', 'url' => '/admin/products'],
+            ['name' => 'Danh sách hóa đơn', 'url' => '/admin/bills'],
+            ['name' => 'Chi tiết hóa đơn', 'url' => '/admin/bills/' . $id . '/edit']
+        ];
+        $this->data = $this->model::with('customer', 'billDetail.product')->where('uid', $id)->orderBy('created_at', 'desc')->first();
+        // dd($this->data);
+        return Inertia::render('Bills/Edit', ['bill' => $this->data, 'crumbs' => $this->crumbs]);
     }
 
     /**

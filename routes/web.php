@@ -67,6 +67,8 @@ Route::middleware(['auth', 'auth.session', 'web', 'authen:Super Admin,Manager'])
     });
     // Module Gallery
     Route::resource('galleries', App\Http\Controllers\Gallery\GalleryController::class)->names('gallery');
+    // Module Biils
+    Route::resource('bills', App\Http\Controllers\Bills\BillController::class)->names('bill');
     // Module Service Collection
     Route::resource('service-collections', App\Http\Controllers\ServicesCollections\ServiceCollectionsContoller::class)->names('service_collections');
     // Module Service

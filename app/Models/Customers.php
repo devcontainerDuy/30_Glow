@@ -57,6 +57,11 @@ class Customers extends Authenticatable
         return $this->hasMany(Carts::class, 'id_customer', 'id');
     }
 
+    public function bills(): HasMany
+    {
+        return $this->hasMany(Bills::class, 'customer_id', 'id');
+    }
+
     public function serviceBills(): HasMany
     {
         return $this->hasMany(ServiceBills::class, 'id_customer', 'id');
