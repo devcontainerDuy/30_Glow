@@ -137,4 +137,22 @@ class UserController extends Controller
 
         return response()->json(['check' => true, 'data' => $this->data], 200);
     }
+
+    public function apiShow($id)
+    {
+        $this->data = $this->model::with('roles')->where('uid', $id)->active()->whereHas("roles", function (Builder $query) {
+            $query->where('name', 'Staff');
+        })->first();
+
+        $this->data = [
+            'uid' => $this->data->uid,
+            'name' => $this->data->name,
+            'email' => $this->data->email,
+            'phone' => $this->data->phone,
+            'address' => $this->data->address,
+            'roles' => $this->data->roles->pluck('name')->toArray(),
+        ];
+
+        return response()->json(['check' => true, 'data' => $this->data], 200);
+    }
 }
