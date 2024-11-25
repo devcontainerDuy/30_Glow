@@ -28,6 +28,7 @@ import PermMediaOutlinedIcon from "@mui/icons-material/PermMediaOutlined";
 import { toast, ToastContainer } from "react-toastify";
 import logo from "@img/logo-30glow.jpg";
 import SearchIcon from "@mui/icons-material/Search";
+import ReceiptLongOutlinedIcon from "@mui/icons-material/ReceiptLongOutlined";
 
 function Layout({ children }) {
     const [user, setUser] = useState(null);
@@ -151,6 +152,9 @@ function Layout({ children }) {
                         </SubMenu>
                         <MenuItem icon={<PermMediaOutlinedIcon />} component={<Link href="/admin/galleries" />}>
                             Bộ sưu tập
+                        </MenuItem>
+                        <MenuItem icon={<ReceiptLongOutlinedIcon />} component={<Link href="/admin/bills" />}>
+                            Hoán đơn
                         </MenuItem>
                         <MenuItem icon={<MapOutlinedIcon />} component={<Link href="/admin/sitemap" />}>
                             Sitemap

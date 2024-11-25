@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import Layout from "@/Layouts/Index";
 import { Button, Card, Col, Form, Modal, Row, Spinner } from "react-bootstrap";
 
@@ -22,9 +22,27 @@ function Index({ roles, permissions, crumbs }) {
     const [editingId, setEditingId] = useState({});
     const [selectedPermissions, setSelectedPermissions] = useState([]);
 
+    const filterData = (inputValue) => {
+        const filtered = permissionData.filter((i) => i.name.toLowerCase().includes(inputValue.toLowerCase()));
+        return filtered.map((perm) => ({
+            value: perm.id,
+            label: perm.name,
+        }));
+    };
+
+    const loadOptions = async (inputValue) => {
+        return new Promise((resolve) => {
+            setTimeout(() => {
+                resolve(filterData(inputValue));
+            }, 1000);
+        });
+    };
+
     const handleClose = () => {
         setShowModal(false);
         setName("");
+        setSelectedPermissions([]);
+        setEditingId({});
     };
     const handleShow = () => setShowModal(true);
 
@@ -211,6 +229,9 @@ function Index({ roles, permissions, crumbs }) {
     useEffect(() => {
         setData(roles);
         setPermissionData(permissions);
+    }, [roles, permissions]);
+
+    useEffect(() => {
         if (editingId?.permissions) {
             setSelectedPermissions(
                 editingId.permissions.map((item) => ({
@@ -219,7 +240,7 @@ function Index({ roles, permissions, crumbs }) {
                 }))
             );
         }
-    }, [roles, permissions, editingId]);
+    }, [editingId]);
 
     return (
         <>
@@ -347,6 +368,8 @@ function Index({ roles, permissions, crumbs }) {
                                             closeMenuOnSelect={false}
                                             components={makeAnimated()}
                                             isMulti
+                                            isSearchable={true}
+                                            loadOptions={loadOptions}
                                             value={selectedPermissions}
                                             defaultOptions={permissionData.map((perm) => ({
                                                 value: perm.id,

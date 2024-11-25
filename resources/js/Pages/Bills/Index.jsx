@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from "react";
+import React, { useState, useMemo, useEffect } from "react";
 import Layout from "@/Layouts/Index";
 import { Button, Col, Row } from "react-bootstrap";
 import { Box } from "@mui/material";
@@ -7,43 +7,41 @@ import { Helmet } from "react-helmet";
 import BreadcrumbComponent from "@/Components/BreadcrumbComponent";
 import { router } from "@inertiajs/react";
 
-function Index({ bookings, crumbs }) {
-    const [data, setData] = useState(bookings || []);
+function Index({ bills, crumbs }) {
+    const [data, setData] = useState([]);
     const [crumbsData, setCrumbsData] = useState(crumbs || []);
 
-    const handleView = (id) => {
-        router.visit("/admin/bookings/" + id + "/edit", {
+    const handleView = (uid) => {
+        router.visit("/admin/bills/" + uid + "/edit", {
             method: "get",
         });
     };
 
     const columns = useMemo(() => [
         {
-            field: "time",
-            headerName: "Thời gian đến",
-            width: 160,
-            renderCell: (params) => new Date(params.row.time).toLocaleString(),
+            field: "uid",
+            headerName: "Mã hóa đơn",
+            width: 140,
         },
-
         {
-            field: "id_customer",
+            field: "customer_id",
             headerName: "Khách hàng",
             width: 160,
             renderCell: (params) => (
                 <>
-                    <p>{params.row.customer ? params.row.customer.name : ""}</p>
+                    <p>{params.row.customer ? params.row.name : ""}</p>
                 </>
             ),
         },
         {
             field: "phone",
             headerName: "SĐT",
-            width: 120,
+            width: 130,
             renderCell: (params) => (
                 <span>
                     {params.row.customer ? (
                         <a href={"tel:" + params.row?.phone} className="text-decoration-none">
-                            {params.row.customer?.phone?.toString().replace(/(\d{3})(\d{3})(\d{4})/, "$1-$2-$3")}
+                            {params.row?.phone?.toString().replace(/(\d{3})(\d{3})(\d{4})/, "$1-$2-$3")}
                         </a>
                     ) : (
                         "Không có SĐT"
@@ -54,39 +52,44 @@ function Index({ bookings, crumbs }) {
         {
             field: "status",
             headerName: "Trạng thái",
-            width: 180,
+            width: 160,
             renderCell: (params) => {
                 let statusText = "";
                 let statusClass = "";
                 let statusIcon = "";
                 switch (params.row.status) {
                     case 0:
-                        statusText = "Đang chờ xếp nhân viên";
+                        statusText = "Thanh toán online";
+                        statusClass = "text-success";
+                        statusIcon = "bi bi-paypal";
+                        break;
+                    case 1:
+                        statusText = "Đang chờ xử lý";
                         statusClass = "text-warning";
                         statusIcon = "bi bi-clock";
                         break;
-                    case 1:
-                        statusText = "Đã xếp nhân viên";
-                        statusClass = "text-primary";
-                        statusIcon = "bi bi-person-fill-check";
-                        break;
                     case 2:
-                        statusText = "Đang thực hiện";
-                        statusClass = "text-info";
-                        statusIcon = "bi bi-chat-right-dots-fill";
-                        break;
-                    case 3:
-                        statusText = "Thành công";
-                        statusClass = "text-success";
+                        statusText = "Đã xác nhận";
+                        statusClass = "text-primary";
                         statusIcon = "bi bi-check-circle-fill";
                         break;
+                    case 3:
+                        statusText = "Đang giao hàng";
+                        statusClass = "text-info";
+                        statusIcon = "bi bi-truck";
+                        break;
                     case 4:
+                        statusText = "Đã giao hàng";
+                        statusClass = "text-success";
+                        statusIcon = "bi bi-cart-check-fill";
+                        break;
+                    case 5:
                         statusText = "Đã thanh toán";
                         statusClass = "text-success";
                         statusIcon = "bi bi-clipboard2-check-fill";
                         break;
-                    case 5:
-                        statusText = "Thất bại";
+                    case 6:
+                        statusText = "Đã hủy đơn";
                         statusClass = "text-danger";
                         statusIcon = "bi bi-x-circle";
                         break;
@@ -97,7 +100,7 @@ function Index({ bookings, crumbs }) {
                 }
                 return (
                     <>
-                        <div className={statusClass}>
+                        <div className={statusClass} title={params.row.transaction_id !== null ? "Đã thanh toán online" : "Trạng thái hóa đơn"}>
                             <i class={statusIcon + " me-1"} width="24" height="16" />
                             <span>{statusText}</span>
                         </div>
@@ -106,22 +109,35 @@ function Index({ bookings, crumbs }) {
             },
         },
         {
-            field: "service",
-            headerName: "Dịch vụ",
-            width: 340,
+            field: "id_product",
+            headerName: "Sản phẩm",
+            width: 240,
             renderCell: (params) => (
                 <>
-                    <span title={params.row.service && params.row.service.map((item) => item.name).join(", ")}>{params.row.service && params.row.service.map((item) => item.name).join(", ")}</span>
+                    <span title={params.row.bill_detail && params.row.bill_detail.map((item) => item.product?.name).join(", ")}>
+                        {params.row.bill_detail && params.row.bill_detail.map((item) => item.product?.name).join(", ")}
+                    </span>
                 </>
             ),
         },
         {
-            field: "id_user",
-            headerName: "Nhân viên thực hiện",
+            field: "total",
+            headerName: "Tổng",
+            width: 140,
+            renderCell: (params) => {
+                return new Intl.NumberFormat("vi-VN", {
+                    style: "currency",
+                    currency: "VND",
+                }).format(params.value);
+            },
+        },
+        {
+            field: "created_at",
+            headerName: "Ngày tạo",
             width: 160,
             renderCell: (params) => (
                 <>
-                    <p>{params.row.user ? params.row.user.name : "Chưa sắp xếp nhân viên"}</p>
+                    <span>{new Date(params.row.created_at).toLocaleString()}</span>
                 </>
             ),
         },
@@ -130,7 +146,7 @@ function Index({ bookings, crumbs }) {
             headerName: "Thao tác",
             width: 100,
             renderCell: (params) => (
-                <Button type="button" variant="outline-info" title="Xem chi tiết dịch vụ" onClick={() => handleView(params.row.id)}>
+                <Button type="button" variant="outline-info" title="Xem chi tiết hóa đơn" onClick={() => handleView(params.row.uid)}>
                     <i className="bi bi-exclamation-circle" />
                 </Button>
             ),
@@ -138,24 +154,14 @@ function Index({ bookings, crumbs }) {
     ]);
 
     useEffect(() => {
-        const channel = pusher.subscribe("channelBookings");
-
-        channel.bind("BookingCreated", (response) => {
-            setData((prevData) => [response.bookingData, ...prevData]);
-        });
-
-        channel.bind("BookingUpdated", (response) => {
-            setData((prevData) => {
-                return prevData.map((booking) => (booking.id === response.bookingData.id ? response.bookingData : booking));
-            });
-        });
-    }, []);
+        setData(bills);
+    }, [bills]);
 
     return (
         <>
             <Helmet>
-                <title>Danh sách lịch đặt</title>
-                <meta name="description" content="Danh sách lịch đặt" />
+                <title>Danh sách Hóa Đơn</title>
+                <meta name="description" content="Danh sách hóa đơn" />
             </Helmet>
             <Layout>
                 <section className="container">
@@ -163,7 +169,7 @@ function Index({ bookings, crumbs }) {
                         <BreadcrumbComponent props={crumbsData}>
                             <Button type="button" variant="primary" disabled={true}>
                                 <i className="bi bi-plus-circle" />
-                                <span className="ms-2">Thêm lịch đặt mới</span>
+                                <span className="ms-2">Thêm hóa đơn mới</span>
                             </Button>
                         </BreadcrumbComponent>
 
@@ -171,7 +177,7 @@ function Index({ bookings, crumbs }) {
                         <Col xs="12">
                             <Box sx={{ height: "70vh", width: "100%" }}>
                                 <div className="text-start">
-                                    <h4>Danh Sách lịch đặt</h4>
+                                    <h4>Danh Sách hóa đơn</h4>
                                 </div>
                                 <DataGrid
                                     rows={data}

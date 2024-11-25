@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Bills extends Model
@@ -16,6 +17,7 @@ class Bills extends Model
 
     protected $fillable = [
         'uid',
+        'customer_id',
         'name',
         'email',
         'phone',
@@ -27,16 +29,21 @@ class Bills extends Model
         'address_order',
         'note_order',
         'payment_method',
-        'transaction_id',
         'total',
+        'transaction_id',
         'status',
         'created_at',
         'updated_at',
     ];
 
-    public function bill_detail(): HasMany
+    public function billDetail(): HasMany
     {
         return $this->hasMany(BillsDetail::class, 'id_bill', 'id');
+    }
+
+    public function customer(): BelongsTo
+    {
+        return $this->belongsTo(Customers::class, 'customer_id', 'id');
     }
 
     public function scopeActive($query)

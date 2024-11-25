@@ -1,18 +1,11 @@
 import React, { useEffect, useState } from "react";
 import { Box } from "@mui/material";
 import Layout from "@/Layouts/Index";
-
-import { Button, Card, Col, Form, Row, Spinner, Table, Badge } from "react-bootstrap";
-import Swal from "sweetalert2";
-import CKEditor from "@/Containers/CKEditor";
-import { Dropzone, FileMosaic } from "@dropzone-ui/react";
+import { Button, Card, Col, Form, Row, Table } from "react-bootstrap";
 import BreadcrumbComponent from "@/Components/BreadcrumbComponent";
 import { router } from "@inertiajs/react";
-import { toast } from "react-toastify";
 
 function Edit({ bookings, crumbs }) {
-    const [show, setShow] = useState(false);
-    const [loading, setLoading] = useState(false);
     const [customer, setCustomer] = useState({});
     const [user, setUser] = useState({});
     const [services, setServices] = useState([]);
@@ -77,151 +70,152 @@ function Edit({ bookings, crumbs }) {
                                     <h4>Chi tiết dịch vụ đặt</h4>
                                 </div>
                                 <Form encType="multipart/form-data">
-                                    <Row className="mt-4">
+                                    <Row className="row-gap-3">
                                         {/* Thông tin Booking */}
-                                        <Col xs={12} md={8} className="mb-4">
-                                            <Card>
-                                                <Card.Body>
-                                                    <Card.Title className="text-primary">Thông tin Booking</Card.Title>
-                                                    <Form.Group className="mb-3" controlId="note">
-                                                        <Form.Label>Ghi chú</Form.Label>
-                                                        <Form.Control as="textarea" rows={3} value={note} onChange={(e) => setNote(e.target.value)} placeholder="Nhập ghi chú..." disabled />
-                                                    </Form.Group>
-                                                    <Form.Group className="mb-3" controlId="status">
-                                                        <Form.Label>Trạng thái</Form.Label>
-                                                        <Form.Select value={status} onChange={(e) => setStatus(Number(e.target.value))} disabled>
-                                                            <option value={0}>Chưa xếp nhân viên</option>
-                                                            <option value={1}>Đã xếp nhân viên</option>
-                                                            <option value={2}>Đang thực hiện</option>
-                                                            <option value={3}>Đã xong</option>
-                                                            <option value={4}>Đã thanh toán</option>
-                                                            <option value={5}>Lịch đã hủy</option>
-                                                        </Form.Select>
-                                                    </Form.Group>
-                                                    <Row className="mb-3">
-                                                        {/* Ngày đặt */}
-                                                        <Col md={6}>
-                                                            <Form.Group controlId="bookingDate">
-                                                                <Form.Label>Ngày đặt</Form.Label>
-                                                                <Form.Control type="date" value={bookingDate ? bookingDate.split(" ")[0] : ""} readOnly disabled />
+                                        <Col xs={12} md={8}>
+                                            <Row className="row-gap-3">
+                                                <Col xs={12}>
+                                                    <Card>
+                                                        <Card.Body>
+                                                            <Card.Title className="text-primary">Thông tin Booking</Card.Title>
+                                                            <Form.Group className="mb-3" controlId="note">
+                                                                <Form.Label>Ghi chú</Form.Label>
+                                                                <Form.Control as="textarea" rows={3} value={note} onChange={(e) => setNote(e.target.value)} placeholder="Nhập ghi chú..." disabled />
                                                             </Form.Group>
-                                                        </Col>
-                                                        {/* Giờ đặt */}
-                                                        <Col md={6}>
-                                                            <Form.Group controlId="bookingTime">
-                                                                <Form.Label>Giờ đặt</Form.Label>
-                                                                <Form.Control type="time" value={bookingDate ? bookingDate.split(" ")[1] : ""} readOnly disabled />
+                                                            <Form.Group className="mb-3" controlId="status">
+                                                                <Form.Label>Trạng thái</Form.Label>
+                                                                <Form.Select value={status} onChange={(e) => setStatus(Number(e.target.value))} disabled>
+                                                                    <option value={0}>Chưa xếp nhân viên</option>
+                                                                    <option value={1}>Đã xếp nhân viên</option>
+                                                                    <option value={2}>Đang thực hiện</option>
+                                                                    <option value={3}>Đã xong</option>
+                                                                    <option value={4}>Đã thanh toán</option>
+                                                                    <option value={5}>Lịch đã hủy</option>
+                                                                </Form.Select>
                                                             </Form.Group>
-                                                        </Col>
-                                                    </Row>
-                                                    <Row className="mb-3">
-                                                        {/* Ngày đến */}
-                                                        <Col md={6}>
-                                                            <Form.Group controlId="arrivalDate">
-                                                                <Form.Label>Ngày đến</Form.Label>
-                                                                <Form.Control type="date" value={arrivalDate ? arrivalDate.split(" ")[0] : ""} readOnly disabled />
-                                                            </Form.Group>
-                                                        </Col>
-                                                        {/* Giờ đến */}
-                                                        <Col md={6}>
-                                                            <Form.Group controlId="arrivalTime">
-                                                                <Form.Label>Giờ đến</Form.Label>
-                                                                <Form.Control type="time" value={arrivalDate ? arrivalDate.split(" ")[1] : ""} readOnly disabled />
-                                                            </Form.Group>
-                                                        </Col>
-                                                    </Row>
-                                                </Card.Body>
-                                            </Card>
+                                                            <Row className="mb-3">
+                                                                {/* Ngày đặt */}
+                                                                <Col md={6}>
+                                                                    <Form.Group controlId="bookingDate">
+                                                                        <Form.Label>Ngày đặt</Form.Label>
+                                                                        <Form.Control type="date" value={bookingDate ? bookingDate.split(" ")[0] : ""} readOnly disabled />
+                                                                    </Form.Group>
+                                                                </Col>
+                                                                {/* Giờ đặt */}
+                                                                <Col md={6}>
+                                                                    <Form.Group controlId="bookingTime">
+                                                                        <Form.Label>Giờ đặt</Form.Label>
+                                                                        <Form.Control type="time" value={bookingDate ? bookingDate.split(" ")[1] : ""} readOnly disabled />
+                                                                    </Form.Group>
+                                                                </Col>
+                                                            </Row>
+                                                            <Row className="mb-3">
+                                                                {/* Ngày đến */}
+                                                                <Col md={6}>
+                                                                    <Form.Group controlId="arrivalDate">
+                                                                        <Form.Label>Ngày đến</Form.Label>
+                                                                        <Form.Control type="date" value={arrivalDate ? arrivalDate.split(" ")[0] : ""} readOnly disabled />
+                                                                    </Form.Group>
+                                                                </Col>
+                                                                {/* Giờ đến */}
+                                                                <Col md={6}>
+                                                                    <Form.Group controlId="arrivalTime">
+                                                                        <Form.Label>Giờ đến</Form.Label>
+                                                                        <Form.Control type="time" value={arrivalDate ? arrivalDate.split(" ")[1] : ""} readOnly disabled />
+                                                                    </Form.Group>
+                                                                </Col>
+                                                            </Row>
+                                                        </Card.Body>
+                                                    </Card>
+                                                </Col>
+                                                <Col xs={12}>
+                                                    <Card>
+                                                        <Card.Body>
+                                                            <Card.Title className="text-primary">Danh sách Dịch vụ</Card.Title>
+                                                            {services && services.length > 0 ? (
+                                                                <Table striped bordered hover responsive>
+                                                                    <thead>
+                                                                        <tr>
+                                                                            <th>#</th>
+                                                                            <th>Tên Dịch vụ</th>
+                                                                            <th>Giá</th>
+                                                                        </tr>
+                                                                    </thead>
+                                                                    <tbody>
+                                                                        {services.map((service, index) => (
+                                                                            <tr key={service.id}>
+                                                                                <td>{index + 1}</td>
+                                                                                <td>{service.name}</td>
+                                                                                <td>{service.price.toLocaleString()} VND</td>
+                                                                            </tr>
+                                                                        ))}
+                                                                    </tbody>
+                                                                </Table>
+                                                            ) : (
+                                                                <p className="text-center text-muted">Không có dịch vụ nào được chọn.</p>
+                                                            )}
+                                                        </Card.Body>
+                                                    </Card>
+                                                </Col>
+                                            </Row>
                                         </Col>
 
                                         {/* Thông tin Khách hàng & nhân viên */}
-                                        <Col xs={12} md={4} className="mb-4">
-                                            <Card className="mb-4">
-                                                {" "}
-                                                {/* Thêm margin-bottom ở đây để tạo khoảng cách */}
-                                                <Card.Body>
-                                                    <Card.Title className="text-primary">Thông tin Khách hàng</Card.Title>
-                                                    {customer ? (
-                                                        <>
-                                                            <p>
-                                                                <strong>Tên:</strong> {customer.name}
-                                                            </p>
-                                                            <p>
-                                                                <strong>Email:</strong> <a href={`mailto:${customer.email}`}>{customer.email}</a>
-                                                            </p>
-                                                            <p>
-                                                                <strong>Số điện thoại:</strong> {customer.phone || "Không có"}
-                                                            </p>
-                                                            <p>
-                                                                <strong>Địa chỉ:</strong> {customer.address || "Không có"}
-                                                            </p>
-                                                        </>
-                                                    ) : (
-                                                        <p>Không có thông tin khách hàng.</p>
-                                                    )}
-                                                </Card.Body>
-                                            </Card>
-
-                                            {status !== 0 && (
-                                                <Card className="mb-4">
-                                                    {" "}
-                                                    {/* Thêm margin-bottom ở đây */}
-                                                    <Card.Body>
-                                                        <Card.Title className="text-primary">Thông tin Nhân viên</Card.Title>
-                                                        {user ? (
-                                                            <>
-                                                                <p>
-                                                                    <strong>Tên:</strong> {user.name}
-                                                                </p>
-                                                                <p>
-                                                                    <strong>Email:</strong> <a href={`mailto:${user.email}`}>{user.email}</a>
-                                                                </p>
-                                                                <p>
-                                                                    <strong>Số điện thoại:</strong> {user.phone || "Không có"}
-                                                                </p>
-                                                                <p>
-                                                                    <strong>Địa chỉ:</strong> {user.address || "Không có"}
-                                                                </p>
-                                                            </>
-                                                        ) : (
-                                                            <p>Không có thông tin nhân viên.</p>
-                                                        )}
-                                                    </Card.Body>
-                                                </Card>
-                                            )}
-                                        </Col>
-                                    </Row>
-
-                                    {/* Danh sách Dịch vụ */}
-                                    <Row>
-                                        <Col xs={12}>
-                                            <Card>
-                                                <Card.Body>
-                                                    <Card.Title className="text-primary">Danh sách Dịch vụ</Card.Title>
-                                                    {services && services.length > 0 ? (
-                                                        <Table striped bordered hover responsive>
-                                                            <thead>
-                                                                <tr>
-                                                                    <th>#</th>
-                                                                    <th>Tên Dịch vụ</th>
-                                                                    <th>Giá</th>
-                                                                </tr>
-                                                            </thead>
-                                                            <tbody>
-                                                                {services.map((service, index) => (
-                                                                    <tr key={service.id}>
-                                                                        <td>{index + 1}</td>
-                                                                        <td>{service.name}</td>
-                                                                        <td>{service.price.toLocaleString()} VND</td>
-                                                                    </tr>
-                                                                ))}
-                                                            </tbody>
-                                                        </Table>
-                                                    ) : (
-                                                        <p className="text-center text-muted">Không có dịch vụ nào được chọn.</p>
-                                                    )}
-                                                </Card.Body>
-                                            </Card>
+                                        <Col xs={12} md={4}>
+                                            <Row className="row-gap-3">
+                                                <Col xs={12}>
+                                                    <Card>
+                                                        <Card.Body>
+                                                            <Card.Title className="text-primary">Thông tin Khách hàng</Card.Title>
+                                                            {customer ? (
+                                                                <>
+                                                                    <p>
+                                                                        <strong>Tên:</strong> {customer.name}
+                                                                    </p>
+                                                                    <p>
+                                                                        <strong>Email:</strong> <a href={`mailto:${customer.email}`}>{customer.email}</a>
+                                                                    </p>
+                                                                    <p>
+                                                                        <strong>Số điện thoại:</strong> {customer.phone || "Không có"}
+                                                                    </p>
+                                                                    <p>
+                                                                        <strong>Địa chỉ:</strong> {customer.address || "Không có"}
+                                                                    </p>
+                                                                </>
+                                                            ) : (
+                                                                <p>Không có thông tin khách hàng.</p>
+                                                            )}
+                                                        </Card.Body>
+                                                    </Card>
+                                                </Col>
+                                                {status !== 0 && (
+                                                    <Col xs={12}>
+                                                        <Card>
+                                                            <Card.Body>
+                                                                <Card.Title className="text-primary">Thông tin Nhân viên</Card.Title>
+                                                                {user ? (
+                                                                    <>
+                                                                        <p>
+                                                                            <strong>Tên:</strong> {user.name}
+                                                                        </p>
+                                                                        <p>
+                                                                            <strong>Email:</strong> <a href={`mailto:${user.email}`}>{user.email}</a>
+                                                                        </p>
+                                                                        <p>
+                                                                            <strong>Số điện thoại:</strong> {user.phone || "Không có"}
+                                                                        </p>
+                                                                        <p>
+                                                                            <strong>Địa chỉ:</strong> {user.address || "Không có"}
+                                                                        </p>
+                                                                    </>
+                                                                ) : (
+                                                                    <p>Không có thông tin nhân viên.</p>
+                                                                )}
+                                                            </Card.Body>
+                                                        </Card>
+                                                    </Col>
+                                                )}
+                                            </Row>
                                         </Col>
                                     </Row>
                                 </Form>
