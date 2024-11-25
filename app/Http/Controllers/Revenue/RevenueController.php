@@ -197,7 +197,7 @@ class RevenueController extends Controller
 
         if ($this->data->isEmpty()) {
             return response()->json([
-                'status' => 'error',
+                'check' => false,
                 'message' => 'Không có dữ liệu cho sản phẩm này!',
             ], 404);
         }
