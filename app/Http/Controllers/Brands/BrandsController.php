@@ -99,16 +99,14 @@ class BrandsController extends Controller
     // }
     public function destroy($id)
     {
-        $productsCount = Products::where('id_brand', $id)->count();
-        if ($productsCount > 0) {
+        $this->instance = $this->model::findOrFail($id)->load('products');
+        if ($this->instance->products()->count() > 0) {
             return response()->json(['check' => false, 'message' => 'Thương hiệu đang có sản phẩm, không thể xóa!'], 400);
         }
 
-        $this->instance = $this->model::findOrFail($id);
-        $this->instance->update(['status' => 0]);   
-        $this->instance = $this->instance->delete();
+        $this->instance->update(['status' => 0]);
 
-        if ($this->instance) {
+        if ($this->instance->delete()) {
             $this->data = $this->model::with('products')->withCount('products')->orderBy('id', 'desc')->get();
             $trashs = $this->model::with('products')->withCount('products')->orderBy('id', 'desc')->onlyTrashed()->get();
             return response()->json(['check' => true, 'message' => 'Xoá thành công!', 'data' => $this->data, 'trashs' => $trashs,], 200);
@@ -116,22 +114,24 @@ class BrandsController extends Controller
 
         return response()->json(['check' => false, 'message' => 'Có lỗi xảy ra khi xóa!'], 500);
     }
+
     public function restore($id)
     {
         $this->instance = $this->model::withTrashed()->findOrFail($id);
-        $this->instance->update(['status' => 1]);   
-        $this->instance->restore();
-        if ($this->instance) {
+        $this->instance->update(['status' => 1]);
+
+        if ($this->instance->restore()) {
             $this->data = $this->model::with('products')->withCount('products')->orderBy('id', 'desc')->get();
             $trashs = $this->model::with('products')->withCount('products')->orderBy('id', 'desc')->onlyTrashed()->get();
             return response()->json(['check' => true, 'message' => 'Khôi phục thành công!', 'data' => $this->data, 'trashs' => $trashs], 200);
         }
     }
+
     public function permanent(string $id)
     {
         $this->instance = $this->model::withTrashed()->findOrFail($id);
-        $this->instance->forceDelete();
-        if ($this->instance) {
+
+        if ($this->instance->forceDelete()) {
             $this->data = $this->model::with('products')->withCount('products')->orderBy('id', 'desc')->get();
             $trashs = $this->model::with('products')->withCount('products')->orderBy('id', 'desc')->onlyTrashed()->get();
             return response()->json(['check' => true, 'message' => 'Đã xóa vĩnh viễn thành công!', 'data' => $this->data, 'trashs' => $trashs], 200);

@@ -324,10 +324,7 @@ function Index({ categories, trashs, products, crumbs }) {
             width: 180,
             renderCell: (params) => (
                 <>
-                    <FormControlLabel
-                        control={<Switch checked={params.row.status === 1} onClick={() => handleCellEditStop(params.row.id, "status", params.row.status === 1 ? 0 : 1)} />}
-                        label={params.row.status ? "Hoạt động" : "Ẩn"}
-                    />
+                    <FormControlLabel control={<Switch checked={params.row.status === 1} />} label={params.row.status ? "Hoạt động" : "Ẩn"} disabled />
                 </>
             ),
         },
@@ -341,14 +338,7 @@ function Index({ categories, trashs, products, crumbs }) {
                 return (
                     <>
                         <FormControl fullWidth>
-                            <Select
-                                id="parent-select"
-                                value={parentId}
-                                displayEmpty
-                                onChange={(e) => {
-                                    handleCellEditStop(params.row.id, "id_parent", e.target.value);
-                                }}
-                            >
+                            <Select id="parent-select" value={parentId} displayEmpty disabled>
                                 <MenuItem value="">Danh mục cha</MenuItem>
                                 {data
                                     .filter((category) => category.id_parent === null)
@@ -463,11 +453,7 @@ function Index({ categories, trashs, products, crumbs }) {
                                                         <span className="mt-2">{item.name}</span>
                                                     </div>
                                                     <Card.Body className="p-2 d-flex justify-content-between align-items-center">
-                                                        <select
-                                                            className="form-select"
-                                                            value={item.id_category}
-                                                            onChange={(e) => handleUpdateProduct(item.id, e.target.value)}
-                                                        >
+                                                        <select className="form-select" value={item.id_category} onChange={(e) => handleUpdateProduct(item.id, e.target.value)}>
                                                             {categories.map((category) => (
                                                                 <option key={category.id} value={category.id}>
                                                                     {category.name}

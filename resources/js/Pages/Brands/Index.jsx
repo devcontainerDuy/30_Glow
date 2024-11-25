@@ -62,7 +62,7 @@ function Index({ brands, trashs, crumbs }) {
         } else {
             setSelectedProducts([]);
         }
-    }
+    };
 
     const handleCloseProducts = () => {
         setShowProductsModal(false);
@@ -121,11 +121,7 @@ function Index({ brands, trashs, crumbs }) {
                     .then((res) => {
                         if (res.data.check === true) {
                             toast.success(res.data.message);
-                            setData((prevData) =>
-                                prevData.filter(
-                                    (category) => category.id !== id
-                                )
-                            );
+                            setData((prevData) => prevData.filter((category) => category.id !== id));
                             setTrash(res.data.trashs);
                         } else {
                             toast.warning(res.data.message);
@@ -237,12 +233,6 @@ function Index({ brands, trashs, crumbs }) {
             renderCell: (params) => new Date(params.row.created_at).toLocaleString(),
         },
         {
-            field: "updated_at",
-            headerName: "Ngày cập nhật",
-            width: 200,
-            renderCell: (params) => new Date(params.row.updated_at).toLocaleString(),
-        },
-        {
             field: "action",
             headerName: "Thao tác",
             width: 160,
@@ -281,15 +271,13 @@ function Index({ brands, trashs, crumbs }) {
             field: "deleted_at",
             headerName: "Ngày xóa",
             width: 200,
-            renderCell: (params) =>
-                new Date(params.row.deleted_at).toLocaleString(),
+            renderCell: (params) => new Date(params.row.deleted_at).toLocaleString(),
         },
         {
             field: "updated_at",
             headerName: "Ngày cập nhật",
             width: 200,
-            renderCell: (params) =>
-                new Date(params.row.updated_at).toLocaleString(),
+            renderCell: (params) => new Date(params.row.updated_at).toLocaleString(),
         },
         {
             field: "action",

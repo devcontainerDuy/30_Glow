@@ -24,7 +24,7 @@ class CategoriesController extends Controller
             ['name' => 'Danh sách danh mục', 'url' => '/admin/categories'],
         ];
         $this->data = $this->model::with('parent', 'products', 'products.gallery')->active()->select('id', 'name', 'slug', 'id_parent', 'status')->withCount('products')->get();
-        $trashs = $this->model::with('parent', 'products', 'products.gallery')->active()->select('id', 'name', 'slug', 'id_parent', 'status')->withCount('products')->onlyTrashed()->get();
+        $trashs = $this->model::with('parent', 'products', 'products.gallery')->select('id', 'name', 'slug', 'id_parent', 'status')->withCount('products')->onlyTrashed()->get();
         return Inertia::render('Categories/Index', ['categories' => $this->data, 'trashs' => $trashs, 'crumbs' => $this->crumbs,]);
     }
     public function store(CategoriesRequest $request)
@@ -64,16 +64,18 @@ class CategoriesController extends Controller
     }
     public function destroy($id)
     {
-        $this->instance = $this->model::findOrFail($id);
+        $this->instance = $this->model::findOrFail($id)->load('products', 'children');
+
         if ($this->instance->products()->count() > 0) {
             return response()->json(['check' => false, 'message' => 'Danh mục có sản phẩm, không thể xóa!'], 400);
         }
-        if ($this->model::where('id_parent', $id)->count() > 0) {
+
+        if ($this->instance->children()->count() > 0) {
             return response()->json(['check' => false, 'message' => 'Danh mục đang là cha, không thể xóa!'], 400);
         }
-        $this->instance = $this->instance->delete();
+        $this->instance->update(['status' => 0]);
 
-        if ($this->instance) {
+        if ($this->instance->delete()) {
             $this->data = $this->model::with('parent', 'products', 'products.gallery')->active()->select('id', 'name', 'slug', 'id_parent', 'status')->withCount('products')->get();
             $trashs = $this->model::with('parent', 'products', 'products.gallery')->active()->select('id', 'name', 'slug', 'id_parent', 'status')->withCount('products')->onlyTrashed()->get();
             return response()->json(['check' => true, 'message' => 'Xoá thành công!', 'data' => $this->data, 'trashs' => $trashs,], 200);
