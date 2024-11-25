@@ -66,7 +66,6 @@ class Customers extends Authenticatable
     {
         return $this->hasMany(ServiceBills::class, 'id_customer', 'id');
     }
-
     public function scopeActive($query)
     {
         return $query->where('status', 1);
