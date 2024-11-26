@@ -193,7 +193,7 @@ class ProductController extends Controller
      */
     public function apiHighlighted()
     {
-        $this->data = $this->model::with('category', 'brand', 'gallery')->highlighted()->active()->orderBy('created_at', 'desc')->limit(5)->get();
+        $this->data = $this->model::with('category', 'brand', 'gallery')->highlighted()->active()->orderBy('created_at', 'desc')->take(10)->get();
         $this->data->transform(function ($item) {
             return [
                 'id' => $item->id,
@@ -271,7 +271,7 @@ class ProductController extends Controller
 
     public function apiShow($slug)
     {
-        $this->data = $this->model::with(['category', 'brand', 'gallery', 'relatedProducts'])->active()->where('slug', $slug)->firstOrFail();
+        $this->data = $this->model::with(['category', 'brand', 'gallery', 'relatedProducts'])->active()->where('slug', $slug)->first();
 
         if (!$this->data) {
             return response()->json(['check' => false, 'message' => 'Không tìm thấy sản phẩm'], 404);
@@ -306,7 +306,7 @@ class ProductController extends Controller
                     'status' => $gallery->status,
                 ];
             }),
-            'related_products' => $this->data->relatedProducts->map(function ($related) {
+            'related_products' => $this->data->relatedProducts->take(10)->map(function ($related) {
                 return [
                     'id' => $related->id,
                     'name' => $related->name,

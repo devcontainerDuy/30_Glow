@@ -126,7 +126,7 @@ class ServiceController extends Controller
 
     public function apiHighlighted()
     {
-        $this->data = $this->model::with('collection')->highlighted()->active()->orderBy('created_at', 'desc')->limit(5)->get();
+        $this->data = $this->model::with('collection')->highlighted()->active()->orderBy('created_at', 'desc')->take(5)->get();
         $this->data->transform(function ($item) {
             return [
                 'id' => $item->id,
@@ -177,7 +177,7 @@ class ServiceController extends Controller
 
     public function apiShow($slug)
     {
-        $this->data = $this->model::with('collection')->active()->where('slug', $slug)->firstOrFail();
+        $this->data = $this->model::with('collection')->active()->where('slug', $slug)->first();
 
         $this->instance = [
             'id' => $this->data->id,
