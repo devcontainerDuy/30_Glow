@@ -64,13 +64,12 @@ class AuthenController extends Controller
         }
         return response()->json(['check' => false, 'message' => 'Đăng nhập thất bại!'], 401);
     }
+
     public function handleLogoutManager()
     {
         try {
-            dd(Auth::guard('api')->check());
-            $this->instance = Auth::guard('api')->user();
+            $this->instance = Auth::user()->load('roles');
             if ($this->instance) {
-                $this->instance->load('roles');
                 $this->instance->tokens()->delete();
                 Auth::guard('api')->logout();
                 return response()->json(['check' => true, 'message' => 'Đăng xuất thành công!'], 200);

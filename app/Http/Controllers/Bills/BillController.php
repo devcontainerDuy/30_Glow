@@ -114,10 +114,10 @@ class BillController extends Controller
                 'address_other' => $this->data['address_other'] ?? null,
                 'note_other' => $this->data['note_other'] ?? null,
                 'payment_method' => $this->data['payment_method'],
-                'payment_status' => 0,
+                'payment_status' => $this->data['payment_status'] ?? 0,
                 'transaction_id' => $this->data['transaction_id'] ?? null,
                 'total' => $this->data['total'],
-                'status' => 1,
+                'status' => 0,
                 'created_at' => now(),
                 'updated_at' => now(),
             ]);
@@ -165,7 +165,18 @@ class BillController extends Controller
      */
     public function update(BillRequest $request, string $id)
     {
-        //
+        $this->data = $request->validated();
+        $this->instance = $this->model::where('uid', $id)->first();
+
+        if ($this->data['status'] < $this->instance->status) {
+            return response()->json(['check' => false, 'message' => 'Không thể thay đổi trạng thái trước đó!'], 400);
+        }
+
+        if ($this->instance->update($this->data)) {
+            return response()->json(['check' => true, 'message' => 'Cập nhật thành công!'], 200);
+        }
+
+        return response()->json(['check' => false, 'message' => 'Cập nhật thất bại!'], 401);
     }
 
     /**

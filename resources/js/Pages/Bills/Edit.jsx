@@ -4,6 +4,8 @@ import Layout from "@/Layouts/Index";
 import { Button, Card, Col, Form, Row, Table } from "react-bootstrap";
 import BreadcrumbComponent from "@/Components/BreadcrumbComponent";
 import { router } from "@inertiajs/react";
+import axios from "axios";
+import { toast } from "react-toastify";
 
 function Edit({ bill, crumbs }) {
     const [data, setData] = useState([]);
@@ -32,6 +34,48 @@ function Edit({ bill, crumbs }) {
         }
     };
 
+    const paymentStatus = (status) => {
+        switch (Number(status)) {
+            case 0:
+                return "Chưa thanh toán";
+            case 1:
+                return "Đã thanh toán";
+            case 2:
+                return "Đã hoàn trả";
+            default:
+                return "Thanh toán lỗi";
+        }
+    };
+
+    const handleStatusChange = (e) => {
+        const newStatus = Number(e.target.value);
+        setStatus(newStatus);
+        setData({ ...data, status: newStatus });
+    };
+
+    const handleStatus = (e) => {
+        e.preventDefault();
+        axios
+            .put("/admin/bills/" + data.uid, {
+                status,
+            })
+            .then((res) => {
+                if (res.data.check == true) {
+                    toast.success(res.data.message);
+                    // setTimeout(() => {
+                    //     router.visit("/admin/bills/" + data.uid + "/edit", {
+                    //         method: "get",
+                    //     });
+                    // }, 2000);
+                } else {
+                    toast.warning(res.data.message);
+                }
+            })
+            .catch((error) => {
+                toast.error(error.response.data.message);
+            });
+    };
+
     useEffect(() => {
         setData(bill);
         setProduct(bill.bill_detail);
@@ -47,7 +91,7 @@ function Edit({ bill, crumbs }) {
                                 <i className="bi bi-box-arrow-right" />
                                 <span className="ms-2">Quay lại</span>
                             </Button>
-                            <Button className="ms-2" variant="success" type="submit">
+                            <Button className="ms-2" variant="success" type="submit" onClick={handleStatus}>
                                 <i className="bi bi-floppy-fill" />
                                 <span className="ms-2">Lưu lại</span>
                             </Button>
@@ -72,26 +116,46 @@ function Edit({ bill, crumbs }) {
                                                                 <Form.Label>Mã hóa đơn</Form.Label>
                                                                 <Form.Control type="text" value={data.uid || "Không có mã hóa đơn"} readOnly disabled />
                                                             </Form.Group>
-                                                            <Form.Group className="mb-3" controlId="payment">
-                                                                <Form.Label>Phương thức thanh toán</Form.Label>
-                                                                <Form.Control type="text" value={paymentMethod(data.payment_method)} readOnly disabled />
-                                                            </Form.Group>
+                                                            <Row className="row-gap-3">
+                                                                <Col>
+                                                                    <Form.Group className="mb-3" controlId="payment">
+                                                                        <Form.Label>Phương thức thanh toán</Form.Label>
+                                                                        <Form.Control type="text" value={paymentMethod(data.payment_method)} readOnly disabled />
+                                                                    </Form.Group>
+                                                                </Col>
+                                                                <Col>
+                                                                    <Form.Group className="mb-3" controlId="paymentStatus">
+                                                                        <Form.Label>Trạng thái thanh toán</Form.Label>
+                                                                        <Form.Control type="text" value={paymentStatus(data.payment_status)} readOnly disabled />
+                                                                    </Form.Group>
+                                                                </Col>
+                                                            </Row>
                                                             <Form.Group className="mb-3" controlId="note">
                                                                 <Form.Label>Ghi chú</Form.Label>
                                                                 <Form.Control as="textarea" rows={3} value={data.note || "Không có nhập ghi chú"} placeholder="Ghi chú..." disabled />
                                                             </Form.Group>
-                                                            <Form.Group className="mb-3" controlId="status">
-                                                                <Form.Label>Trạng thái đơn hàng</Form.Label>
-                                                                <Form.Select value={data.status} onChange={(e) => setStatus(Number(e.target.value))}>
-                                                                    <option value={0}>Đang chờ xử lý</option>
-                                                                    <option value={1}>Đã xác nhận</option>
-                                                                    <option value={2}>Đã giao đơn vị vận chuyển</option>
-                                                                    <option value={3}>Đang giao hàng</option>
-                                                                    <option value={4}>Đã giao hàng</option>
-                                                                    <option value={5}>Khách hàng từ chối nhận</option>
-                                                                    <option value={6}>Đã hoàn trả</option>
-                                                                </Form.Select>
-                                                            </Form.Group>
+                                                            <Row className="row-gap-3">
+                                                                <Col>
+                                                                    <Form.Group className="mb-3" controlId="status">
+                                                                        <Form.Label>Trạng thái đơn hàng</Form.Label>
+                                                                        <Form.Select value={data.status} onChange={handleStatusChange}>
+                                                                            <option value={0}>Đang chờ xử lý</option>
+                                                                            <option value={1}>Đã xác nhận</option>
+                                                                            <option value={2}>Đã giao đơn vị vận chuyển</option>
+                                                                            <option value={3}>Đang giao hàng</option>
+                                                                            <option value={4}>Đã giao hàng</option>
+                                                                            <option value={5}>Khách hàng từ chối nhận</option>
+                                                                            <option value={6}>Đã hoàn trả</option>
+                                                                        </Form.Select>
+                                                                    </Form.Group>
+                                                                </Col>
+                                                                <Col>
+                                                                    <Form.Group className="mb-3" controlId="transactionId">
+                                                                        <Form.Label>Mã giao dịch</Form.Label>
+                                                                        <Form.Control type="text" value={data.transaction_id || "Không có mã giao dịch"} readOnly disabled />
+                                                                    </Form.Group>
+                                                                </Col>
+                                                            </Row>
                                                             <Row className="mb-3">
                                                                 <Col md={6}>
                                                                     <Form.Group controlId="createdAt">
@@ -177,7 +241,14 @@ function Edit({ bill, crumbs }) {
                                                                     <strong>Email:</strong> <a href={`mailto:${data.email}`}>{data.email}</a>
                                                                 </p>
                                                                 <p>
-                                                                    <strong>Số điện thoại:</strong> {data.phone || "Không có"}
+                                                                    <strong>Số điện thoại: </strong>
+                                                                    {data.phone ? (
+                                                                        <a href={"tel:" + data?.phone} className="text-decoration-none">
+                                                                            {data?.phone?.toString().replace(/(\d{3})(\d{3})(\d{4})/, "$1-$2-$3")}
+                                                                        </a>
+                                                                    ) : (
+                                                                        "Không có SĐT"
+                                                                    )}
                                                                 </p>
                                                                 <p>
                                                                     <strong>Địa chỉ:</strong> {data.address || "Không có"}
@@ -197,7 +268,14 @@ function Edit({ bill, crumbs }) {
                                                                 <strong>Email khác:</strong> <a href={`mailto:${data.email}`}>{data.email_other || "Không có địa chỉ email khác"}</a>
                                                             </p>
                                                             <p>
-                                                                <strong>Số điện thoại khác:</strong> {data.phone_other || "Không có số điện thoại khác"}
+                                                                <strong>Số điện thoại khác:</strong>{" "}
+                                                                {data.phone_other ? (
+                                                                    <a href={"tel:" + data?.phone_other} className="text-decoration-none">
+                                                                        {data?.phone_other?.toString().replace(/(\d{3})(\d{3})(\d{4})/, "$1-$2-$3")}
+                                                                    </a>
+                                                                ) : (
+                                                                    "Không có SĐT khác"
+                                                                )}
                                                             </p>
                                                             <p>
                                                                 <strong>Địa chỉ khác:</strong> {data.address_other || "Không có địa chỉ khác"}

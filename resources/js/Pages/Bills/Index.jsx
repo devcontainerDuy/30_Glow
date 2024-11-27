@@ -59,19 +59,19 @@ function Index({ bills, crumbs }) {
                 let statusIcon = "";
                 switch (params.row.status) {
                     case 0:
-                        statusText = "Thanh toán online";
-                        statusClass = "text-success";
-                        statusIcon = "bi bi-paypal";
-                        break;
-                    case 1:
                         statusText = "Đang chờ xử lý";
                         statusClass = "text-warning";
                         statusIcon = "bi bi-clock";
                         break;
-                    case 2:
+                    case 1:
                         statusText = "Đã xác nhận";
                         statusClass = "text-primary";
                         statusIcon = "bi bi-check-circle-fill";
+                        break;
+                    case 2:
+                        statusText = "Đã giao đơn vị vận chuyển";
+                        statusClass = "text-info";
+                        statusIcon = "bi bi-person-chec";
                         break;
                     case 3:
                         statusText = "Đang giao hàng";
@@ -84,13 +84,13 @@ function Index({ bills, crumbs }) {
                         statusIcon = "bi bi-cart-check-fill";
                         break;
                     case 5:
-                        statusText = "Đã thanh toán";
-                        statusClass = "text-success";
-                        statusIcon = "bi bi-clipboard2-check-fill";
+                        statusText = "Khách hàng từ chối nhận hàng";
+                        statusClass = "text-danger";
+                        statusIcon = "bi bi-exclamation-diamond-fill";
                         break;
                     case 6:
-                        statusText = "Đã hủy đơn";
-                        statusClass = "text-danger";
+                        statusText = "Đã hoàn trả";
+                        statusClass = "text-dark";
                         statusIcon = "bi bi-x-circle";
                         break;
                     default:
