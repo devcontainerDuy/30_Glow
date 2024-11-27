@@ -192,4 +192,102 @@ class BillServicesController extends Controller
     {
         //
     }
+    //api for manager
+    public function apiByCustomer($id)
+    {
+        $bills = ServiceBills::where('id_customer', $id)
+            ->with(['customer', 'booking', 'serviceBillDetails.service'])
+            ->get();
+
+        if ($bills->isEmpty()) {
+            return response()->json([
+                'check' => false,
+                'message' => 'Khách hành này chưa có bất kỳ bill dịch vụ nào!!',
+            ], 404);
+        }
+
+        $data = $bills->map(function ($bill) {
+            return [
+                'bill_uid' => $bill->uid,
+                'customer' => $bill->customer ? [
+                    'uid' => $bill->customer->uid,
+                    'name' => $bill->customer->name,
+                    'email' => $bill->customer->email,
+                    'phone' => $bill->customer->phone,
+                    'address' => $bill->customer->address,
+                ] : null,
+                'booking' => $bill->booking ? [
+                    'booking_id' => $bill->booking->id,
+                    'time' => $bill->booking->time,
+                    'status' => $bill->booking->status,
+                ] : null,
+                'services' => $bill->serviceBillDetails->map(function ($serviceDetail) {
+                    return [
+                        'name' => $serviceDetail->service->name,
+                        'slug' => $serviceDetail->service->slug,
+                        'image' => asset('storage/products/' . $serviceDetail->service->image),
+                        'unit_price' => (float) $serviceDetail->unit_price,
+                    ];
+                })->toArray(),
+                'total' =>(float) $bill->total,
+                'status' => $bill->status,
+                'created_at' => $bill->created_at,
+            ];
+        });
+
+        return response()->json([
+            'check' => true,
+            'data' => $data,
+        ], 200);
+    }
+
+    public function apiByUser($id)
+    {
+        $bookings = Bookings::where('id_user', $id)
+            ->with(['user', 'customer', 'services'])
+            ->get();
+
+        if ($bookings->isEmpty()) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Nhân viên này chưa có bất kỳ booking nào!!',
+            ], 404);
+        }
+
+        $data = $bookings->map(function ($booking) {
+            return [
+                'id' => $booking->id,
+                'user' => $booking->user ? [
+                    'uid' => $booking->user->uid,
+                    'name' => $booking->user->name,
+                    'email' => $booking->user->email,
+                    'phone' => $booking->user->phone,
+                    'address' => $booking->user->address,
+                ] : null,
+                'customer' => $booking->customer ? [
+                    'uid' => $booking->customer->uid,
+                    'name' => $booking->customer->name,
+                    'email' => $booking->customer->email,
+                    'phone' => $booking->customer->phone,
+                    'address' => $booking->customer->address,
+                ] : null,
+                'time' => $booking->time,
+                'services' => $booking->services->map(function ($service) {
+                    return [
+                        'name' => $service->name,
+                        'slug' => $service->slug,
+                        'image' => asset('storage/products/' . $service->image),
+                        'price' => $service->price,
+                    ];
+                })->toArray(),
+                'status' => $booking->status,
+                'created_at' => $booking->created_at,
+            ];
+        });
+
+        return response()->json([
+            'status' => 'success',
+            'data' => $data,
+        ], 200);
+    }
 }

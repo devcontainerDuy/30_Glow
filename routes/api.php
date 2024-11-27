@@ -62,6 +62,10 @@ Route::middleware('api')->group(function () {
 
     Route::middleware(['auth:sanctum', 'auth.session', 'role:Manager|Staff'])->group(function () {
         Route::resource('/bill-services', App\Http\Controllers\BillServices\BillServicesController::class);
+        Route::middleware('api')->controller(App\Http\Controllers\BillServices\BillServicesController::class)->group(function () {
+            Route::get('/bill-services/user/{id}', 'apiByUser');
+            Route::get('/bill-services/customer/{id}', 'apiByCustomer');
+        });
 
         Route::controller(App\Http\Controllers\Users\UserController::class)->group(function () {
             Route::get('/staff', 'apiIndex');
