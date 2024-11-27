@@ -37,7 +37,7 @@ class RevenueController extends Controller
             $totalRevenueYear += $totalRevenue;
         }
 
-        return response()->json(['status' => 'success', 'data' => ['monthly_revenue' => $instance, 'revenue_year' => $totalRevenueYear,],], 200);
+        return response()->json(['check' => true, 'data' => ['monthly_revenue' => $instance, 'revenue_year' => $totalRevenueYear,],], 200);
     }
     public function getRevenueByService($id)
     {
@@ -72,7 +72,7 @@ class RevenueController extends Controller
         }
 
         return response()->json([
-            'status' => 'success',
+            'check' => true,
             'data' => [
                 'service' => $service,
                 'monthly_revenue' => $this->instance,
@@ -113,7 +113,7 @@ class RevenueController extends Controller
         }
 
         return response()->json([
-            'status' => 'success',
+            'check' => true,
             'data' => [
                 'customer' => $customer,
                 'monthly_revenue' => $this->instance,
@@ -169,7 +169,7 @@ class RevenueController extends Controller
                 ->values(),
         ];
 
-        return response()->json(['status' => 'success', 'data' => $this->instance,], 200);
+        return response()->json(['check' => true, 'data' => $this->instance,], 200);
     }
     //doanh thi cho bill products
     public function getRevenueAllProducts()
@@ -191,7 +191,7 @@ class RevenueController extends Controller
             $totalRevenueYear += $totalRevenue;
         }
 
-        return response()->json(['status' => 'success', 'data' => ['monthly_revenue' => $instance, 'revenue_year' => $totalRevenueYear]], 200);
+        return response()->json(['check' => true, 'data' => ['monthly_revenue' => $instance, 'revenue_year' => $totalRevenueYear]], 200);
     }
     public function getRevenueByProduct($id)
     {
@@ -357,6 +357,6 @@ class RevenueController extends Controller
             'payment_methods' => $paymentMethods,
         ];
 
-        return response()->json(['status' => 'success', 'data' => $this->instance], 200);
+        return response()->json(['check' => true, 'data' => $this->instance], 200);
     }
 }
