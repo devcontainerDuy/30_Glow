@@ -37,7 +37,7 @@ class RevenueController extends Controller
             $totalRevenueYear += $totalRevenue;
         }
 
-        return response()->json(['status' => 'success', 'data' => ['monthly_revenue' => $instance, 'revenue_year' => $totalRevenueYear,],], 200);
+        return response()->json(['check' => true, 'data' => ['monthly_revenue' => $instance, 'revenue_year' => $totalRevenueYear,],], 200);
     }
     public function getRevenueByService($id)
     {
@@ -72,7 +72,7 @@ class RevenueController extends Controller
         }
 
         return response()->json([
-            'status' => 'success',
+            'check' => true,
             'data' => [
                 'service' => $service,
                 'monthly_revenue' => $this->instance,
@@ -113,7 +113,7 @@ class RevenueController extends Controller
         }
 
         return response()->json([
-            'status' => 'success',
+            'check' => true,
             'data' => [
                 'customer' => $customer,
                 'monthly_revenue' => $this->instance,
@@ -169,12 +169,16 @@ class RevenueController extends Controller
                 ->values(),
         ];
 
-        return response()->json(['status' => 'success', 'data' => $this->instance,], 200);
+        return response()->json(['check' => true, 'data' => $this->instance,], 200);
     }
     //doanh thi cho bill products
     public function getRevenueAllProducts()
     {
-        $data = Bills::monthlyRevenue()->get()->keyBy('month');
+        $data = Bills::where('payment_status', 1)
+            ->where('status', 4)
+            ->monthlyRevenue()
+            ->get()
+            ->keyBy('month');
         $instance = [];
         $totalRevenueYear = 0;
 
@@ -187,11 +191,14 @@ class RevenueController extends Controller
             $totalRevenueYear += $totalRevenue;
         }
 
-        return response()->json(['status' => 'success', 'data' => ['monthly_revenue' => $instance, 'revenue_year' => $totalRevenueYear]], 200);
+        return response()->json(['check' => true, 'data' => ['monthly_revenue' => $instance, 'revenue_year' => $totalRevenueYear]], 200);
     }
     public function getRevenueByProduct($id)
     {
         $this->data = BillsDetail::with('product', 'product.gallery')
+            ->whereHas('bill', function ($query) {
+                $query->where('payment_status', 1)->where('status', 4);
+            })
             ->where('id_product', $id)
             ->get();
 
@@ -234,10 +241,7 @@ class RevenueController extends Controller
                     return $galleryItem->status == 1;
                 })->map(function ($galleryItem) {
                     return [
-                        'id' => $galleryItem->id,
                         'image' => asset('storage/gallery/' . $galleryItem->image),
-                        'id_parent' => $galleryItem->id_parent,
-                        'status' => $galleryItem->status,
                     ];
                 }),
                 'monthly_revenue' => $monthlyRevenue,
@@ -250,9 +254,10 @@ class RevenueController extends Controller
     public function getRevenueProductByCustomer($id)
     {
         $this->data = Bills::with('customer')
+            ->where('payment_status', 1)
+            ->where('status', 4)
             ->where('customer_id', $id)
             ->get();
-
         if ($this->data->isEmpty()) {
             return response()->json([
                 'check' => false,
@@ -291,57 +296,67 @@ class RevenueController extends Controller
         $request->validated();
         $startDate = $request->input('startDate');
         $endDate = $request->input('endDate');
-    
-        $this->data = Bills::with(['billDetail.product.gallery' => function ($query) {
+
+        $this->data = Bills::with(['billDetail.product.gallery', 'billDetail.product.category' => function ($query) {
             $query->where('status', 1);
         }])
-        ->whereBetween('created_at', [$startDate, $endDate])
-        ->get();
-    
+            ->where('payment_status', 1)
+            ->where('status', 4)
+            ->whereBetween('created_at', [$startDate, $endDate])
+            ->get();
+
         if ($this->data->isEmpty()) {
             return response()->json([
                 'check' => false,
                 'message' => 'Không có hóa đơn nào trong khoảng thời gian này!',
             ], 404);
         }
-    
+        $paymentMethods = $this->data->groupBy('payment_method')->map(function ($bills, $paymentMethod) {
+            return [
+                'payment_method' => $paymentMethod,
+                'total' => $bills->sum('total'),
+            ];
+        })->values();
+
         $this->instance = [
             'total_revenue' => $this->data->sum('total'),
-            'products' => $this->data->flatMap(function ($bill) {
-                return $bill->billDetail->map(function ($detail) use ($bill) {
+            'categories' => $this->data->flatMap(function ($bill) {
+                return $bill->billDetail->map(function ($detail) {
                     $product = $detail->product;
                     if (!$product) {
                         return null;
                     }
-                    $productImage = $product->gallery->first();
+                    $productImage = $product->gallery->firstWhere('status', 1);
                     $imageUrl = $productImage ? asset('storage/products/' . $productImage->image) : null;
-    
+
                     return [
-                        'name' => $product->name,
-                        'slug' => $product->slug,
-                        'price' =>(float) $product->price,
-                        'unit_price' => (float) $detail->unit_price,
-                        'image' => $imageUrl,
+                        'id_category' => $product->id_category,
+                        'name' => $product->category->name ?? 'Uncategorized',
+                        'product' => [
+                            'name' => $product->name,
+                            'slug' => $product->slug,
+                            'price' => (float) $product->price,
+                            'unit_price' => (float) $detail->unit_price,
+                            'quantity' => $detail->quantity,
+                            'image' => $imageUrl,
+                        ],
                     ];
                 })->filter();
             })
-            ->groupBy('slug')
-            ->map(function ($group) {
-                $product = $group->first();
-                $count = $group->count();
-                $total_price = $count * $product['unit_price']; 
-                return [
-                    'name' => $product['name'],
-                    'slug' => $product['slug'],
-                    'unit_price' => $product['price'],
-                    'total_price' => $total_price,
-                    'image' => $product['image'],
-                    'quantity' => $group->count(),
-                ];
-            })
-            ->values(),
+                ->groupBy('id_category')
+                ->map(function ($group, $categoryId) {
+                    $categoryName = $group->first()['name'];
+                    $products = $group->pluck('product')->toArray();
+
+                    return [
+                        'name' => $categoryName,
+                        'products' => $products,
+                    ];
+                })
+                ->values(),
+            'payment_methods' => $paymentMethods,
         ];
-    
-        return response()->json(['status' => 'success', 'data' => $this->instance], 200);
+
+        return response()->json(['check' => true, 'data' => $this->instance], 200);
     }
 }
