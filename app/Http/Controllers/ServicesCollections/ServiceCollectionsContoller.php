@@ -112,7 +112,12 @@ class ServiceCollectionsContoller extends Controller
 
     public function apiShow($slug)
     {
-        $this->data = $this->model::with('services')->active()->select('id', 'name', 'slug', 'status', 'highlighted')->whereHas('services')->where('slug', $slug)->firstOrFail();
+        $this->data = $this->model::with('services')->active()->select('id', 'name', 'slug', 'status', 'highlighted')->whereHas(
+            'services',
+            function ($query) {
+                $query->where('status', 1);
+            }
+        )->where('slug', $slug)->firstOrFail();
 
         if (!$this->data) {
             return response()->json(['check' => false, 'message' => 'Không tìm thấy dịch vụ!'], 404);

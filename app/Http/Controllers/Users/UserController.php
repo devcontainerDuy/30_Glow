@@ -14,6 +14,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Auth;
 
 class UserController extends Controller
 {
@@ -82,7 +83,7 @@ class UserController extends Controller
      */
     public function show(string $id)
     {
-        //
+        // 
     }
 
     /**
@@ -154,5 +155,16 @@ class UserController extends Controller
         ];
 
         return response()->json(['check' => true, 'data' => $this->data], 200);
+    }
+
+    public function apiEdit()
+    {
+        // if (Auth::guard('api')->check()) {
+        //     $this->data = $this->model::with('roles')->where('uid', Auth::guard('api')->user()->uid)->active()->whereHas("roles", function (Builder $query) {
+        //         $query->where('name', 'Staff');
+        //     })->first();
+        //     return response()->json(['check' => true, 'data' => $this->data], 200);
+        // }
+        return response()->json(['check' => false, 'message' => 'Unauthorized'], 401);
     }
 }

@@ -114,7 +114,7 @@ class BillController extends Controller
                 'address_other' => $this->data['address_other'] ?? null,
                 'note_other' => $this->data['note_other'] ?? null,
                 'payment_method' => $this->data['payment_method'],
-                'payment_status' => $this->data['payment_status'] ?? 0,
+                'payment_status' => 0,
                 'transaction_id' => $this->data['transaction_id'] ?? null,
                 'total' => $this->data['total'],
                 'status' => 1,

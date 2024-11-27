@@ -28,6 +28,7 @@ Route::middleware('api')->group(function () {
 
     Route::controller(App\Http\Controllers\Auth\Admin\AuthenController::class)->group(function () {
         Route::post('login-manager', 'loginManager')->middleware(['throttle:5,1']);
+        Route::post('logout-manager', 'handleLogoutManager')->middleware(['auth:sanctum', 'auth.session', 'role:Manager|Staff']);
     });
 
     Route::post('/carts/loadCart', [App\Http\Controllers\Carts\CartController::class, 'loadCart']);
@@ -62,6 +63,7 @@ Route::middleware('api')->group(function () {
         Route::controller(App\Http\Controllers\Users\UserController::class)->group(function () {
             Route::get('/staff', 'apiIndex');
             Route::get('/staff/{id}', 'apiShow');
+            Route::get('/manager/infomation', 'apiEdit');
         });
     });
 });

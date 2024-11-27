@@ -9,6 +9,7 @@ use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Session;
+use Illuminate\Support\Facades\Log;
 
 class AuthenController extends Controller
 {
@@ -62,5 +63,23 @@ class AuthenController extends Controller
             }
         }
         return response()->json(['check' => false, 'message' => 'Đăng nhập thất bại!'], 401);
+    }
+    public function handleLogoutManager()
+    {
+        try {
+            dd(Auth::guard('api')->check());
+            $this->instance = Auth::guard('api')->user();
+            if ($this->instance) {
+                $this->instance->load('roles');
+                $this->instance->tokens()->delete();
+                Auth::guard('api')->logout();
+                return response()->json(['check' => true, 'message' => 'Đăng xuất thành công!'], 200);
+            } else {
+                return response()->json(['check' => false, 'message' => 'Người dùng không tồn tại hoặc không được xác thực!'], 400);
+            }
+        } catch (\Exception $e) {
+            Log::error($e->getMessage());
+            return response()->json(['check' => false, 'message' => 'Đăng xuất thất bại!'], 400);
+        }
     }
 }
