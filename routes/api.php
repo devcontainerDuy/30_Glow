@@ -45,6 +45,9 @@ Route::middleware('api')->group(function () {
 
     Route::controller(App\Http\Controllers\Bills\BillController::class)->group(function () {
         Route::post('/bills', 'store');
+        Route::get('/bills/list', 'apiIndex');
+        Route::get('/bills/{id}', 'apiShow');
+        Route::get('/bill/customer/{id}', 'getBillByCustomer');
     });
 
     Route::controller(App\Http\Controllers\Bookings\BookingController::class)->group(function () {
