@@ -331,7 +331,7 @@ class RevenueController extends Controller
 
                     return [
                         'id_category' => $product->id_category,
-                        'category_name' => $product->category->name ?? 'Uncategorized',
+                        'name' => $product->category->name ?? 'Uncategorized',
                         'product' => [
                             'name' => $product->name,
                             'slug' => $product->slug,
