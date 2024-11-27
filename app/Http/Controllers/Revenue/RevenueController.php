@@ -345,11 +345,11 @@ class RevenueController extends Controller
             })
                 ->groupBy('id_category')
                 ->map(function ($group, $categoryId) {
-                    $categoryName = $group->first()['category_name'];
+                    $categoryName = $group->first()['name'];
                     $products = $group->pluck('product')->toArray();
 
                     return [
-                        'category_name' => $categoryName,
+                        'name' => $categoryName,
                         'products' => $products,
                     ];
                 })
