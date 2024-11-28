@@ -15,6 +15,7 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 
 class UserController extends Controller
 {
@@ -159,22 +160,35 @@ class UserController extends Controller
 
     public function apiEdit()
     {
-        if (Auth::check()) {
-            $this->data = $this->model::with('roles')->where('uid', Auth::user()->uid)->active()->whereHas("roles", function (Builder $query) {
-                $query->where('name', 'Staff');
-            })->first();
+        try {
+            if (Auth::check()) {
+                $user = Auth::user();
+                $this->data = $this->model::with('roles')->where('uid', $user->uid)->active()->first();
 
-            $this->data = [
-                'uid' => $this->data->uid,
-                'name' => $this->data->name,
-                'email' => $this->data->email,
-                'phone' => $this->data->phone,
-                'address' => $this->data->address,
-                'roles' => $this->data->roles->pluck('name')->toArray(),
-            ];
+                if (!$this->data) {
+                    return response()->json(['check' => false, 'message' => 'Unauthorized'], 401);
+                }
 
-            return response()->json(['check' => true, 'data' => $this->data], 200);
+                $this->instance = [
+                    'uid' => $this->data->uid,
+                    'name' => $this->data->name,
+                    'email' => $this->data->email,
+                    'phone' => $this->data->phone,
+                    'address' => $this->data->address,
+                    'roles' => $this->data->roles->pluck('name')->toArray(),
+                ];
+
+                return response()->json(['check' => true, 'data' => $this->instance], 200);
+            } else {
+                return response()->json(['check' => false, 'message' => 'Unauthorized'], 401);
+            }
+        } catch (\Throwable $e) {
+            Log::error($e->getMessage());
+            if (Auth::check()) {
+                Auth::user()->tokens()->delete();
+                Auth::guard('api')->logout();
+            }
+            return response()->json(['check' => false, 'message' => 'Unauthorized'], 401);
         }
-        return response()->json(['check' => false, 'message' => 'Unauthorized'], 401);
     }
 }
