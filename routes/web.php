@@ -34,9 +34,7 @@ Route::fallback(function () {
 });
 
 Route::middleware(['auth', 'auth.session', 'web', 'authen:Super Admin,Manager'])->prefix('admin')->as('admin.')->group(function () {
-    Route::name('home')->get('/', function () {
-        return Inertia::render('Home');
-    });
+    Route::get('/', [App\Http\Controllers\Revenue\RevenueController::class, 'index'])->name('home');
     // Module User
     Route::resource('users', App\Http\Controllers\Users\UserController::class)->names('user');
     // Module Role

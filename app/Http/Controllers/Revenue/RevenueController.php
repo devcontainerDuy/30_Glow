@@ -12,8 +12,10 @@ use App\Models\ServiceBills;
 use App\Models\ServiceBillsDetails;
 use App\Models\Services;
 use App\Models\User;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Inertia\Inertia;
 
 class RevenueController extends Controller
 {
@@ -21,6 +23,95 @@ class RevenueController extends Controller
     {
         $this->model = ServiceBills::class;
     }
+
+    public function index()
+    {
+        // Tổng số người dùng
+        $totalUsers = Customers::count();
+
+        // Tổng số người dùng mới trong tháng này
+        $totalNewUsersThisMonth = Customers::whereMonth('created_at', Carbon::now()->month)
+            ->whereYear('created_at', Carbon::now()->year)
+            ->count();
+
+        // Doanh thu tháng này
+        $currentMonthRevenue = Bills::whereMonth('created_at', now()->month)
+            ->sum('total') + ServiceBills::whereMonth('created_at', now()->month)
+            ->sum('total');
+
+        // Đơn hàng mới trong tháng này
+        $newOrdersCount = Bills::whereMonth('created_at', now()->month)
+            ->where('status', 1)
+            ->count();
+
+        // Sản phẩm bán chạy trong tháng này
+        $bestSellingProduct = BillsDetail::selectRaw('id_product, SUM(quantity) as total_quantity')
+            ->whereMonth('created_at', now()->month)
+            ->with(['product.gallery' => function ($query) {
+                $query->where('status', 1);
+            }])
+            ->groupBy('id_product')
+            ->orderByDesc('total_quantity')
+            ->first();
+
+        // Doanh thu sản phẩm và dịch vụ
+        $products = Bills::monthlyRevenue()->get()->keyBy('month');
+        $instance = [];
+        $totalRevenueYear = 0;
+
+        for ($month = 1; $month <= 12; $month++) {
+            $totalRevenue = $products->get($month)->revenue ?? 0;
+            $instance[] = [
+                'month' => $month,
+                'revenue' => $totalRevenue,
+            ];
+            $totalRevenueYear += $totalRevenue;
+        }
+        $total_products[] = [
+            'monthly_revenue' => $instance,
+            'revenue_year' => $totalRevenueYear
+        ];
+        $services = ServiceBills::monthlyRevenue()->get()->keyBy('month');
+        $instance = [];
+        $totalRevenueYear = 0;
+
+        for ($month = 1; $month <= 12; $month++) {
+            $totalRevenue = $services->get($month)->revenue ?? 0;
+            $instance[] = [
+                'month' => $month,
+                'revenue' => $totalRevenue,
+            ];
+            $totalRevenueYear += $totalRevenue;
+        }
+        $total_services[] = [
+            'monthly_revenue' => $instance,
+            'revenue_year' => $totalRevenueYear
+        ];
+
+        $latestProductOrders = Bills::select('uid', 'created_at', 'total')
+            ->latest()
+            ->take(3)
+            ->get();
+
+        $latestServiceBills = ServiceBills::select('uid', 'created_at', 'total')
+            ->latest()
+            ->take(3)
+            ->get();
+
+        return Inertia::render('Home', [
+            'products' => $total_products,
+            'services' => $total_services,
+            'totalUsers' => $totalUsers,
+            'currentMonthRevenue' => $currentMonthRevenue,
+            'newOrdersCount' => $newOrdersCount,
+            'bestSellingProduct' => $bestSellingProduct,
+            'totalNewUsersThisMonth' => $totalNewUsersThisMonth,
+            'latestProductOrders' => $latestProductOrders,
+            'latestServiceBills' => $latestServiceBills,
+        ]);
+    }
+
+
     //doanh thi cho bill services
     public function getRevenueAllServices()
     {
