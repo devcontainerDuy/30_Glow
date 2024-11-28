@@ -35,7 +35,7 @@ class Bookings extends Model
         return $this->belongsTo(Customers::class, 'id_customer', 'id');
     }
 
-    public function services(): BelongsToMany
+    public function service(): BelongsToMany
     {
         return $this->belongsToMany(Services::class, 'booking_has_services', 'id_booking', 'id_service');
     }
