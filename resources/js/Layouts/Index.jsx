@@ -32,7 +32,17 @@ import ReceiptLongOutlinedIcon from "@mui/icons-material/ReceiptLongOutlined";
 
 function Layout({ children }) {
     const [user, setUser] = useState(null);
+    const [isExpanded, setIsExpanded] = useState(true);
     const { collapseSidebar } = useProSidebar();
+    function handleToggle() {
+        if (isCollapsed) {
+            collapseSidebar(false);
+            setIsExpanded(true);
+        } else {
+            collapseSidebar(true);
+            setIsExpanded(false);
+        }
+    }
 
     const [placeholderText, setPlaceholderText] = useState("");
     const fullText = "Bạn muốn tìm gì...?";
@@ -105,7 +115,7 @@ function Layout({ children }) {
             {/* Alert notification */}
 
             <div id="app" style={({ height: "100vh" }, { display: "flex" })}>
-                <Sidebar style={{ height: "100vh" }}>
+                <Sidebar style={{ height: "100vh" }} collapsed={!isExpanded}>
                     <Menu>
                         <MenuItem icon={<MenuOutlinedIcon />} onClick={() => collapseSidebar()} style={{ textAlign: "center" }}>
                             <Image src={logo} />

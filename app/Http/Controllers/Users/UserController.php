@@ -159,12 +159,22 @@ class UserController extends Controller
 
     public function apiEdit()
     {
-        // if (Auth::guard('api')->check()) {
-        //     $this->data = $this->model::with('roles')->where('uid', Auth::guard('api')->user()->uid)->active()->whereHas("roles", function (Builder $query) {
-        //         $query->where('name', 'Staff');
-        //     })->first();
-        //     return response()->json(['check' => true, 'data' => $this->data], 200);
-        // }
+        if (Auth::check()) {
+            $this->data = $this->model::with('roles')->where('uid', Auth::user()->uid)->active()->whereHas("roles", function (Builder $query) {
+                $query->where('name', 'Staff');
+            })->first();
+
+            $this->data = [
+                'uid' => $this->data->uid,
+                'name' => $this->data->name,
+                'email' => $this->data->email,
+                'phone' => $this->data->phone,
+                'address' => $this->data->address,
+                'roles' => $this->data->roles->pluck('name')->toArray(),
+            ];
+
+            return response()->json(['check' => true, 'data' => $this->data], 200);
+        }
         return response()->json(['check' => false, 'message' => 'Unauthorized'], 401);
     }
 }
