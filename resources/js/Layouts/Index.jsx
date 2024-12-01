@@ -34,15 +34,28 @@ function Layout({ children }) {
     const [user, setUser] = useState(null);
     const [isExpanded, setIsExpanded] = useState(true);
     const { collapseSidebar } = useProSidebar();
-    function handleToggle() {
-        if (isCollapsed) {
+
+    useEffect(() => {
+        const savedState = localStorage.getItem("isSidebarExpanded");
+        if (savedState !== null) {
+            setIsExpanded(JSON.parse(savedState));
+            collapseSidebar(!JSON.parse(savedState));
+        }
+    }, [collapseSidebar]);
+
+    const handleToggle = () => {
+        console.log("handleToggle", isExpanded);
+
+        if (!isExpanded) {
             collapseSidebar(false);
             setIsExpanded(true);
+            localStorage.setItem("isSidebarExpanded", true);
         } else {
             collapseSidebar(true);
             setIsExpanded(false);
+            localStorage.setItem("isSidebarExpanded", false);
         }
-    }
+    };
 
     const [placeholderText, setPlaceholderText] = useState("");
     const fullText = "Bạn muốn tìm gì...?";
@@ -114,19 +127,19 @@ function Layout({ children }) {
             <ToastContainer autoClose={2000} />
             {/* Alert notification */}
 
-            <div id="app" style={({ height: "100vh" }, { display: "flex" })}>
+            <Container fluid id="app" className="p-0 my-0" style={({ height: "100vh" }, { display: "flex" })}>
                 <Sidebar style={{ height: "100vh" }} collapsed={!isExpanded}>
                     <Menu>
-                        <MenuItem icon={<MenuOutlinedIcon />} onClick={() => collapseSidebar()} style={{ textAlign: "center" }}>
+                        <MenuItem icon={<MenuOutlinedIcon />} onClick={() => handleToggle()} style={{ textAlign: "center" }}>
                             <Image src={logo} />
                             {/* <h2> 30 Glow</h2> */}
                         </MenuItem>
                         <MenuItem icon={<HomeOutlinedIcon />} component={<Link href="/admin/" method="get" as="a" />}>
-                            Trang chủ
+                            Thống kê
                         </MenuItem>
                         <SubMenu icon={<PeopleOutlinedIcon />} label="Quản lý tài khoản">
                             <MenuItem icon={<BadgeOutlinedIcon />} component={<Link href="/admin/users" />}>
-                                Ds tài khoản
+                                Ds nhân viên
                             </MenuItem>
                             <MenuItem icon={<PermContactCalendarOutlinedIcon />} component={<Link href="/admin/customers" />}>
                                 Ds khách hàng
@@ -143,10 +156,10 @@ function Layout({ children }) {
                                 Ds sản phẩm
                             </MenuItem>
                             <MenuItem icon={<CategoryOutlinedIcon />} component={<Link href="/admin/categories" />}>
-                                Danh mục sản phẩm
+                                Danh mục
                             </MenuItem>
                             <MenuItem icon={<BrandingWatermarkOutlinedIcon />} component={<Link href="/admin/brands" />}>
-                                Thương hiệu sản phẩm
+                                Thương hiệu
                             </MenuItem>
                         </SubMenu>
                         <SubMenu icon={<ContentCutOutlinedIcon />} label="Quản lý dịch vụ">
@@ -180,11 +193,11 @@ function Layout({ children }) {
                     </Menu>
                 </Sidebar>
 
-                <main className="w-100">
+                <Container fluid as={"main"} className="bg-body-light px-0">
                     {/* Thanh Header */}
                     <Navbar expand="lg" className="bg-body-tertiary">
                         <Container fluid>
-                            <Navbar.Brand href="#home">
+                            <Navbar.Brand>
                                 <Form inline>
                                     <InputGroup>
                                         <InputGroup.Text id="btn-search">
@@ -212,11 +225,11 @@ function Layout({ children }) {
                             </Navbar.Collapse>
                         </Container>
                     </Navbar>
-                    <Container fluid className="px-5 py-4">
+                    <Container fluid className="px-md-5 py-md-4 px-lg-5 py-lg-4 px-xl-5 py-xl-4">
                         {children}
                     </Container>
-                </main>
-            </div>
+                </Container>
+            </Container>
         </>
     );
 }

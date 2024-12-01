@@ -11,6 +11,7 @@ use Inertia\Inertia;
 use App\Mail\createUser;
 use App\Mail\resetPassword;
 use App\Traits\GeneratesUniqueId;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Validator;
@@ -95,9 +96,9 @@ class CustomerController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(string $id)
+    public function show()
     {
-        $this->instance = $this->model::where('uid', $id)->select('uid', 'name', 'address', 'email', 'phone',)->active()->first();
+        $this->instance = $this->model::where('uid', Auth::user()->uid)->select('uid', 'name', 'address', 'email', 'phone',)->active()->first();
 
         if ($this->instance) {
             return response()->json(['check' => true, 'data' => $this->instance], 200);
@@ -109,10 +110,10 @@ class CustomerController extends Controller
     /**
      * Show api the form for editing the specified resource.
      */
-    public function edit(CustomerRequest $request, string $id)
+    public function edit(CustomerRequest $request)
     {
         $this->data = $request->validated();
-        $this->instance = $this->model::where('uid', $id)->active()->first();
+        $this->instance = $this->model::where('uid', Auth::user()->uid)->active()->first();
 
         if ($this->instance->update($this->data)) {
             return response()->json(['check' => true, 'message' => 'Cập nhật thành công!'], 200);
@@ -120,7 +121,7 @@ class CustomerController extends Controller
         return response()->json(['check' => false, 'message' => 'Cập nhật thất bại!'], 401);
     }
 
-    public function changePassword(Request $request, string $id)
+    public function changePassword(Request $request)
     {
         $validator = Validator::make($request->all(), [
             'password' => ['required', 'string', 'min:8', 'confirmed'],
@@ -132,7 +133,7 @@ class CustomerController extends Controller
         }
 
         $this->data = $request->only('password');
-        $this->instance = $this->model::where('uid', $id)->active()->first();
+        $this->instance = $this->model::where('uid', Auth::user()->uid)->active()->first();
 
         $hashPassword = Hash::make($this->data['password']);
         if ($this->instance->update(['password' => $hashPassword])) {

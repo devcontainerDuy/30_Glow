@@ -20,10 +20,15 @@ Route::middleware(['auth:sanctum', 'web'])->get('/user', function (Request $requ
 });
 
 Route::middleware('api')->group(function () {
-    Route::controller(App\Http\Controllers\Auth\AuthenticateController::class)->group(function () {
+    Route::controller(App\Http\Controllers\Auth\Clients\AuthenticateController::class)->group(function () {
         Route::post('register', 'register');
         Route::post('login', 'login');
         Route::post('logout', 'logout')->middleware('auth:sanctum');
+    });
+
+    Route::controller(App\Http\Controllers\Auth\Clients\ResetPasswordController::class)->group(function () {
+        Route::post('reset-password', 'sendMail');
+        Route::put('reset-password/{token}', 'reset');
     });
 
     Route::controller(App\Http\Controllers\Auth\Admin\AuthenController::class)->group(function () {
@@ -37,9 +42,9 @@ Route::middleware('api')->group(function () {
         Route::apiResource('carts', App\Http\Controllers\Carts\CartController::class);
 
         Route::controller(App\Http\Controllers\Customers\CustomerController::class)->group(function () {
-            Route::get('/customers/{id}', 'show');
-            Route::put('/customers/{id}', 'edit');
-            Route::post('/customers/{id}/change-password', 'changePassword');
+            Route::get('/customers', 'show');
+            Route::put('/customers/edit', 'edit');
+            Route::post('/customers/change-password', 'changePassword');
         });
     });
 

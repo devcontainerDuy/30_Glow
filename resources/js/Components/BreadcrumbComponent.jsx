@@ -6,18 +6,10 @@ function BreadcrumbComponent({ props, children }) {
     const { url } = usePage();
     return (
         <Container className="my-4">
-            <div className="d-flex justify-content-between align-items-center bg-body-tertiary rounded-3 p-2">
+            <div className="d-flex flex-wrap justify-content-md-between align-items-center bg-body-tertiary rounded-3 p-2">
                 <Breadcrumb aria-label="breadcrumb" className="mt-3 ms-3">
-                    <Breadcrumb.Item
-                        href="/admin/"
-                        linkAs={Link}
-                        linkProps={{ to: "/admin/" }}
-                    >
-                        <i
-                            className="bi bi-house-door-fill"
-                            width="16"
-                            height="16"
-                        />
+                    <Breadcrumb.Item href="/admin/" linkAs={Link} linkProps={{ to: "/admin/" }}>
+                        <i className="bi bi-house-door-fill" width="16" height="16" />
                         <span className="visually-hidden">Home</span>
                     </Breadcrumb.Item>
                     {props &&
