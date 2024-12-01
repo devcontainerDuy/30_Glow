@@ -24,6 +24,8 @@ Route::middleware('api')->group(function () {
         Route::post('register', 'register');
         Route::post('login', 'login');
         Route::post('logout', 'logout')->middleware('auth:sanctum');
+        Route::get('auth/google', 'redirectToAuth');
+        Route::get('auth/google/callback', 'handleAuthCallback');
     });
 
     Route::controller(App\Http\Controllers\Auth\Clients\ResetPasswordController::class)->group(function () {

@@ -18,6 +18,8 @@ class AuthenticateRequest extends BaseRequest
             'phone' => ['required', 'numeric', 'unique:customers,phone'],
             'password' => ['required', 'string', 'min:8', 'confirmed'],
             // 'password_confirmation' => ['required', 'string', 'min:8'],
+            'social_id' => ['nullable', 'sometimes', 'string'],
+            'social_type' => ['nullable', 'sometimes ', 'string'],
         ];
     }
 }

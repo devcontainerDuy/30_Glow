@@ -8,11 +8,14 @@ use Illuminate\Http\Request;
 use App\Mail\createUser;
 use App\Models\Customers;
 use App\Traits\GeneratesUniqueId;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
+use Laravel\Socialite\Facades\Socialite;
 
 class AuthenticateController extends Controller
 {
@@ -72,5 +75,53 @@ class AuthenticateController extends Controller
     {
         $request->user()->tokens()->delete();
         return response()->json(['check' => true, 'message' => 'Đăng xuất thành công!'], 200);
+    }
+
+    public function redirectToAuth(): JsonResponse
+    {
+        return response()->json([
+            'url' => Socialite::driver('google')->stateless()->redirect()->getTargetUrl(),
+        ]);
+    }
+
+    public function handleAuthCallback(): JsonResponse
+    {
+        try {
+            $user = Socialite::driver('google')->stateless()->user();
+            $password = Str::random(8);
+
+            $this->instance = $this->model::active()->firstOrCreate([
+                'email' => $user->getEmail(),
+            ], [
+                'uid' => $this->createCodeCustomer(),
+                'name' => $user->getName(),
+                'email' => $user->getEmail(),
+                'password' => Hash::make($password),
+                'status' => 1,
+                'email_verified_at' => now(),
+                'social_id' => $user->getId(),
+                'social_type' => 'google',
+            ]);
+
+            if ($this->instance->wasRecentlyCreated) {
+                $dataMail = [
+                    'name' => $user->getName(),
+                    'email' => $user->getEmail(),
+                    'password' => $password,
+                ];
+                Mail::to($user->getEmail())->send(new createUser($dataMail));
+            }
+
+            Auth::guard('customer')->login($this->instance, false);
+            $this->instance->tokens()->delete();
+            $expiry = now()->addHours(6);
+            $token = $this->instance->createToken($this->instance->uid);
+            $token->expires_at = $expiry;
+
+            return response()->json(['check' => true, 'uid' => $this->instance->uid, 'token' => $token->plainTextToken, 'expiry' => $expiry->timestamp], 200);
+        } catch (\Throwable $e) {
+            Log::error("Đăng nhập Google thất bại: " . $e->getMessage());
+            return response()->json(['check' => false, 'message' => 'Đăng nhập thất bại!'], 400);
+        }
     }
 }
