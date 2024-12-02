@@ -57,6 +57,11 @@ Route::middleware('api')->group(function () {
         Route::get('/bill/customer/{id}', 'getBillByCustomer');
     });
 
+    Route::controller(App\Http\Controllers\Payment\VnPayController::class)->group(function () {
+        Route::post('/vnpay/create-payment', 'createPayment');
+        Route::get('/vnpay/return-payment', 'vnpayReturn');
+    });
+
     Route::controller(App\Http\Controllers\Bookings\BookingController::class)->group(function () {
         Route::post('/bookings', 'store');
 

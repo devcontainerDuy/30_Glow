@@ -80,6 +80,7 @@ class AuthenticateController extends Controller
     public function redirectToAuth(): JsonResponse
     {
         return response()->json([
+            'check' => true,
             'url' => Socialite::driver('google')->stateless()->redirect()->getTargetUrl(),
         ]);
     }

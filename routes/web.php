@@ -29,9 +29,9 @@ Route::get('/forbidden', function () {
     return Inertia::render('Errors/403/Forbidden');
 })->name('forbidden');
 
-Route::fallback(function () {
-    return redirect()->route('notfound');
-});
+// Route::fallback(function () {
+//     return redirect()->route('notfound');
+// });
 
 Route::middleware(['auth', 'auth.session', 'web', 'authen:Super Admin,Manager'])->prefix('admin')->as('admin.')->group(function () {
     Route::name('home')->get('/', function () {
