@@ -85,7 +85,7 @@ class AuthenticateController extends Controller
         ]);
     }
 
-    public function handleAuthCallback(): JsonResponse
+    public function handleAuthCallback()
     {
         try {
             $user = Socialite::driver('google')->stateless()->user();
