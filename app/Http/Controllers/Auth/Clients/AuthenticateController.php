@@ -85,7 +85,7 @@ class AuthenticateController extends Controller
         ]);
     }
 
-    public function handleAuthCallback()
+    public function handleAuthCallback(): JsonResponse
     {
         try {
             $user = Socialite::driver('google')->stateless()->user();
@@ -119,8 +119,7 @@ class AuthenticateController extends Controller
             $token = $this->instance->createToken($this->instance->uid);
             $token->expires_at = $expiry;
 
-            $frontendUrl = "https://30glow.site/#check=true" . "&uid={$this->instance->uid}" . "&token={$token->plainTextToken}" . "&expiry={$expiry->timestamp}";
-            return redirect()->to($frontendUrl);
+            return response()->json(['check' => true, 'uid' => $this->instance->uid, 'token' => $token->plainTextToken, 'expiry' => $expiry->timestamp], 200);
         } catch (\Throwable $e) {
             Log::error("Đăng nhập Google thất bại: " . $e->getMessage());
             return response()->json(['check' => false, 'message' => 'Đăng nhập thất bại!'], 400);
