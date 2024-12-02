@@ -119,7 +119,8 @@ class AuthenticateController extends Controller
             $token = $this->instance->createToken($this->instance->uid);
             $token->expires_at = $expiry;
 
-            return response()->json(['check' => true, 'uid' => $this->instance->uid, 'token' => $token->plainTextToken, 'expiry' => $expiry->timestamp], 200);
+            $frontendUrl = "https://30glow.site/#check=true" . "&uid={$this->instance->uid}" . "&token={$token->plainTextToken}" . "&expiry={$expiry->timestamp}";
+            return redirect()->to($frontendUrl);
         } catch (\Throwable $e) {
             Log::error("Đăng nhập Google thất bại: " . $e->getMessage());
             return response()->json(['check' => false, 'message' => 'Đăng nhập thất bại!'], 400);
