@@ -126,21 +126,12 @@ class AuthenticateController extends Controller
                 'expiry' => $expiry->timestamp
             ];
 
-            return response()->json($response, 200)
-                ->withHeaders(['Content-Type' => 'application/json'])
-                ->setContent(
-                    '<script>window.opener.postMessage(' . json_encode($response) . ', "*"); window.close();</script>'
-                );
+            return response()->json($response, 200, ['Content-Type' => 'application/json']);
         } catch (\Throwable $e) {
             Log::error("Đăng nhập Google thất bại: " . $e->getMessage() . " at " . $e->getFile() . ":" . $e->getLine());
 
             $response = ['check' => false, 'message' => 'Đăng nhập thất bại!'];
-
-            return response()->json($response, 500)
-                ->withHeaders(['Content-Type' => 'application/json'])
-                ->setContent(
-                    '<script>window.opener.postMessage(' . json_encode($response) . ', "*"); window.close();</script>'
-                );
+            return response()->json($response, 500, ['Content-Type' => 'application/json']);
         }
     }
 }
