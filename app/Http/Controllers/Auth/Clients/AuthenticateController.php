@@ -128,12 +128,9 @@ class AuthenticateController extends Controller
 
             return response()->json($response, 200)
                 ->withHeaders(['Content-Type' => 'application/json'])
-                ->withJavascript("
-                if (window.opener) {
-                    window.opener.postMessage(" . json_encode($response) . ", '*');
-                }
-                window.close();
-            ");
+                ->setContent(
+                    '<script>window.opener.postMessage(' . json_encode($response) . ', "*"); window.close();</script>'
+                );
         } catch (\Throwable $e) {
             Log::error("Đăng nhập Google thất bại: " . $e->getMessage() . " at " . $e->getFile() . ":" . $e->getLine());
 
@@ -141,12 +138,9 @@ class AuthenticateController extends Controller
 
             return response()->json($response, 500)
                 ->withHeaders(['Content-Type' => 'application/json'])
-                ->withJavascript("
-                if (window.opener) {
-                    window.opener.postMessage(" . json_encode($response) . ", '*');
-                }
-                window.close();
-            ");
+                ->setContent(
+                    '<script>window.opener.postMessage(' . json_encode($response) . ', "*"); window.close();</script>'
+                );
         }
     }
 }
