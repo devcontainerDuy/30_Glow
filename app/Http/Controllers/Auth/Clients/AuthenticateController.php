@@ -119,10 +119,34 @@ class AuthenticateController extends Controller
             $token = $this->instance->createToken($this->instance->uid);
             $token->expires_at = $expiry;
 
-            return response()->json(['check' => true, 'uid' => $this->instance->uid, 'token' => $token->plainTextToken, 'expiry' => $expiry->timestamp], 200);
+            $response = (object) [
+                'check' => true,
+                'uid' => $this->instance->uid,
+                'token' => $token->plainTextToken,
+                'expiry' => $expiry->timestamp
+            ];
+
+            return response()->json($response, 200)
+                ->withHeaders(['Content-Type' => 'application/json'])
+                ->withJavascript("
+                if (window.opener) {
+                    window.opener.postMessage(" . json_encode($response) . ", '*');
+                }
+                window.close();
+            ");
         } catch (\Throwable $e) {
-            Log::error("Đăng nhập Google thất bại: " . $e->getMessage());
-            return response()->json(['check' => false, 'message' => 'Đăng nhập thất bại!'], 400);
+            Log::error("Đăng nhập Google thất bại: " . $e->getMessage() . " at " . $e->getFile() . ":" . $e->getLine());
+
+            $response = ['check' => false, 'message' => 'Đăng nhập thất bại!'];
+
+            return response()->json($response, 500)
+                ->withHeaders(['Content-Type' => 'application/json'])
+                ->withJavascript("
+                if (window.opener) {
+                    window.opener.postMessage(" . json_encode($response) . ", '*');
+                }
+                window.close();
+            ");
         }
     }
 }
