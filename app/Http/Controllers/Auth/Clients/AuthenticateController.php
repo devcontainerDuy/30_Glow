@@ -119,19 +119,16 @@ class AuthenticateController extends Controller
             $token = $this->instance->createToken($this->instance->uid);
             $token->expires_at = $expiry;
 
-            $response = (object) [
-                'check' => true,
-                'uid' => $this->instance->uid,
-                'token' => $token->plainTextToken,
-                'expiry' => $expiry->timestamp
-            ];
-
-            return response()->json($response, 200, ['Content-Type' => 'application/json']);
+            return redirect()->away(env('CLIENT_URL') .
+                '/auth/callback#' . http_build_query([
+                    'check' => true,
+                    'uid' => $this->instance->uid,
+                    'token' => $token->plainTextToken,
+                    'expiry' => $expiry->timestamp,
+                ]));
         } catch (\Throwable $e) {
             Log::error("Đăng nhập Google thất bại: " . $e->getMessage() . " at " . $e->getFile() . ":" . $e->getLine());
-
-            $response = ['check' => false, 'message' => 'Đăng nhập thất bại!'];
-            return response()->json($response, 500, ['Content-Type' => 'application/json']);
+            return response()->json(['check' => false, 'message' => 'Đăng nhập Google thất bại!'], 500, ['Content-Type' => 'application/json']);
         }
     }
 }
