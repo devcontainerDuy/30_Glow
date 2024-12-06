@@ -13,6 +13,7 @@ use App\Traits\GeneratesUniqueId;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Inertia\Inertia;
 
 class BillServicesController extends Controller
 {
@@ -26,7 +27,12 @@ class BillServicesController extends Controller
     }
     public function index()
     {
-        //
+        $this->crumbs = [
+            ['name' => 'Dịch vụ', 'url' => '/admin/services'],
+            ['name' => 'Danh sách hóa đơn', 'url' => '/admin/bills/services']
+        ];
+        $this->data = $this->model::with('customer', 'booking', 'serviceBillDetails.service')->orderBy('created_at', 'desc')->get();
+        return Inertia::render('BillsServices/Index', ['bills' => $this->data, 'crumbs' => $this->crumbs]);
     }
 
     /**
@@ -153,7 +159,14 @@ class BillServicesController extends Controller
      */
     public function edit(string $id)
     {
-        //
+        $this->crumbs = [
+            ['name' => 'Dịch vụ', 'url' => '/admin/services '],
+            ['name' => 'Danh sách hóa đơn', 'url' => '/admin/bills-services'],
+            ['name' => 'Chi tiết hóa đơn', 'url' => '/admin/bills-services/' . $id . '/edit']
+        ];
+        $this->data = $this->model::with('customer', 'booking', 'serviceBillDetails.service')->where('uid', $id)->orderBy('created_at', 'desc')->firstOrFail();
+        // dd($this->data);
+        return Inertia::render('BillsServices/Edit', ['bill' => $this->data, 'crumbs' => $this->crumbs]);
     }
 
     /**
@@ -229,7 +242,7 @@ class BillServicesController extends Controller
                         'unit_price' => (float) $serviceDetail->unit_price,
                     ];
                 })->toArray(),
-                'total' =>(float) $bill->total,
+                'total' => (float) $bill->total,
                 'status' => $bill->status,
                 'created_at' => $bill->created_at,
             ];

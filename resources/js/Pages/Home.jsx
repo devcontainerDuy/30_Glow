@@ -2,23 +2,44 @@ import React from "react";
 import Layout from "../Layouts/Index";
 import { Helmet } from "react-helmet";
 import { toast } from "react-toastify";
+import { router } from "@inertiajs/react";
 import { Badge, Button, Card, Col, Container, ListGroup, ProgressBar, Row } from "react-bootstrap";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, PieChart, Pie, Cell } from "recharts";
 
-function Home() {
-    const data = [
-        { name: "Jan", value: 10000 },
-        { name: "Feb", value: 15000 },
-        // ... thêm dữ liệu cho biểu đồ
-    ];
+function Home({ products, services, totalUsers, totalNewUsersThisMonth, currentMonthRevenue, newOrdersCount, newBookingCount, bestSellingProduct, bestSellingService, latestProductOrders, latestServiceBills }) {
+    const formatCurrency = (value) => {
+        if (isNaN(value)) {
+            return '0 VND';
+        }
+        return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(value);
+    };
+
+    const productData = products.monthly_revenue.map(item => ({
+        name: `Tháng ${item.month}`,
+        value: item.revenue && !isNaN(item.revenue) ? item.revenue : 0,
+    }));
+
+    const maxProductValue = Math.max(...productData.map(item => item.value));
+    const maxProductY = maxProductValue * 1.2;
+
+    const serviceData = services.monthly_revenue.map(item => ({
+        name: `Tháng ${item.month}`,
+        value: item.revenue && !isNaN(item.revenue) ? item.revenue : 0,
+    }));
+
+    const maxServiceValue = Math.max(...serviceData.map(item => item.value));
+    const maxServiceY = maxServiceValue * 1.2;
+
+    // Dữ liệu biểu đồ tròn
+    const totalRevenueProduct = products.revenue_year;
+    const totalRevenueService = services.revenue_year;
 
     const pieData = [
-        { name: "Direct", value: 40 },
-        { name: "Social", value: 30 },
-        { name: "Referral", value: 30 },
+        { name: "Sản phẩm", value: totalRevenueProduct },
+        { name: "Dịch vụ", value: totalRevenueService },
     ];
 
-    const COLORS = ["#0088FE", "#00C49F", "#FFBB28"];
+    const COLORS = ["#0088FE", "#00C49F"];
 
     const RADIAN = Math.PI / 180;
     const renderCustomizedLabel = ({ cx, cy, midAngle, innerRadius, outerRadius, percent, index }) => {
@@ -34,6 +55,18 @@ function Home() {
     };
 
     const notify = () => toast("Đây là 1 thông báo để test !");
+
+    const handleinfo = (uid, route) => {
+        router.visit(`/admin/${route}/${uid}/edit`, {
+            method: "get",
+        });
+    };
+    const handleList = (route) => {
+        router.visit(`/admin/${route}`, {
+            method: "get",
+        });
+    };
+
     return (
         <>
             <Helmet>
@@ -53,7 +86,7 @@ function Home() {
                                 <Card.Body>
                                     <Card.Title>Tổng số người dùng</Card.Title>
                                     <Card.Text className="h3">
-                                        1500 <Badge bg="secondary">+30</Badge>
+                                        {totalUsers} <Badge bg="secondary">+{totalNewUsersThisMonth}</Badge>
                                     </Card.Text>
                                 </Card.Body>
                             </Card>
@@ -62,108 +95,115 @@ function Home() {
                             <Card>
                                 <Card.Body>
                                     <Card.Title>Doanh thu tháng này</Card.Title>
-                                    <Card.Text className="h3">$12,500</Card.Text>
+                                    <Card.Text className="h3">{formatCurrency(currentMonthRevenue)}</Card.Text>
                                 </Card.Body>
                             </Card>
                         </Col>
                         <Col xs={12} md={6} lg={3}>
                             <Card>
                                 <Card.Body>
-                                    <Card.Title>Đơn hàng mới</Card.Title>
-                                    <Card.Text className="h3">50</Card.Text>
+                                    <Card.Title>Đơn hàng mới trong ngày</Card.Title>
+                                    <Card.Text className="h3">{newOrdersCount}</Card.Text>
                                 </Card.Body>
                             </Card>
                         </Col>
                         <Col xs={12} md={6} lg={3}>
                             <Card>
                                 <Card.Body>
-                                    <Card.Title>Sản phẩm bán chạy</Card.Title>
-                                    <Card.Text>Laptop ABC</Card.Text>
+                                    <Card.Title>Lịch booking mới trong ngày</Card.Title>
+                                    <Card.Text className="h3">{newBookingCount}</Card.Text>
                                 </Card.Body>
                             </Card>
                         </Col>
-
-                        {/* Bảng dữ liệu */}
-                        <Col xs={12} md={4}>
-                            <Card>
+                        <Col xs={12} sm={6} md={4}>
+                            <Card className="shadow-sm border-left-primary mb-3">
                                 <Card.Body>
-                                    <Card.Title>Danh sách đơn hàng mới</Card.Title>
-                                    {/* Thay thế bằng component bảng dữ liệu thực tế */}
-                                    <ul>
-                                        <li>Đơn hàng #123</li>
-                                        <li>Đơn hàng #456</li>
-                                        <li>Đơn hàng #789</li>
-                                    </ul>
+                                    <Row className="align-items-center">
+                                        <Col xs={4}>
+                                            <img
+                                                src={bestSellingProduct.image}
+                                                alt={bestSellingProduct.name}
+                                                className="img-fluid rounded"
+                                                style={{ maxHeight: '80px' }}
+                                            />
+                                        </Col>
+                                        <Col xs={8}>
+                                            <Card.Title className="text-uppercase text-muted mb-1">
+                                                Sản phẩm bán chạy
+                                            </Card.Title>
+                                            <Card.Text className="h5 mb-0">{bestSellingProduct.name}</Card.Text>
+                                            <Card.Text className="text-muted mb-0">
+                                                <strong>Số lượng đã bán:</strong> {bestSellingProduct.total_quantity}
+                                            </Card.Text>
+                                            <Card.Text className="text-muted">
+                                                <strong>Giá:</strong> {formatCurrency(bestSellingProduct.price)}
+                                            </Card.Text>
+                                        </Col>
+                                    </Row>
+                                </Card.Body>
+                            </Card>
+                            <Card className="shadow-sm border-left-primary mb-3">
+                                <Card.Body>
+                                    <Row className="align-items-center">
+                                        <Col xs={4}>
+                                            <img
+                                                src={bestSellingService.image}
+                                                alt={bestSellingService.name}
+                                                className="img-fluid rounded"
+                                                style={{ maxHeight: '80px' }}
+                                            />
+                                        </Col>
+                                        <Col xs={8}>
+                                            <Card.Title className="text-uppercase text-muted mb-1">
+                                                Dịch vụ được đặt nhiều
+                                            </Card.Title>
+                                            <Card.Text className="h5 mb-0">{bestSellingService.name}</Card.Text>
+                                            <Card.Text className="text-muted mb-0">
+                                                <strong>Số lần đặt:</strong> {bestSellingService.total_orders}
+                                            </Card.Text>
+                                            <Card.Text className="text-muted">
+                                                <strong>Giá:</strong> {formatCurrency(bestSellingService.price)}
+                                            </Card.Text>
+                                        </Col>
+                                    </Row>
                                 </Card.Body>
                             </Card>
                         </Col>
 
                         {/* Hoạt động gần đây */}
                         <Col xs={12} md={4}>
-                            <Card className="shadow-sm">
+                            <Card className="mb-3">
                                 <Card.Body>
-                                    <Card.Title>Hoạt động gần đây</Card.Title>
-                                    <ListGroup variant="flush">
-                                        <ListGroup.Item>
-                                            Người dùng mới đăng ký <Badge bg="success">Mới</Badge>
-                                        </ListGroup.Item>
-                                        <ListGroup.Item>Đơn hàng #123 đã được thanh toán</ListGroup.Item>
-                                    </ListGroup>
+                                    <Card.Title className="d-flex justify-content-between align-items-center">
+                                        Danh sách đơn hàng sản phẩm mới
+                                        <Button variant="link" className="float-end text-decoration-none" onClick={() => handleList("bills")} title="xem thêm đơn hàng">Xem thêm</Button>
+                                    </Card.Title>
+                                    <ul style={{ listStyleType: "none", padding: 0, margin: 0 }}>
+                                        {latestProductOrders.map((order) => (
+                                            <li key={order.id} style={{ marginBottom: "5px" }}>
+                                                <a href="#" onClick={(e) => { handleinfo(order.uid, "bills") }} className="text-decoration-none" style={{ color: "black" }} title="Chi tiết đơn hàng">
+                                                    #{order.uid} - {new Date(order.created_at).toLocaleDateString()} - {formatCurrency(order.total)}
+                                                </a>
+                                            </li>
+                                        ))}
+                                    </ul>
                                 </Card.Body>
                             </Card>
-                        </Col>
-
-                        {/* Tiến độ dự án */}
-                        <Col xs={12} lg={8}>
-                            <Card className="shadow-sm">
+                            <Card className="mb-3">
                                 <Card.Body>
-                                    <Card.Title>Tiến độ dự án</Card.Title>
-                                    <ProgressBar now={60} label={`${60}%`} />
-                                </Card.Body>
-                            </Card>
-                        </Col>
-                    </Row>
-
-                    <Row className="g-4 mt-4">
-                        {/* Biểu đồ */}
-                        <Col xs={12} md={8}>
-                            <Card className="shadow-sm">
-                                <Card.Body>
-                                    <Card.Title>Biểu đồ doanh thu</Card.Title>
-                                    {/* Thay thế bằng component biểu đồ thực tế */}
-                                    <div>Biểu đồ doanh thu</div>
-                                </Card.Body>
-                            </Card>
-                        </Col>
-                        {/* 4 thẻ tổng quan */}
-                        <Col xs={12} sm={6} md={3}>
-                            <Card className="shadow-sm border-left-primary">
-                                <Card.Body>
-                                    <Row>
-                                        <Col>
-                                            <Card.Text className="text-uppercase text-muted mb-1">Earnings (Monthly)</Card.Text>
-                                            <Card.Title className="h5 mb-0">$40,000</Card.Title>
-                                        </Col>
-                                        <Col className="col-auto">
-                                            <i className="fas fa-calendar fa-2x text-gray-300"></i>
-                                        </Col>
-                                    </Row>
-                                </Card.Body>
-                            </Card>
-                        </Col>
-                        {/* Biểu đồ đường */}
-                        <Col xs={12} md={8}>
-                            <Card className="shadow-sm">
-                                <Card.Body>
-                                    <Card.Title>Earnings Overview</Card.Title>
-                                    <LineChart width={730} height={250} data={data}>
-                                        <CartesianGrid strokeDasharray="3 3" />
-                                        <XAxis dataKey="name" />
-                                        <YAxis />
-                                        <Tooltip />
-                                        <Legend />
-                                        <Line type="monotone" dataKey="value" stroke="#8884d8" />
-                                    </LineChart>
+                                    <Card.Title className="d-flex justify-content-between align-items-center">
+                                        Danh sách hóa đơn dịch vụ mới
+                                        <Button variant="link" className="float-end text-decoration-none" onClick={() => handleList("bills-services")} title="xem thêm hóa đơn">Xem thêm</Button>
+                                    </Card.Title>
+                                    <ul style={{ listStyleType: "none", padding: 0, margin: 0 }}>
+                                        {latestServiceBills.map((bill) => (
+                                            <li key={bill.id} style={{ marginBottom: "5px" }}>
+                                                <a href="#" onClick={(e) => { handleinfo(bill.uid, "bills-services") }} className="text-decoration-none" style={{ color: "black" }} title="Chi tiết đơn hàng">
+                                                    #{bill.uid} - {new Date(bill.created_at).toLocaleDateString()} - {formatCurrency(bill.total)}
+                                                </a>
+                                            </li>
+                                        ))}
+                                    </ul>
                                 </Card.Body>
                             </Card>
                         </Col>
@@ -171,7 +211,7 @@ function Home() {
                         <Col xs={12} md={4}>
                             <Card className="shadow-sm">
                                 <Card.Body>
-                                    <Card.Title>Revenue Sources</Card.Title>
+                                    <Card.Title>So sánh doanh thu</Card.Title>
                                     <PieChart width={300} height={250}>
                                         <Pie data={pieData} cx="50%" cy="50%" labelLine={false} label={renderCustomizedLabel} outerRadius={80} fill="#8884d8" dataKey="value">
                                             {pieData.map((entry, index) => (
@@ -181,6 +221,43 @@ function Home() {
                                         <Legend />
                                     </PieChart>
                                 </Card.Body>
+                            </Card>
+                        </Col>
+                    </Row>
+
+                    <Row className="g-4 mt-4">
+                        {/* Biểu đồ */}
+                        {/* Biểu đồ đường */}
+                        <Col xs={12} md={6}>
+                            <Card className="shadow-sm">
+                                <Card.Body>
+                                    <Card.Title>Doanh thu sản phẩm trong năm</Card.Title>
+                                    <LineChart width={730} height={250} data={productData}>
+                                        <CartesianGrid strokeDasharray="3 3" />
+                                        <XAxis dataKey="name" />
+                                        <YAxis domain={[0, maxProductY]} />
+                                        <Tooltip formatter={(value) => formatCurrency(value)} />
+                                        <Legend />
+                                        <Line type="monotone" dataKey="value" stroke="#8884d8" />
+                                    </LineChart>
+                                </Card.Body>
+
+                            </Card>
+                        </Col>
+                        <Col xs={12} md={6}>
+                            <Card className="shadow-sm">
+                                <Card.Body>
+                                    <Card.Title>Doanh thu dịch vụ trong năm</Card.Title>
+                                    <LineChart width={730} height={250} data={serviceData}>
+                                        <CartesianGrid strokeDasharray="3 3" />
+                                        <XAxis dataKey="name" />
+                                        <YAxis domain={[0, maxServiceY]} />
+                                        <Tooltip formatter={(value) => formatCurrency(value)} />
+                                        <Legend />
+                                        <Line type="monotone" dataKey="value" stroke="#82ca9d" />
+                                    </LineChart>
+                                </Card.Body>
+
                             </Card>
                         </Col>
                     </Row>

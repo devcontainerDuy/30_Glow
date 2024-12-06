@@ -72,7 +72,7 @@ Route::middleware('api')->group(function () {
         });
     });
 
-    Route::middleware(['auth:sanctum', 'auth.session', 'role:Manager|Staff'])->group(function () {
+    Route::middleware(['auth:sanctum', 'auth.session', 'role:Manager|Staff|Super Admin'])->group(function () {
         Route::resource('/bill-services', App\Http\Controllers\BillServices\BillServicesController::class);
         Route::middleware('api')->controller(App\Http\Controllers\BillServices\BillServicesController::class)->group(function () {
             Route::get('/bill-services/user/{id}', 'apiByUser');
@@ -140,4 +140,9 @@ Route::middleware('api')->controller(App\Http\Controllers\Revenue\RevenueControl
     Route::get('/revenue/products/{id}', 'getRevenueByProduct');
     Route::get('/revenue/customer/products/{id}', 'getRevenueProductByCustomer');
     Route::post('/revenue/dateRange/products', 'getRevenueByDateRangeProduct');
+});
+Route::middleware('api')->controller(App\Http\Controllers\Comments\CommentsController::class)->group(function () {
+    Route::post('/addComment', 'addComment');
+    Route::get('/comments/product/{id}', 'getCommentsByProduct');
+    Route::get('/comments/service/{id}', 'getCommentsByService');
 });

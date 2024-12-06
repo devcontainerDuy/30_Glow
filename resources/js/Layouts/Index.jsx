@@ -134,7 +134,7 @@ function Layout({ children }) {
                             <Image src={logo} />
                             {/* <h2> 30 Glow</h2> */}
                         </MenuItem>
-                        <MenuItem icon={<HomeOutlinedIcon />} component={<Link href="/admin/" method="get" as="a" />}>
+                        <MenuItem icon={<HomeOutlinedIcon />} component={<Link href="/admin" method="get" as="a" />}>
                             Thống kê
                         </MenuItem>
                         <SubMenu icon={<PeopleOutlinedIcon />} label="Quản lý tài khoản">
@@ -173,11 +173,16 @@ function Layout({ children }) {
                                 Ds lịch đặt
                             </MenuItem>
                         </SubMenu>
+                        <SubMenu icon={<ReceiptLongOutlinedIcon />} label="Quản lý hóa đơn">
+                            <MenuItem icon={<StorefrontIcon />} component={<Link href="/admin/bills" />}>
+                                Hóa đơn sản phẩm
+                            </MenuItem>
+                            <MenuItem icon={<ContentPasteOutlinedIcon />} component={<Link href="/admin/bills-services" />}>
+                                Hóa đơn dịch vụ
+                            </MenuItem>
+                        </SubMenu>
                         <MenuItem icon={<PermMediaOutlinedIcon />} component={<Link href="/admin/galleries" />}>
                             Bộ sưu tập
-                        </MenuItem>
-                        <MenuItem icon={<ReceiptLongOutlinedIcon />} component={<Link href="/admin/bills" />}>
-                            Hoán đơn
                         </MenuItem>
                         <MenuItem icon={<MapOutlinedIcon />} component={<Link href="/admin/sitemap" />}>
                             Sitemap

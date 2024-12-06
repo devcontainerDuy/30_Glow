@@ -14,6 +14,7 @@ use App\Models\Services;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Inertia\Inertia;
 
 class RevenueController extends Controller
 {
@@ -21,6 +22,123 @@ class RevenueController extends Controller
     {
         $this->model = ServiceBills::class;
     }
+    public function index()
+    {
+        $totalUsers = Customers::count();
+
+        $currentMonthRevenue = Bills::whereMonth('created_at', now()->month)
+            ->sum('total');
+            $totalNewUsersThisMonth = Customers::whereMonth('created_at', now()->month)
+            ->count();
+        
+        $newOrdersCount = Bills::whereDate('created_at', now()->toDateString())
+            ->where('status', 1)
+            ->count();
+        
+        $newBookingCount = Bookings::whereDate('created_at', now()->toDateString())
+            ->count();
+        
+        $bestSellingProduct = BillsDetail::selectRaw('id_product, SUM(quantity) as total_quantity')
+            ->whereMonth('created_at', now()->month)
+            ->with(['product.gallery' => function ($query) {
+                $query->where('status', 1);
+            }])
+            ->groupBy('id_product')
+            ->orderByDesc('total_quantity')
+            ->first();
+        if (!$bestSellingProduct) {
+            $bestSellingProductData = null;
+        } else {
+            $bestSellingProductData = [
+                'id' => $bestSellingProduct->product->id,
+                'name' => $bestSellingProduct->product->name,
+                'image' => $bestSellingProduct->product->gallery->first()->image ?? null,
+                'total_quantity' => $bestSellingProduct->total_quantity,
+                'price' => $bestSellingProduct->product->price,
+            ];
+        }
+
+        $bestSellingService = ServiceBillsDetails::selectRaw('id_service, COUNT(*) as total_orders')
+            ->whereMonth('created_at', now()->month)
+            ->with(['service' => function ($query) {
+                $query->select('id', 'name', 'price', 'image');
+            }])
+            ->groupBy('id_service')
+            ->orderByDesc('total_orders')
+            ->first();
+
+        if (!$bestSellingService) {
+            $bestSellingServiceData = null;
+        } else {
+            $bestSellingServiceData = [
+                'id' => $bestSellingService->service->id,
+                'name' => $bestSellingService->service->name,
+                'image' => $bestSellingService->service->image,
+                'total_orders' => $bestSellingService->total_orders,
+                'price' => $bestSellingService->service->price,
+            ];
+        }
+        $latestProductOrders = Bills::select('uid', 'created_at', 'total')
+            ->latest()
+            ->take(3)
+            ->get();
+        $latestServiceBills = ServiceBills::select('uid', 'created_at', 'total')
+            ->latest()
+            ->take(3)
+            ->get();
+
+        $products = Bills::monthlyRevenue()->get()->keyBy('month');
+        $productData = [];
+        $totalRevenueYear = 0;
+        for ($month = 1; $month <= 12; $month++) {
+            $totalRevenue = $products->get($month)->revenue ?? 0;
+            $productData[] = [
+                'month' => $month,
+                'revenue' => $totalRevenue,
+            ];
+            $totalRevenueYear += $totalRevenue;
+        }
+
+        $total_products = [
+            'monthly_revenue' => $productData,
+            'revenue_year' => $totalRevenueYear
+        ];
+
+        $services = ServiceBills::monthlyRevenue()->get()->keyBy('month');
+        $serviceData = [];
+        $totalRevenueYear = 0;
+        for ($month = 1; $month <= 12; $month++) {
+            $totalRevenue = $services->get($month)->revenue ?? 0;
+            $serviceData[] = [
+                'month' => $month,
+                'revenue' => $totalRevenue,
+            ];
+            $totalRevenueYear += $totalRevenue;
+        }
+
+        $total_services = [
+            'monthly_revenue' => $serviceData,
+            'revenue_year' => $totalRevenueYear
+        ];
+
+        // Truyền tất cả dữ liệu vào trang Vue
+        return Inertia::render('Home', [
+            'products' => $total_products,
+            'services' => $total_services,
+            'totalUsers' => $totalUsers,
+            'totalNewUsersThisMonth'=> $totalNewUsersThisMonth,
+            'currentMonthRevenue' => $currentMonthRevenue,
+            'newOrdersCount' => $newOrdersCount,
+            'newBookingCount' => $newBookingCount,
+            'bestSellingProduct' => $bestSellingProductData,
+            'bestSellingService' => $bestSellingServiceData,
+            'latestProductOrders' => $latestProductOrders,
+            'latestServiceBills' => $latestServiceBills,
+
+        ]);
+    }
+
+
     //doanh thi cho bill services
     public function getRevenueAllServices()
     {
