@@ -34,9 +34,7 @@ Route::get('/forbidden', function () {
 // });
 
 Route::middleware(['auth', 'auth.session', 'web', 'authen:Super Admin,Manager'])->prefix('admin')->as('admin.')->group(function () {
-    Route::name('home')->get('/', function () {
-        return Inertia::render('Home');
-    });
+    Route::get('/', [App\Http\Controllers\Revenue\RevenueController::class, 'index'])->name('home');
     // Module User
     Route::resource('users', App\Http\Controllers\Users\UserController::class)->names('user');
     // Module Role
@@ -69,6 +67,8 @@ Route::middleware(['auth', 'auth.session', 'web', 'authen:Super Admin,Manager'])
     Route::resource('galleries', App\Http\Controllers\Gallery\GalleryController::class)->names('gallery');
     // Module Biils
     Route::resource('bills', App\Http\Controllers\Bills\BillController::class)->names('bill');
+    // Module Biils-services
+    Route::resource('bills-services', App\Http\Controllers\BillServices\BillServicesController::class)->names('bill-services');
     // Module Service Collection
     Route::resource('service-collections', App\Http\Controllers\ServicesCollections\ServiceCollectionsContoller::class)->names('service_collections');
     // Module Service
@@ -85,6 +85,8 @@ Route::middleware(['auth', 'auth.session', 'web', 'authen:Super Admin,Manager'])
     Route::resource('bookings', App\Http\Controllers\Bookings\BookingController::class)->names('bookings');
     // Module contacts
     Route::resource('contacts', App\Http\Controllers\Contacts\ContactsController::class)->names('contacts');
+    //Modele comments
+    Route::resource('comments', App\Http\Controllers\Comments\CommentsController::class)->names('comments');
 });
 
 Route::middleware('web')->prefix('auth')->as('auth.')->controller(App\Http\Controllers\Auth\Admin\AuthenController::class)->group(function () {
