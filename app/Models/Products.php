@@ -73,7 +73,7 @@ class Products extends Model
 
     public function scopeRelatedProducts()
     {
-        return $this->hasMany(self::class, 'id_category', 'id_category')->where('id', '!=', $this->id)->active()->limit(5);
+        return $this->hasMany(self::class, 'id_category', 'id_category')->where('id', '!=', $this->id)->active();
     }
 
     public function getCategoryDataAttribute()

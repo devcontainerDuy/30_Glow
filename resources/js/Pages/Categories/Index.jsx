@@ -8,10 +8,9 @@ import { Helmet } from "react-helmet";
 import { toast } from "react-toastify";
 import BreadcrumbComponent from "@/Components/BreadcrumbComponent";
 
-function Index({ categories, trashs, products, crumbs }) {
+function Index({ categories, trashs, crumbs }) {
     const [data, setData] = useState([]);
     const [trash, setTrash] = useState([]);
-    const [productList, setProductList] = useState([]);
     const [show, setShow] = useState(false);
     const [showProductsModal, setShowProductsModal] = useState(false);
     const [selectedProducts, setSelectedProducts] = useState([]);
@@ -20,6 +19,14 @@ function Index({ categories, trashs, products, crumbs }) {
     const [name, setName] = useState("");
     const [idParent, setIdParent] = useState("");
     const [categoryId, setCategoryId] = useState(null);
+
+    const truncateStyle = {
+        display: "-webkit-box",
+        WebkitLineClamp: 2,
+        WebkitBoxOrient: "vertical",
+        overflow: "hidden",
+        textOverflow: "ellipsis",
+    };
 
     const handleClose = () => {
         setShow(false);
@@ -369,6 +376,7 @@ function Index({ categories, trashs, products, crumbs }) {
             ),
         },
     ]);
+
     useEffect(() => {
         setData(categories);
         setTrash(trashs);
@@ -437,21 +445,30 @@ function Index({ categories, trashs, products, crumbs }) {
                                     {selectedProducts.length > 0 ? (
                                         selectedProducts.map((item, index) => (
                                             <Col key={index} className="mb-3">
-                                                <Card style={{ minHeight: "246px" }}>
-                                                    <div className="d-flex flex-column align-items-center">
-                                                        {item.gallery && item.gallery.length > 0 && item.gallery.find((image) => image.status === 1) && (
+                                                <Card>
+                                                    {item.gallery && item.gallery.length > 0 && item.gallery.find((image) => image.status === 1) ? (
+                                                        <>
                                                             <Card.Img
                                                                 variant="top"
                                                                 fluid
-                                                                className="mb-1 rounded-1 w-100"
-                                                                style={{ maxHeight: "182.75px" }}
+                                                                className="mb-1 rounded-1"
                                                                 src={`/storage/gallery/${item.gallery.find((image) => image.status === 1).image}`}
                                                                 alt={item.gallery.find((image) => image.status === 1).image}
                                                             />
-                                                        )}
-                                                        <span className="mt-2">{item.name}</span>
-                                                    </div>
-                                                    <Card.Body className="p-2 d-flex justify-content-between align-items-center">
+                                                        </>
+                                                    ) : (
+                                                        <Card.Img
+                                                            variant="top"
+                                                            fluid
+                                                            className="mb-1 rounded-1"
+                                                            src="https://upload.wikimedia.org/wikipedia/commons/a/a3/Image-not-found.png?20210521171500"
+                                                            alt="No image"
+                                                        />
+                                                    )}
+                                                    <Card.Body className="d-flex flex-wrap">
+                                                        <p className="my-2 text-break" style={truncateStyle}>
+                                                            {item.name}
+                                                        </p>
                                                         <select className="form-select" value={item.id_category} onChange={(e) => handleUpdateProduct(item.id, e.target.value)}>
                                                             {categories.map((category) => (
                                                                 <option key={category.id} value={category.id}>
@@ -464,7 +481,11 @@ function Index({ categories, trashs, products, crumbs }) {
                                             </Col>
                                         ))
                                     ) : (
-                                        <p>Không có sản phẩm nào trong danh mục này.</p>
+                                        <>
+                                            <Col xs="12">
+                                                <p className="text-center">Không có sản phẩm nào trong danh mục này.</p>
+                                            </Col>
+                                        </>
                                     )}
                                 </Row>
                             </Modal.Body>

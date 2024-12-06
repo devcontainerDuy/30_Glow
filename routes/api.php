@@ -101,6 +101,7 @@ Route::middleware('api')->controller(App\Http\Controllers\Products\ProductContro
     Route::get('/products/highlighted', 'apiHighlighted');
     Route::get('/products', 'apiIndex');
     Route::get('/products/{slug}', 'apiShow');
+    Route::get('/products/search/{value}', 'apiSearch');
 });
 
 Route::middleware('api')->controller(App\Http\Controllers\ServicesCollections\ServiceCollectionsContoller::class)->group(function () {

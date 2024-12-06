@@ -140,10 +140,8 @@ class ServiceController extends Controller
                 'content' => $item->content,
                 'status' => $item->status,
                 'collection' => $item->collection ? [
-                    'id' => $item->collection->id,
                     'name' => $item->collection->name,
                     'slug' => $item->collection->slug,
-                    'status' => $item->collection->status,
                 ] : null,
             ];
         });
@@ -165,10 +163,8 @@ class ServiceController extends Controller
                 'content' => $item->content,
                 'status' => $item->status,
                 'collection' => $item->collection ? [
-                    'id' => $item->collection->id,
                     'name' => $item->collection->name,
                     'slug' => $item->collection->slug,
-                    'status' => $item->collection->status,
                 ] : null,
             ];
         });
@@ -191,10 +187,8 @@ class ServiceController extends Controller
             'content' => $this->data->content,
             'status' => $this->data->status,
             'collection' => $this->data->collection ? [
-                'id' => $this->data->collection->id,
                 'name' => $this->data->collection->name,
                 'slug' => $this->data->collection->slug,
-                'status' => $this->data->collection->status,
             ] : null,
         ];
 

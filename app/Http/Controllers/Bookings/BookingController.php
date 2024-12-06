@@ -47,47 +47,58 @@ class BookingController extends Controller
     public function create()
     {
         $user = Auth::user()->load('roles');
+        try {
+            $user->roles->pluck('name')[0] === "Staff" ? $this->data = $this->model::with('user', 'customer', 'service')->where('id_user', $user->id)->recent()->orderBy('id', 'desc')->paginate(20)
+                : $this->data = $this->model::with('user', 'customer', 'service')->recent()->orderBy('id', 'desc')->paginate(20);
 
-        $user->roles->pluck('name')[0] === "Staff" ? $this->data = $this->model::with('user', 'customer', 'service')->where('id_user', $user->id)->recent()->orderBy('id', 'desc')->paginate(20)
-            : $this->data = $this->model::with('user', 'customer', 'service')->recent()->orderBy('id', 'desc')->paginate(20);
+            if ($this->data->isEmpty() || $this->data->count() === 0) {
+                return response()->json(['check' => true, 'message' => "Không có dữ liệu!"], 200);
+            }
 
-        $this->instance = $this->data->getCollection()->map(function ($item) {
-            return [
-                'id' => $item->id,
-                'user' => $item->user ? [
-                    'uid' => $item->user->uid,
-                    'name' => $item->user->name,
-                ] : null,
-                'customer' => $item->customer ? [
-                    'uid' => $item->customer->uid,
-                    'name' => $item->customer->name,
-                ] : null,
-                'time' => $item->time,
-                'service' => $item->service ? $item->service->map(function ($service) {
-                    return [
-                        'id' => $service->id,
-                        'name' => $service->name,
-                    ];
-                })->toArray() : null,
-                'note' => $item->note,
-                'status' => $item->status,
-            ];
-        });
-        return response()->json(['check' => true, 'data' => [
-            'current_page' => $this->data->currentPage(),
-            'data' => $this->instance,
-            'first_page_url' => $this->data->url(1),
-            'from' => $this->data->firstItem(),
-            'last_page' => $this->data->lastPage(),
-            'last_page_url' => $this->data->url($this->data->lastPage()),
-            'links' => $this->data->links(),
-            'next_page_url' => $this->data->nextPageUrl(),
-            'path' => $this->data->path(),
-            'per_page' => $this->data->perPage(),
-            'prev_page_url' => $this->data->previousPageUrl(),
-            'to' => $this->data->lastItem(),
-            'total' => $this->data->total(),
-        ]], 200);
+            $this->instance = $this->data->getCollection()->map(function ($item) {
+                return [
+                    'id' => $item->id,
+                    'user' => $item->user ? [
+                        'uid' => $item->user->uid,
+                        'name' => $item->user->name,
+                    ] : null,
+                    'customer' => $item->customer ? [
+                        'uid' => $item->customer->uid,
+                        'name' => $item->customer->name,
+                    ] : null,
+                    'time' => $item->time,
+                    'service' => $item->service ? $item->service->map(function ($service) {
+                        return [
+                            'id' => $service->id,
+                            'name' => $service->name,
+                        ];
+                    })->toArray() : null,
+                    'note' => $item->note,
+                    'status' => $item->status,
+                ];
+            });
+            return response()->json(['check' => true, 'data' => [
+                'current_page' => $this->data->currentPage(),
+                'data' => $this->instance,
+                'first_page_url' => $this->data->url(1),
+                'from' => $this->data->firstItem(),
+                'last_page' => $this->data->lastPage(),
+                'last_page_url' => $this->data->url($this->data->lastPage()),
+                'links' => $this->data->links(),
+                'next_page_url' => $this->data->nextPageUrl(),
+                'path' => $this->data->path(),
+                'per_page' => $this->data->perPage(),
+                'prev_page_url' => $this->data->previousPageUrl(),
+                'to' => $this->data->lastItem(),
+                'total' => $this->data->total(),
+            ]], 200);
+        } catch (\Throwable $e) {
+            Log::error("Booking failed: " . $e->getMessage());
+
+            $user->tokens()->delete();
+            Auth::guard('api')->logout();
+            return response()->json(['check' => false, 'message' => "Bạn không đủ quyền! Bạn đã đăng xuất"], 401);
+        }
     }
 
     /**
@@ -212,7 +223,7 @@ class BookingController extends Controller
 
             $this->instance = $this->model::findOrFail($id);
 
-            if ($this->instance->id_user === null && empty($this->data['id_user']) && $this->data['status'] >= 2) {
+            if ($this->instance->id_user === null && empty($this->data['id_user']) && $this->data['status'] > 1) {
                 return response()->json(['check' => false, 'message' => 'Vui lòng chọn nhân viên!'], 400);
             } elseif ($this->instance->note === null && empty($this->data['note']) && $this->data['status'] === 5) {
                 return response()->json(['check' => false, 'message' => 'Vui lòng nhập ghi chú!'], 400);

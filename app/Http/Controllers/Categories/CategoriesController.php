@@ -17,6 +17,7 @@ class CategoriesController extends Controller
     {
         $this->model = Categories::class;
     }
+
     public function index()
     {
         $this->crumbs = [
@@ -27,6 +28,7 @@ class CategoriesController extends Controller
         $trashs = $this->model::with('parent', 'products', 'products.gallery')->select('id', 'name', 'slug', 'id_parent', 'status')->withCount('products')->onlyTrashed()->get();
         return Inertia::render('Categories/Index', ['categories' => $this->data, 'trashs' => $trashs, 'crumbs' => $this->crumbs,]);
     }
+
     public function store(CategoriesRequest $request)
     {
         $this->data = $request->validated();
@@ -38,6 +40,7 @@ class CategoriesController extends Controller
         }
         return response()->json(['check' => false, 'message' => 'Tạo thất bại!'], status: 400);
     }
+
     public function edit(string $id)
     {
         $this->crumbs = [
@@ -46,9 +49,7 @@ class CategoriesController extends Controller
             ['name' => 'Sản phẩm thuộc danh mục', 'url' => '/admin/categories/' . $id . '/edit']
         ];
         $this->data = Products::with('category', 'brand', 'gallery')->where('id_category', $id)->get();
-        $category = Categories::active()->select('id', 'name')->get();
-        $brand = Brands::active()->select('id', 'name')->get();
-        return Inertia::render('Products/Index', ['products' => $this->data, 'crumbs' => $this->crumbs, 'categories' => $category, 'brands' => $brand]);
+        return Inertia::render('Products/Index', ['products' => $this->data, 'crumbs' => $this->crumbs]);
     }
 
     public function update(CategoriesRequest $request, $id)
@@ -118,11 +119,11 @@ class CategoriesController extends Controller
         $this->data = $this->model::with("products.gallery", "products.brand", "products.category", "children.products")->active()->select('id', 'name', 'slug', 'id_parent', 'status')->where('slug', $slug)->first();
 
         if (!$this->data) {
-            return response()->json(['check' => false, 'message' => 'Không tìm thấy phân loại sản phẩm'], 404);
+            return response()->json(['check' => false, 'message' => 'Không tìm thấy phân loại sản phẩm'], 404);
         }
 
         if (!$this->data->products) {
-            return response()->json(['check' => false, 'message' => 'Không tìm thấy sản phẩm nào'], 404);
+            return response()->json(['check' => false, 'message' => 'Không tìm thấy sản phẩm nào'], 404);
         }
 
         $this->data->parent = $this->data->parent ? [
@@ -141,31 +142,20 @@ class CategoriesController extends Controller
                 'discount' => $item->discount,
                 'in_stock' => $item->in_stock,
                 'content' => $item->content,
-                'status' => $item->status,
                 'category' => $item->category ? [
-                    'id' => $item->category->id,
                     'name' => $item->category->name,
                     'slug' => $item->category->slug,
-                    'status' => $item->category->status,
                 ] : null,
                 'brand' => $item->brand ? [
-                    'id' => $item->brand->id,
                     'name' => $item->brand->name,
                     'slug' => $item->brand->slug,
-                    'status' => $item->brand->status,
                 ] : null,
-                'gallery' => $item->gallery->map(function ($galleryItem) {
-                    return [
-                        'id' => $galleryItem->id,
-                        'image' => asset("storage/gallery/{$galleryItem->image}"),
-                        'id_parent' => $galleryItem->id_parent,
-                        'status' => $galleryItem->status,
-                    ];
-                }),
+                'gallery' => asset('storage/gallery/' . $item->gallery->firstWhere('status', 1)->image) ?? null,
             ];
         });
 
-        $this->data->children->pluck('products')->flatten()->transform(function ($item) {
+        $childrenProducts = $this->data->children->pluck('products')->flatten();
+        $this->data->children = $childrenProducts->transform(function ($item) {
             return [
                 'id' => $item->id,
                 'name' => $item->name,
@@ -197,6 +187,7 @@ class CategoriesController extends Controller
                 }),
             ];
         });
+
         return response()->json(['check' => true, 'data' => $this->data], 200);
     }
 }

@@ -205,25 +205,14 @@ class ProductController extends Controller
                 'content' => $item->content,
                 'status' => $item->status,
                 'category' => $item->category ? [
-                    'id' => $item->category->id,
                     'name' => $item->category->name,
                     'slug' => $item->category->slug,
-                    'status' => $item->category->status,
                 ] : null,
                 'brand' => $item->brand ? [
-                    'id' => $item->brand->id,
                     'name' => $item->brand->name,
                     'slug' => $item->brand->slug,
-                    'status' => $item->brand->status,
                 ] : null,
-                'gallery' => $item->gallery->map(function ($galleryItem) {
-                    return [
-                        'id' => $galleryItem->id,
-                        'image' => asset('storage/gallery/' . $galleryItem->image),
-                        'id_parent' => $galleryItem->id_parent,
-                        'status' => $galleryItem->status,
-                    ];
-                }),
+                'gallery' => asset('storage/gallery/' . $item->gallery->firstWhere('status', 1)->image) ?? null,
             ];
         });
 
@@ -244,25 +233,14 @@ class ProductController extends Controller
                 'content' => $item->content,
                 'status' => $item->status,
                 'category' => $item->category ? [
-                    'id' => $item->category->id,
                     'name' => $item->category->name,
                     'slug' => $item->category->slug,
-                    'status' => $item->category->status,
                 ] : null,
                 'brand' => $item->brand ? [
-                    'id' => $item->brand->id,
                     'name' => $item->brand->name,
                     'slug' => $item->brand->slug,
-                    'status' => $item->brand->status,
                 ] : null,
-                'gallery' => $item->gallery->map(function ($galleryItem) {
-                    return [
-                        'id' => $galleryItem->id,
-                        'image' => asset('storage/gallery/' . $galleryItem->image),
-                        'id_parent' => $galleryItem->id_parent,
-                        'status' => $galleryItem->status,
-                    ];
-                }),
+                'gallery' => asset('storage/gallery/' . $item->gallery->firstWhere('status', 1)->image) ?? null,
             ];
         });
 
@@ -285,18 +263,13 @@ class ProductController extends Controller
             'discount' => $this->data->discount,
             'in_stock' => $this->data->in_stock,
             'content' => $this->data->content,
-            'status' => $this->data->status,
             'category' => $this->data->category ? [
-                'id' => $this->data->category->id,
                 'name' => $this->data->category->name,
                 'slug' => $this->data->category->slug,
-                'status' => $this->data->category->status,
             ] : null,
             'brand' => $this->data->brand ? [
-                'id' => $this->data->brand->id,
                 'name' => $this->data->brand->name,
                 'slug' => $this->data->brand->slug,
-                'status' => $this->data->brand->status,
             ] : null,
             'gallery' => $this->data->gallery->map(function ($gallery) {
                 return [
@@ -314,30 +287,52 @@ class ProductController extends Controller
                     'price' => $related->price,
                     'discount' => $related->discount,
                     'in_stock' => $related->in_stock,
-                    'status' => $related->status,
                     'category' => $related->category ? [
-                        'id' => $related->category->id,
                         'name' => $related->category->name,
                         'slug' => $related->category->slug,
-                        'status' => $related->category->status,
                     ] : null,
                     'brand' => $related->brand ? [
-                        'id' => $related->brand->id,
                         'name' => $related->brand->name,
                         'slug' => $related->brand->slug,
-                        'status' => $related->brand->status,
                     ] : null,
-                    'gallery' => $related->gallery->map(function ($gallery) {
-                        return [
-                            'id' => $gallery->id,
-                            'image' => asset('storage/gallery/' . $gallery->image),
-                            'id_parent' => $gallery->id_parent,
-                            'status' => $gallery->status,
-                        ];
-                    }),
+                    'gallery' => asset('storage/gallery/' . $related->gallery->firstWhere('status', 1)->image) ?? null,
                 ];
             }),
         ];
         return response()->json(['check' => true, 'data' => $this->instance], 200);
+    }
+
+    public function apiSearch(string $value)
+    {
+        try {
+            $this->data = $this->model::with('category', 'brand', 'gallery')->active()->where('name', 'like', '%' . $value . '%')->paginate(10);
+            $this->data->getCollection()->transform(function ($item) {
+                return [
+                    'id' => $item->id,
+                    'name' => $item->name,
+                    'slug' => $item->slug,
+                    'price' => $item->price,
+                    'discount' => $item->discount,
+                    'in_stock' => $item->in_stock,
+                    'content' => $item->content,
+                    'status' => $item->status,
+                    'category' => $item->category ? [
+                        'id' => $item->category->id,
+                        'name' => $item->category->name,
+                        'slug' => $item->category->slug,
+                    ] : null,
+                    'brand' => $item->brand ? [
+                        'id' => $item->brand->id,
+                        'name' => $item->brand->name,
+                        'slug' => $item->brand->slug,
+                    ] : null,
+                    'gallery' => asset('storage/gallery/' . $item->gallery->firstWhere('status', 1)->image) ?? null,
+                ];
+            });
+
+            return response()->json(['check' => true, 'data' => $this->data], 200);
+        } catch (\Throwable $th) {
+            return response()->json(['check' => false, 'message' => 'Không tìm thấy sản phẩm'], 404);
+        }
     }
 }
