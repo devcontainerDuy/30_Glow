@@ -54,9 +54,9 @@ class BillController extends Controller
         DB::beginTransaction();
         try {
             $this->data = $request->validated();
-            $this->instance = Customers::where('email', $this->data['email'] ?? null)->where('phone', $this->data['phone'] ?? null)->first();
+            $this->instance = Customers::where('email', $this->data['email'])->active()->first();
 
-            if ($this->instance) {
+            if ($this->instance !== null && !empty($this->instance)) {
                 $idCustomer = $this->instance->load('carts.product');
 
                 if (
@@ -100,8 +100,9 @@ class BillController extends Controller
                 $idCustomer->carts()->createMany($this->data['cart']);
             }
 
+            $uidBill = $this->createCodeOrder();
             $this->instance = $this->model::insertGetId([
-                'uid' => $this->createCodeOrder(),
+                'uid' => $uidBill,
                 'customer_id' => $idCustomer->id,
                 'name' => $this->data['name'],
                 'email' => $this->data['email'],
@@ -129,7 +130,7 @@ class BillController extends Controller
             $idCustomer->carts()->delete();
 
             DB::commit();
-            return response()->json(['check' => true, 'message' => 'Đặt hàng thành công!'], 201);
+            return response()->json(['check' => true, 'uid' => $uidBill, 'total' => $this->data['total']], 201);
         } catch (\Throwable $e) {
             DB::rollBack();
             Log::error("Error: " . $e->getMessage());

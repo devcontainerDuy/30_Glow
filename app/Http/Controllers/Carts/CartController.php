@@ -28,7 +28,6 @@ class CartController extends Controller
         }
 
         $this->instance = $this->data->map(function ($item) {
-
             return [
                 'id' => $item->id,
                 'product' => [
