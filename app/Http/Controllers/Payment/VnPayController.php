@@ -127,7 +127,7 @@ class VnPayController extends Controller
                     'transaction_id' => $request->vnp_TransactionNo,
                     'updated_at' => now()
                 ]);
-                return response()->json(['check' => true, 'msg' => 'Thanh toán thành công'], 200);
+                return redirect()->away(session('url_prev') || url(env('CLIENT_URL') . '/thanh-toan-thanh-cong'));
             } else {
                 // Thanh toán không thành công
                 $this->instance->update([
