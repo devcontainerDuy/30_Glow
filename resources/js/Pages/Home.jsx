@@ -6,28 +6,40 @@ import { router } from "@inertiajs/react";
 import { Badge, Button, Card, Col, Container, ListGroup, ProgressBar, Row } from "react-bootstrap";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, PieChart, Pie, Cell } from "recharts";
 
-function Home({ products, services, totalUsers, totalNewUsersThisMonth, currentMonthRevenue, newOrdersCount, newBookingCount, bestSellingProduct, bestSellingService, latestProductOrders, latestServiceBills }) {
+function Home({
+    products,
+    services,
+    totalUsers,
+    totalNewUsersThisMonth,
+    currentMonthRevenue,
+    newOrdersCount,
+    newBookingCount,
+    bestSellingProduct,
+    bestSellingService,
+    latestProductOrders,
+    latestServiceBills,
+}) {
     const formatCurrency = (value) => {
         if (isNaN(value)) {
-            return '0 VND';
+            return "0 VND";
         }
-        return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(value);
+        return new Intl.NumberFormat("vi-VN", { style: "currency", currency: "VND" }).format(value);
     };
 
-    const productData = products.monthly_revenue.map(item => ({
+    const productData = products.monthly_revenue.map((item) => ({
         name: `Tháng ${item.month}`,
         value: item.revenue && !isNaN(item.revenue) ? item.revenue : 0,
     }));
 
-    const maxProductValue = Math.max(...productData.map(item => item.value));
+    const maxProductValue = Math.max(...productData.map((item) => item.value));
     const maxProductY = maxProductValue * 1.2;
 
-    const serviceData = services.monthly_revenue.map(item => ({
+    const serviceData = services.monthly_revenue.map((item) => ({
         name: `Tháng ${item.month}`,
         value: item.revenue && !isNaN(item.revenue) ? item.revenue : 0,
     }));
 
-    const maxServiceValue = Math.max(...serviceData.map(item => item.value));
+    const maxServiceValue = Math.max(...serviceData.map((item) => item.value));
     const maxServiceY = maxServiceValue * 1.2;
 
     // Dữ liệu biểu đồ tròn
@@ -120,23 +132,16 @@ function Home({ products, services, totalUsers, totalNewUsersThisMonth, currentM
                                 <Card.Body>
                                     <Row className="align-items-center">
                                         <Col xs={4}>
-                                            <img
-                                                src={bestSellingProduct.image}
-                                                alt={bestSellingProduct.name}
-                                                className="img-fluid rounded"
-                                                style={{ maxHeight: '80px' }}
-                                            />
+                                            <img src={bestSellingProduct?.image} alt={bestSellingProduct?.name} className="img-fluid rounded" style={{ maxHeight: "80px" }} />
                                         </Col>
                                         <Col xs={8}>
-                                            <Card.Title className="text-uppercase text-muted mb-1">
-                                                Sản phẩm bán chạy
-                                            </Card.Title>
-                                            <Card.Text className="h5 mb-0">{bestSellingProduct.name}</Card.Text>
+                                            <Card.Title className="text-uppercase text-muted mb-1">Sản phẩm bán chạy</Card.Title>
+                                            <Card.Text className="h5 mb-0">{bestSellingProduct?.name}</Card.Text>
                                             <Card.Text className="text-muted mb-0">
-                                                <strong>Số lượng đã bán:</strong> {bestSellingProduct.total_quantity}
+                                                <strong>Số lượng đã bán:</strong> {bestSellingProduct?.total_quantity}
                                             </Card.Text>
                                             <Card.Text className="text-muted">
-                                                <strong>Giá:</strong> {formatCurrency(bestSellingProduct.price)}
+                                                <strong>Giá:</strong> {formatCurrency(bestSellingProduct?.price)}
                                             </Card.Text>
                                         </Col>
                                     </Row>
@@ -146,23 +151,16 @@ function Home({ products, services, totalUsers, totalNewUsersThisMonth, currentM
                                 <Card.Body>
                                     <Row className="align-items-center">
                                         <Col xs={4}>
-                                            <img
-                                                src={bestSellingService.image}
-                                                alt={bestSellingService.name}
-                                                className="img-fluid rounded"
-                                                style={{ maxHeight: '80px' }}
-                                            />
+                                            <img src={bestSellingService?.image} alt={bestSellingService?.name} className="img-fluid rounded" style={{ maxHeight: "80px" }} />
                                         </Col>
                                         <Col xs={8}>
-                                            <Card.Title className="text-uppercase text-muted mb-1">
-                                                Dịch vụ được đặt nhiều
-                                            </Card.Title>
-                                            <Card.Text className="h5 mb-0">{bestSellingService.name}</Card.Text>
+                                            <Card.Title className="text-uppercase text-muted mb-1">Dịch vụ được đặt nhiều</Card.Title>
+                                            <Card.Text className="h5 mb-0">{bestSellingService?.name}</Card.Text>
                                             <Card.Text className="text-muted mb-0">
-                                                <strong>Số lần đặt:</strong> {bestSellingService.total_orders}
+                                                <strong>Số lần đặt:</strong> {bestSellingService?.total_orders}
                                             </Card.Text>
                                             <Card.Text className="text-muted">
-                                                <strong>Giá:</strong> {formatCurrency(bestSellingService.price)}
+                                                <strong>Giá:</strong> {formatCurrency(bestSellingService?.price)}
                                             </Card.Text>
                                         </Col>
                                     </Row>
@@ -176,12 +174,22 @@ function Home({ products, services, totalUsers, totalNewUsersThisMonth, currentM
                                 <Card.Body>
                                     <Card.Title className="d-flex justify-content-between align-items-center">
                                         Danh sách đơn hàng sản phẩm mới
-                                        <Button variant="link" className="float-end text-decoration-none" onClick={() => handleList("bills")} title="xem thêm đơn hàng">Xem thêm</Button>
+                                        <Button variant="link" className="float-end text-decoration-none" onClick={() => handleList("bills")} title="xem thêm đơn hàng">
+                                            Xem thêm
+                                        </Button>
                                     </Card.Title>
                                     <ul style={{ listStyleType: "none", padding: 0, margin: 0 }}>
                                         {latestProductOrders.map((order) => (
                                             <li key={order.id} style={{ marginBottom: "5px" }}>
-                                                <a href="#" onClick={(e) => { handleinfo(order.uid, "bills") }} className="text-decoration-none" style={{ color: "black" }} title="Chi tiết đơn hàng">
+                                                <a
+                                                    href="#"
+                                                    onClick={(e) => {
+                                                        handleinfo(order.uid, "bills");
+                                                    }}
+                                                    className="text-decoration-none"
+                                                    style={{ color: "black" }}
+                                                    title="Chi tiết đơn hàng"
+                                                >
                                                     #{order.uid} - {new Date(order.created_at).toLocaleDateString()} - {formatCurrency(order.total)}
                                                 </a>
                                             </li>
@@ -193,12 +201,22 @@ function Home({ products, services, totalUsers, totalNewUsersThisMonth, currentM
                                 <Card.Body>
                                     <Card.Title className="d-flex justify-content-between align-items-center">
                                         Danh sách hóa đơn dịch vụ mới
-                                        <Button variant="link" className="float-end text-decoration-none" onClick={() => handleList("bills-services")} title="xem thêm hóa đơn">Xem thêm</Button>
+                                        <Button variant="link" className="float-end text-decoration-none" onClick={() => handleList("bills-services")} title="xem thêm hóa đơn">
+                                            Xem thêm
+                                        </Button>
                                     </Card.Title>
                                     <ul style={{ listStyleType: "none", padding: 0, margin: 0 }}>
                                         {latestServiceBills.map((bill) => (
                                             <li key={bill.id} style={{ marginBottom: "5px" }}>
-                                                <a href="#" onClick={(e) => { handleinfo(bill.uid, "bills-services") }} className="text-decoration-none" style={{ color: "black" }} title="Chi tiết đơn hàng">
+                                                <a
+                                                    href="#"
+                                                    onClick={(e) => {
+                                                        handleinfo(bill.uid, "bills-services");
+                                                    }}
+                                                    className="text-decoration-none"
+                                                    style={{ color: "black" }}
+                                                    title="Chi tiết đơn hàng"
+                                                >
                                                     #{bill.uid} - {new Date(bill.created_at).toLocaleDateString()} - {formatCurrency(bill.total)}
                                                 </a>
                                             </li>
@@ -241,7 +259,6 @@ function Home({ products, services, totalUsers, totalNewUsersThisMonth, currentM
                                         <Line type="monotone" dataKey="value" stroke="#8884d8" />
                                     </LineChart>
                                 </Card.Body>
-
                             </Card>
                         </Col>
                         <Col xs={12} md={6}>
@@ -257,7 +274,6 @@ function Home({ products, services, totalUsers, totalNewUsersThisMonth, currentM
                                         <Line type="monotone" dataKey="value" stroke="#82ca9d" />
                                     </LineChart>
                                 </Card.Body>
-
                             </Card>
                         </Col>
                     </Row>

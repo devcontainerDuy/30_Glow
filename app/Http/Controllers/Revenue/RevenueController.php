@@ -28,16 +28,16 @@ class RevenueController extends Controller
 
         $currentMonthRevenue = Bills::whereMonth('created_at', now()->month)
             ->sum('total');
-            $totalNewUsersThisMonth = Customers::whereMonth('created_at', now()->month)
+        $totalNewUsersThisMonth = Customers::whereMonth('created_at', now()->month)
             ->count();
-        
+
         $newOrdersCount = Bills::whereDate('created_at', now()->toDateString())
             ->where('status', 1)
             ->count();
-        
+
         $newBookingCount = Bookings::whereDate('created_at', now()->toDateString())
             ->count();
-        
+
         $bestSellingProduct = BillsDetail::selectRaw('id_product, SUM(quantity) as total_quantity')
             ->whereMonth('created_at', now()->month)
             ->with(['product.gallery' => function ($query) {
@@ -46,6 +46,7 @@ class RevenueController extends Controller
             ->groupBy('id_product')
             ->orderByDesc('total_quantity')
             ->first();
+
         if (!$bestSellingProduct) {
             $bestSellingProductData = null;
         } else {
@@ -57,6 +58,7 @@ class RevenueController extends Controller
                 'price' => $bestSellingProduct->product->price,
             ];
         }
+
 
         $bestSellingService = ServiceBillsDetails::selectRaw('id_service, COUNT(*) as total_orders')
             ->whereMonth('created_at', now()->month)
@@ -126,7 +128,7 @@ class RevenueController extends Controller
             'products' => $total_products,
             'services' => $total_services,
             'totalUsers' => $totalUsers,
-            'totalNewUsersThisMonth'=> $totalNewUsersThisMonth,
+            'totalNewUsersThisMonth' => $totalNewUsersThisMonth,
             'currentMonthRevenue' => $currentMonthRevenue,
             'newOrdersCount' => $newOrdersCount,
             'newBookingCount' => $newBookingCount,
