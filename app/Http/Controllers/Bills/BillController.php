@@ -8,6 +8,7 @@ use App\Models\Bills;
 use App\Models\BillsDetail;
 use App\Models\Customers;
 use App\Traits\GeneratesUniqueId;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\DB;
@@ -38,10 +39,27 @@ class BillController extends Controller
 
     /**
      * Show the form for creating a new resource.
+     * Cho khách hàng lấy danh sách hóa đơn
      */
     public function create()
     {
-        //
+        $this->data = $this->model::where('customer_id', Auth::user()->id)->orderBy('created_at', 'desc')->get();
+
+        if ($this->data->isEmpty()) {
+            return response()->json(['check' => false, 'message' => 'Không có hóa đơn nào cho khách hàng với ID này!',], 404);
+        }
+
+        $this->data->transform(function ($item) {
+            return [
+                'uid' => $item->uid,
+                'payment_status' => $item->payment_status,
+                'status' => $item->status,
+                'total' => $item->total,
+                'created_at' => $item->created_at,
+            ];
+        });
+
+        return response()->json(['check' => true, 'data' => $this->data], 200);
     }
 
     /**
@@ -143,7 +161,50 @@ class BillController extends Controller
      */
     public function show(string $id)
     {
-        // 
+        try {
+            $this->data = $this->model::with('billDetail.product.gallery', 'billDetail.product.category')->where('customer_id', Auth::user()->id)->where('uid', $id)->first();
+
+            $this->data = [
+                'uid' =>  $this->data->uid,
+                'name' =>  $this->data->name,
+                'email' =>  $this->data->email,
+                'phone' =>  $this->data->phone,
+                'address' =>  $this->data->address,
+                'note' =>  $this->data->note,
+                'name_other' =>  $this->data->name_other,
+                'email_other' =>  $this->data->email_other,
+                'phone_other' =>  $this->data->phone_other,
+                'address_other' =>  $this->data->address_other,
+                'note_other' =>  $this->data->note_other,
+                'payment_method' =>  $this->data->payment_method,
+                'payment_status' =>  $this->data->payment_status,
+                'total' =>  $this->data->total,
+                'status' =>  $this->data->status,
+                'created_at' =>  $this->data->created_at,
+                'bill_detail' =>  $this->data->billDetail->map(function ($detail) {
+                    return [
+                        'id' => $detail->id,
+                        'product' => [
+                            'name' => $detail->product->name,
+                            'slug' => $detail->product->slug,
+                            'highlighted' => $detail->product->highlighted,
+                            'gallery' => asset('storage/gallery/' . $detail->product->gallery->firstWhere('status', 1)->image) ?? null,
+                            'category' => [
+                                'name' => $detail->product->category->name,
+                                'slug' => $detail->product->category->slug,
+                            ],
+                        ],
+                        'quantity' => $detail->quantity,
+                        'unit_price' => $detail->unit_price,
+                    ];
+                }),
+            ];
+
+            return response()->json(['check' => true, 'data' => $this->data], 200);
+        } catch (\Throwable $e) {
+            Log::error("Error: " . $e->getMessage());
+            return response()->json(['check' => false, 'message' => 'Không tìm thấy hóa đơn!'], 404);
+        }
     }
 
     /**
@@ -186,133 +247,5 @@ class BillController extends Controller
     public function destroy(string $id)
     {
         //
-    }
-    //api for manager
-    public function apiIndex()
-    {
-        $bills = Bills::with(['billDetail.product.gallery'])->get();
-
-        if ($bills->isEmpty()) {
-            return response()->json([
-                'check' => false,
-                'message' => 'Không có hóa đơn nào!',
-            ], 404);
-        }
-
-        $billsTransformed = $bills->transform(function ($bill) {
-            return [
-                'uid' => $bill->uid,
-                'customer_uid' => $bill->customer->uid,
-                'customer_name' => $bill->name,
-                'customer_email' => $bill->email,
-                'customer_phone' => $bill->phone,
-                'address' => $bill->address,
-                'total' => $bill->total,
-                'payment_method' => $bill->payment_method,
-                'status' => $bill->status,
-                'details' => $bill->billDetail->map(function ($detail) {
-                    $productImage = $detail->product->gallery->firstWhere('status', 1);
-                    $imageUrl = $productImage ? asset('storage/products/' . $productImage->image) : null;
-
-                    return [
-                        'product_name' => $detail->product->name ?? 'Sản phẩm không tồn tại',
-                        'quantity' => $detail->quantity,
-                        'unit_price' => $detail->unit_price,
-                        'total_price' => $detail->quantity * $detail->unit_price,
-                        'product_image' => $imageUrl,
-                    ];
-                }),
-            ];
-        });
-
-        return response()->json([
-            'check' => true,
-            'data' => $billsTransformed,
-        ], 200);
-    }
-    public function apiShow($id)
-    {
-        $bill = Bills::with(['billDetail.product.gallery'])->find($id);
-
-        if (!$bill) {
-            return response()->json([
-                'check' => false,
-                'message' => 'Không tìm thấy hóa đơn với ID này!',
-            ], 404);
-        }
-
-        $billTransformed = [
-            'uid' => $bill->uid,
-            'customer_name' => $bill->name,
-            'customer_email' => $bill->email,
-            'customer_phone' => $bill->phone,
-            'address' => $bill->address,
-            'total' => $bill->total,
-            'payment_method' => $bill->payment_method,
-            'status' => $bill->status,
-            'details' => $bill->billDetail->map(function ($detail) {
-                $productImage = $detail->product->gallery->firstWhere('status', 1);
-                $imageUrl = $productImage ? asset('storage/products/' . $productImage->image) : null;
-
-                return [
-                    'product_name' => $detail->product->name ?? 'Sản phẩm không tồn tại',
-                    'quantity' => $detail->quantity,
-                    'unit_price' => $detail->unit_price,
-                    'total_price' => $detail->quantity * $detail->unit_price,
-                    'product_image' => $imageUrl,
-                ];
-            }),
-        ];
-
-        return response()->json([
-            'check' => true,
-            'data' => $billTransformed,
-        ], 200);
-    }
-
-
-    public function getBillByCustomer($id)
-    {
-        $this->data = $this->model::with(['billDetail.product.gallery'])
-            ->where('customer_id', $id)
-            ->get();
-
-        if ($this->data->isEmpty()) {
-            return response()->json([
-                'check' => false,
-                'message' => 'Không có hóa đơn nào cho khách hàng với ID này!',
-            ], 404);
-        }
-
-        $bills = $this->data->transform(function ($bill) {
-            return [
-                'uid' => $bill->uid,
-                'customer_name' => $bill->name,
-                'customer_email' => $bill->email,
-                'customer_phone' => $bill->phone,
-                'address' => $bill->address,
-                'total' => $bill->total,
-                'payment_method' => $bill->payment_method,
-                'status' => $bill->status,
-                'details' => $bill->billDetail->map(function ($detail) {
-                    $productImage = $detail->product->gallery->firstWhere('status', 1);
-                    $imageUrl = $productImage ? asset('storage/products/' . $productImage->image) : null;
-
-                    return [
-                        'product_name' => $detail->product->name,
-                        'product_slug' => $detail->product->slug,
-                        'quantity' => $detail->quantity,
-                        'unit_price' => $detail->unit_price,
-                        'total_price' => $detail->quantity * $detail->unit_price,
-                        'product_image' => $imageUrl,
-                    ];
-                }),
-            ];
-        });
-
-        return response()->json([
-            'check' => true,
-            'data' => $bills,
-        ], 200);
     }
 }
