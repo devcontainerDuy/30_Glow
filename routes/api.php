@@ -58,7 +58,7 @@ Route::middleware('api')->group(function () {
     });
 
     Route::controller(App\Http\Controllers\Payment\VnPayController::class)->group(function () {
-        Route::post('/vnpay/create-payment', 'createPayment');
+        Route::get('/vnpay/create-payment', 'createPayment');
         Route::get('/vnpay/return-payment', 'vnpayReturn');
     });
 
