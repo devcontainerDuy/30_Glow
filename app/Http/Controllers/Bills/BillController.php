@@ -75,34 +75,31 @@ class BillController extends Controller
             $this->instance = Customers::where('email', $this->data['email'])->active()->first();
 
             if ($this->instance !== null && !empty($this->instance)) {
-                $idCustomer = $this->instance->load('carts.product');
+                $customers = $this->instance->load('carts.product');
 
                 if (
-                    $idCustomer->name !== $this->data['name'] ||
-                    $idCustomer->email !== $this->data['email'] ||
-                    (!empty($idCustomer->phone) && $idCustomer->phone !== $this->data['phone']) ||
-                    (!empty($idCustomer->address) && $idCustomer->address !== $this->data['address'])
+                    $customers->name !== $this->data['name'] || $customers->email !== $this->data['email']
                 ) {
                     return response()->json(['check' => false, 'message' => 'Thông tin khách hàng không chính xác!'], 401);
                 }
 
-                if (is_null($idCustomer->address)) {
-                    $idCustomer->update(['address' => $this->data['address']]);
-                } elseif ($idCustomer->address !== $this->data['address']) {
+                if (is_null($customers->address)) {
+                    $customers->update(['address' => $this->data['address']]);
+                } elseif ($customers->address !== $this->data['address']) {
                     return response()->json(['check' => false, 'message' => 'Địa chỉ không khớp!'], 401);
                 }
 
-                if (is_null($idCustomer->phone)) {
-                    $idCustomer->update(['phone' => $this->data['phone']]);
-                } elseif ($idCustomer->phone !== $this->data['phone']) {
+                if (is_null($customers->phone)) {
+                    $customers->update(['phone' => $this->data['phone']]);
+                } elseif ($customers->phone !== $this->data['phone']) {
                     return response()->json(['check' => false, 'message' => 'Số điện thoại không khớp!'], 401);
                 }
 
-                if ($idCustomer->carts->isEmpty()) {
+                if ($customers->carts->isEmpty()) {
                     return response()->json(['check' => false, 'message' => 'Giỏ hàng trống!'], 401);
                 }
 
-                $this->data['cart'] = $idCustomer->carts->map(function ($item) {
+                $this->data['cart'] = $customers->carts->map(function ($item) {
                     if (!$item->product) {
                         return response()->json(['check' => false, 'message' => 'Sản phẩm không tồn tại!'], 401);
                     }
@@ -114,14 +111,14 @@ class BillController extends Controller
                 })->toArray();
             } else {
                 $password = Str::random(10);
-                $idCustomer = Customers::create(['uid' => $this->createCodeCustomer(), 'name' => $this->data['name'], 'email' => $this->data['email'], 'phone' => $this->data['phone'], 'address' => $this->data['address'], 'password' => Hash::make($password)]);
-                $idCustomer->carts()->createMany($this->data['cart']);
+                $customers = Customers::create(['uid' => $this->createCodeCustomer(), 'name' => $this->data['name'], 'email' => $this->data['email'], 'phone' => $this->data['phone'], 'address' => $this->data['address'], 'password' => Hash::make($password)]);
+                $customers->carts()->createMany($this->data['cart']);
             }
 
             $uidBill = $this->createCodeOrder();
             $this->instance = $this->model::insertGetId([
                 'uid' => $uidBill,
-                'customer_id' => $idCustomer->id,
+                'customer_id' => $customers->id,
                 'name' => $this->data['name'],
                 'email' => $this->data['email'],
                 'phone' => $this->data['phone'],
@@ -145,7 +142,7 @@ class BillController extends Controller
                 BillsDetail::create(['id_bill' => $this->instance, 'id_product' => $item['id_product'], 'quantity' => $item['quantity'], 'unit_price' => $item['unit_price']]);
             }
 
-            $idCustomer->carts()->delete();
+            $customers->carts()->delete();
 
             DB::commit();
             return response()->json(['check' => true, 'uid' => $uidBill, 'total' => $this->data['total']], 201);
