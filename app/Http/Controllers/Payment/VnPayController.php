@@ -127,7 +127,7 @@ class VnPayController extends Controller
                     'transaction_id' => $request->vnp_TransactionNo,
                     'updated_at' => now()
                 ]);
-                return redirect()->away(session('url_prev') || url(env('CLIENT_URL') . '/thanh-toan-thanh-cong'));
+                return redirect()->away(url(env('CLIENT_URL') . '/thanh-toan-thanh-cong') . '?uid=' . $request->vnp_TxnRef . '&status=1');
             } else {
                 // Thanh toán không thành công
                 $this->instance->update([
@@ -135,11 +135,11 @@ class VnPayController extends Controller
                     'transaction_id' => $request->vnp_TransactionNo,
                     'updated_at' => now()
                 ]);
-                return response()->json(['check' => false, 'msg' => 'Thanh toán khóa'], 200);
+                return redirect()->away(url(env('CLIENT_URL') . '/thanh-toan-that-bai') . '?uid=' . $request->vnp_TxnRef . '&status=2');
             }
         } else {
             // Dữ liệu không hợp lệ
-            return response()->json(['check' => false, 'msg' => 'Dữ liệu không hợp lệ'], 400);
+            return redirect()->away(url(env('CLIENT_URL') . '/thanh-toan-that-bai') . '?uid=' . $request->vnp_TxnRef . '&status=2');
         }
     }
 }
