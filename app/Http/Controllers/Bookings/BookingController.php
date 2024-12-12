@@ -17,6 +17,9 @@ use Illuminate\Support\Facades\Hash;
 use App\Events\Bookings\BookingCreatedEvent;
 use App\Events\Bookings\BookingUpdatedEvent;
 use App\Http\Requests\Bookings\BookingRequest;
+use App\Mail\createUser;
+use Illuminate\Support\Facades\Mail;
+
 
 class BookingController extends Controller
 {
@@ -34,7 +37,7 @@ class BookingController extends Controller
             ['name' => 'Dịch vụ', 'url' => '/admin/services'],
             ['name' => 'Danh sách dịch vụ đặt lịch', 'url' => '/admin/bookings'],
         ];
-        $this->data = $this->model::with('user', 'customer', 'service')->recent()->orderBy('id', 'desc')->get();
+        $this->data = $this->model::with('user', 'customer', 'service')->orderBy('id', 'desc')->get();
         return Inertia::render('Bookings/Index', ['bookings' => $this->data, 'crumbs' => $this->crumbs]);
     }
 
@@ -106,7 +109,10 @@ class BookingController extends Controller
         DB::beginTransaction();
         try {
             $this->data = $request->validated();
-            $this->instance = Customers::where('email', $this->data['email'])->where('phone', $this->data['phone'])->active()->first();
+
+            $this->instance = Customers::where(function ($query) {
+                $query->where('email', $this->data['email'])->orWhere('phone', $this->data['phone']);
+            })->active()->first();
 
             if (!empty($this->data['id_user'] && $this->data['id_user'] !== 'null')) {
                 $idUser = User::where('uid', $this->data['id_user'])->first();
@@ -117,7 +123,13 @@ class BookingController extends Controller
                 $customerId = $this->instance->id;
             } else {
                 $password = Str::random(10);
-                $customerId = Customers::insertGetId(['uid' => $this->createCodeCustomer(), 'name' => $this->data['name'], 'email' => $this->data['email'], 'phone' => $this->data['phone'], 'password' => Hash::make($password),]);
+                $customerId = Customers::insertGetId(['uid' => $this->createCodeCustomer(), 'name' => $this->data['name'], 'email' => $this->data['email'], 'phone' => $this->data['phone'], 'password' => Hash::make($password)]);
+                $dataMail = [
+                    'name' => $this->data['name'],
+                    'email' => $this->data['email'],
+                    'password' => $password,
+                ];
+                Mail::to($this->data['email'])->send(new createUser($dataMail));
             }
 
             $booking = $this->model::insertGetId(['id_user' => $idUser->id ?? null, 'id_customer' => $customerId, 'time' => $this->data['time'], 'status' => $this->data['status'] ?? 0, 'created_at' => now(), 'updated_at' => now(),]);

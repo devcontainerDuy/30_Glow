@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useState } from "react";
-import { Box, FormControlLabel, Select, Switch } from "@mui/material";
-import { DataGrid, GridToolbar } from "@mui/x-data-grid";
+import { FormControlLabel, Select, Switch } from "@mui/material";
+import TableDataGrid from "@components/TableDataGrid";
 import Layout from "@/Layouts/Index";
 import { Button, Col, Form, Image, InputGroup, Modal, Row, Spinner, Tab, Tabs } from "react-bootstrap";
 import { FormControl, MenuItem } from "@mui/material";
@@ -42,8 +42,21 @@ function Index({ products, trashs, crumbs, categories, brands }) {
 
     const handleShow = () => setShow(true);
 
+    const formatPrice = (params) => {
+        return new Intl.NumberFormat("vi-VN", {
+            style: "currency",
+            currency: "VND",
+        }).format(params);
+    };
+
     const updateFiles = (incommingFiles) => {
         setFiles(incommingFiles);
+    };
+
+    const handleView = (id) => {
+        router.visit("/admin/products/" + id + "/edit", {
+            method: "get",
+        });
     };
 
     const onDelete = (id) => {
@@ -168,33 +181,33 @@ function Index({ products, trashs, crumbs, categories, brands }) {
     };
 
     const handleDeletePermanent = (id) => {
-        window.axios
-            .delete("/admin/products/" + id + "/permanent")
-            .then((res) => {
-                if (res.data.check === true) {
-                    toast.success(res.data.message);
-                    setData(res.data.data);
-                    setTrash(res.data.trashs);
-                } else {
-                    toast.warning(res.data.message);
-                }
-            })
-            .catch((error) => {
-                toast.error(error.response.data.message);
-            });
-    };
-
-    const handleView = (id) => {
-        router.visit("/admin/products/" + id + "/edit", {
-            method: "get",
+        Swal.fire({
+            title: "Xóa vĩnh viễn mục?",
+            text: "Bạn chắc chắn muốn xóa mục này!",
+            icon: "error",
+            showCancelButton: true,
+            confirmButtonColor: "#3085d6",
+            cancelButtonColor: "#d33",
+            confirmButtonText: "Có, xóa",
+            cancelButtonText: "Hủy",
+        }).then((result) => {
+            if (result.isConfirmed) {
+                window.axios
+                    .delete("/admin/products/" + id + "/permanent")
+                    .then((res) => {
+                        if (res.data.check === true) {
+                            toast.success(res.data.message);
+                            setData(res.data.data);
+                            setTrash(res.data.trashs);
+                        } else {
+                            toast.warning(res.data.message);
+                        }
+                    })
+                    .catch((error) => {
+                        toast.error(error.response.data.message);
+                    });
+            }
         });
-    };
-
-    const formatPrice = (params) => {
-        return new Intl.NumberFormat("vi-VN", {
-            style: "currency",
-            currency: "VND",
-        }).format(params);
     };
 
     const columns = useMemo(() => [
@@ -543,78 +556,20 @@ function Index({ products, trashs, crumbs, categories, brands }) {
                         </Modal>
                         {/* End Modal */}
 
+                        <Col xs="12">
+                            <div className="text-start my-2">
+                                <h4>Danh Sách Sản Phẩm </h4>
+                            </div>
+                        </Col>
+
                         {/* Start DataGrid */}
                         <Col xs="12">
                             <Tabs defaultActiveKey="list" id="uncontrolled-tab-example">
-                                <Tab eventKey="list" title={"Danh sách sản phẩm" + " (" + data.length + ")"}>
-                                    <Box sx={{ height: "70vh", width: "100%" }}>
-                                        <DataGrid
-                                            rows={data}
-                                            columns={columns}
-                                            slots={{
-                                                toolbar: GridToolbar,
-                                            }}
-                                            slotProps={{
-                                                toolbar: {
-                                                    showQuickFilter: true,
-                                                    quickFilterProps: {
-                                                        debounceMs: 500,
-                                                    },
-                                                },
-                                            }}
-                                            initialState={{
-                                                pagination: {
-                                                    paginationModel: {
-                                                        pageSize: 20,
-                                                    },
-                                                },
-                                            }}
-                                            onCellEditStop={(params, e) => {
-                                                handleCellEditStop(params.row.id, params.field, e.target.value);
-                                            }}
-                                            onCellEditStart={(params, e) => {
-                                                handleCellEditStart(params.row.id, params.field, e.target.value);
-                                            }}
-                                            pageSizeOptions={[20, 40, 60, 80, 100]}
-                                            checkboxSelection
-                                            disableRowSelectionOnClick
-                                        />
-                                    </Box>
+                                <Tab eventKey="list" title={"Danh sách" + " (" + data.length + ")"}>
+                                    <TableDataGrid data={data} columns={columns} handleCellEditStop={handleCellEditStop} handleCellEditStart={handleCellEditStart} />
                                 </Tab>
                                 <Tab eventKey="trash" title={"Thùng rác" + " (" + trash.length + ")"}>
-                                    <Box sx={{ height: "70vh", width: "100%" }}>
-                                        <DataGrid
-                                            rows={trash}
-                                            columns={columnsTrash}
-                                            slots={{
-                                                toolbar: GridToolbar,
-                                            }}
-                                            slotProps={{
-                                                toolbar: {
-                                                    showQuickFilter: true,
-                                                    quickFilterProps: {
-                                                        debounceMs: 500,
-                                                    },
-                                                },
-                                            }}
-                                            initialState={{
-                                                pagination: {
-                                                    paginationModel: {
-                                                        pageSize: 20,
-                                                    },
-                                                },
-                                            }}
-                                            onCellEditStop={(params, e) => {
-                                                handleCellEditStop(params.row.id, params.field, e.target.value);
-                                            }}
-                                            onCellEditStart={(params, e) => {
-                                                handleCellEditStart(params.row.id, params.field, e.target.value);
-                                            }}
-                                            pageSizeOptions={[20, 40, 60, 80, 100]}
-                                            checkboxSelection
-                                            disableRowSelectionOnClick
-                                        />
-                                    </Box>
+                                    <TableDataGrid data={trash} columns={columnsTrash} handleCellEditStop={handleCellEditStop} handleCellEditStart={handleCellEditStart} />
                                 </Tab>
                             </Tabs>
                         </Col>
