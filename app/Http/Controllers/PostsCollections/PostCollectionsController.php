@@ -1,31 +1,32 @@
 <?php
 
-namespace App\Http\Controllers\ServicesCollections;
+namespace App\Http\Controllers\PostsCollections;
 
 use App\Http\Controllers\Controller;
-use App\Http\Requests\ServicesCollections\ServiceCollectionsrRequest;
-use App\Models\ServicesCollections;
+use App\Http\Requests\PostsCollections\PostCollectionsRequest;
+use App\Models\PostCollections;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Illuminate\Support\Str;
 
-class ServiceCollectionsContoller extends Controller
+class PostCollectionsController extends Controller
 {
     public function __construct()
     {
-        $this->model = ServicesCollections::class;
+        $this->model = PostCollections::class;
     }
+
     /**
      * Display a listing of the resource.
      */
     public function index()
     {
         $this->crumbs = [
-            ['name' => 'Dịch Vụ', 'url' => '/admin/services'],
-            ['name' => 'Phân Loại Dịch Vụ', 'url' => '/admin/service-collections'],
+            ['name' => 'Tin Tức', 'url' => 'admin/posts'],
+            ['name' => 'Phân Loại Tin Tức', 'url' => 'admin/posts/collections'],
         ];
         $this->data = $this->model::orderBy('id', 'desc')->get();
-        return Inertia::render('ServicesCollections/Index', ['collections' => $this->data, 'crumbs' => $this->crumbs]);
+        return Inertia::render('PostsCollections/Index', ['collections' => $this->data, 'crumbs' => $this->crumbs]);
     }
 
     /**
@@ -39,7 +40,7 @@ class ServiceCollectionsContoller extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(ServiceCollectionsrRequest $request)
+    public function store(PostCollectionsRequest $request)
     {
         $this->data = $request->validated();
         $this->data['slug'] = Str::slug($this->data['name']);
@@ -70,7 +71,7 @@ class ServiceCollectionsContoller extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(ServiceCollectionsrRequest $request, string $id)
+    public function update(PostCollectionsRequest $request, string $id)
     {
         $this->data = $request->validated();
         if (isset($this->data['name'])) $this->data['slug'] = Str::slug($this->data['name']);
@@ -95,55 +96,35 @@ class ServiceCollectionsContoller extends Controller
         return response()->json(['check' => false, 'message' => 'Xóa thất bại!'], 400);
     }
 
-    /**
-     * API Client
-     */
-    public function apiHighlighted()
+    public function restore($id)
     {
-        $this->data = $this->model::highlighted()->select('id', 'name', 'slug', 'status', 'highlighted')->whereHas('services')->orderBy('created_at', 'asc')->get();
-        return response()->json(['check' => true, 'data' => $this->data], 200);
+        $this->instance = $this->model::withTrashed()->findOrFail($id);
+        $this->instance->restore();
+        if ($this->instance) {
+            $this->data = $this->model::orderBy('id', 'desc')->get();
+            return response()->json(['check' => true, 'message' => 'Khôi phục tion!', 'data' => $this->data], 200);
+        }
+    }
+
+    public function forceDelete($id)
+    {
+        $this->instance = $this->model::withTrashed()->findOrFail($id);
+        $this->instance->forceDelete();
+        if ($this->instance) {
+            $this->data = $this->model::orderBy('id', 'desc')->get();
+            return response()->json(['check' => true, 'message' => 'Xóa vĩnh viễn thành công!', 'data' => $this->data], 200);
+        }
     }
 
     public function apiIndex()
     {
-        $this->data = $this->model::active()->select('id', 'name', 'slug', 'status', 'highlighted')->whereHas('services')->orderBy('created_at', 'asc')->get();
+        $this->data = $this->model::orderBy('id', 'desc')->get();
         return response()->json(['check' => true, 'data' => $this->data], 200);
     }
 
-    public function apiShow($slug)
+    public function apiShow($id)
     {
-        $this->data = $this->model::with('services')->active()->select('id', 'name', 'slug', 'status', 'highlighted')->whereHas(
-            'services',
-            function ($query) {
-                $query->where('status', 1);
-            }
-        )->where('slug', $slug)->firstOrFail();
-
-        if (!$this->data) {
-            return response()->json(['check' => false, 'message' => 'Không tìm thấy dịch vụ!'], 404);
-        }
-
-        $this->data->services->transform(function ($item) {
-            return [
-                'id' => $item->id,
-                'name' => $item->name,
-                'slug' => $item->slug,
-                'price' => $item->price,
-                'compare_price' => $item->compare_price,
-                'discount' => $item->discount,
-                'image' => asset('storage/services/' . $item->image),
-                'summary' => $item->summary,
-                'content' => $item->content,
-                'status' => $item->status,
-                'collection' => $item->collection ? [
-                    'id' => $item->collection->id,
-                    'name' => $item->collection->name,
-                    'slug' => $item->collection->slug,
-                    'status' => $item->collection->status,
-                ] : null,
-            ];
-        });
-
+        $this->data = $this->model::findOrFail($id);
         return response()->json(['check' => true, 'data' => $this->data], 200);
     }
 }

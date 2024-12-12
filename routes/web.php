@@ -73,6 +73,11 @@ Route::middleware(['auth', 'auth.session', 'web', 'authen:Super Admin,Manager'])
     Route::resource('service-collections', App\Http\Controllers\ServicesCollections\ServiceCollectionsContoller::class)->names('service_collections');
     // Module Service
     Route::resource('services', App\Http\Controllers\Services\ServiceController::class)->names('service');
+    Route::controller(App\Http\Controllers\Services\ServiceController::class)->group(function () {
+        Route::post('/services/{id}/upload', 'updateFiles')->name('services.updateImage');
+        // Route::post('/services/{id}/restore', 'restore')->name('services.restore');
+        // Route::delete('/services/{id}/permanent', 'permanent')->name('services.permanent');
+    });
     // Module Booking
     Route::prefix('bookings')->as('bookings.')->controller(App\Http\Controllers\Bookings\BookingController::class)->group(function () {
         Route::get('/', 'index')->name('index');

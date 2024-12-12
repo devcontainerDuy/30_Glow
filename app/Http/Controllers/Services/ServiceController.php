@@ -8,6 +8,7 @@ use App\Models\Services;
 use App\Models\ServicesCollections;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
+use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
 
 class ServiceController extends Controller
@@ -90,20 +91,35 @@ class ServiceController extends Controller
         $this->data = $request->validated();
         if (isset($this->data['name'])) $this->data['slug'] = Str::slug($this->data['name']);
 
-        if (isset($this->data['image'])) {
-            $file = $request->file('image');
-            $imageName = $file->getClientOriginalName();
-            $extractTo = storage_path('app/public/services/');
-            $file->move($extractTo, $imageName);
-            $this->data['image'] = $imageName;
-        }
-
         $this->instance = $this->model::findOrFail($id)->update($this->data);
         if ($this->instance) {
             $this->data = $this->model::with('collection')->orderBy('id', 'desc')->get();
             return response()->json(['check' => true, 'message' => 'Cập nhật thành công!', 'data' => $this->data], 200);
         }
         return response()->json(['check' => false, 'message' => 'Cập nhật thất bại!'], 400);
+    }
+
+    public function updateFiles(Request $request, string $id)
+    {
+        $validator = Validator::make($request->all(), [
+            'image' => ['required', 'image', 'max:2048'],
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json(['check' => false, 'message' => $validator->errors()->first()], 400);
+        }
+
+        $file = $request->file('image');
+        $imageName = $file->getClientOriginalName();
+        $extractTo = storage_path('app/public/services/');
+        $file->move($extractTo, $imageName);
+
+        $this->instance = $this->model::findOrFail($id)->update(['image' => $imageName]);
+        if ($this->instance) {
+            $this->data = $this->model::with('collection')->orderBy('id', 'desc')->get();
+            return response()->json(['check' => true, 'message' => 'Cập nhật ảnh thành công!', 'data' => $this->data], 200);
+        }
+        return response()->json(['check' => false, 'message' => 'Cập nhật ảnh thất bại!'], 400);
     }
 
 

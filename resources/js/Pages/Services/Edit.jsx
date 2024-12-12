@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { Box } from "@mui/material";
 import Layout from "@/Layouts/Index";
-
 import { Button, Card, Col, Form, Image, InputGroup, Modal, Row, Spinner } from "react-bootstrap";
 import Swal from "sweetalert2";
 import CKEditor from "@/Containers/CKEditor";
@@ -9,73 +8,51 @@ import { Dropzone, FileMosaic } from "@dropzone-ui/react";
 import BreadcrumbComponent from "@/Components/BreadcrumbComponent";
 import { router } from "@inertiajs/react";
 import { toast } from "react-toastify";
+import axios from "axios";
 
 function Edit({ service, collections, crumbs }) {
+    const [data, setData] = useState({
+        id: 0,
+        name: "",
+        slug: "",
+        price: 0,
+        discount: 0,
+        compare_price: 0,
+        summary: "",
+        id_collection: 0,
+        image: null,
+        content: "",
+        status: 0,
+        highlighted: 0,
+        created: "",
+        updated: "",
+    });
     const [collectionsData, setCollectionsData] = useState([]);
-    const [loading, setLoading] = useState(false);
-    const [name, setName] = useState("");
-    const [slug, setSlug] = useState("");
-    const [price, setPrice] = useState(0);
-    const [comparePrice, setComparePrice] = useState(0);
-    const [discount, setDiscount] = useState(0);
-    const [summary, setSummary] = useState("");
-    const [idCollection, setIdCollection] = useState(0);
     const [files, setFiles] = useState([]);
-    const [imagePreview, setImagePreview] = useState("");
-    const [content, setContent] = useState("");
-    const [status, setStatus] = useState(0);
-    const [highlighted, setHighlighted] = useState(0);
-    const [created, setCreated] = useState("");
-    const [updated, setUpdated] = useState("");
+    const [loading, setLoading] = useState(false);
+    const [show, setShow] = useState(false);
+
+    const handleClose = () => setShow(false);
+    const handleShow = () => setShow(true);
 
     const handleBack = () => {
-        setName("");
-        setPrice(0);
-        setComparePrice(0);
-        setDiscount(0);
-        setSummary("");
-        setIdCollection(0);
-        setFiles([]);
-        setContent("");
-        setStatus(0);
-        setHighlighted(0);
+        setData({});
         router.visit("/admin/services", {
             method: "get",
         });
     };
 
-    const handleImageChange = (event) => {
-        const selectedFile = event.target.files[0];
-        if (selectedFile) {
-            setFiles(selectedFile.name);
-            const fileURL = URL.createObjectURL(selectedFile);
-            setImagePreview(fileURL);
-            console.log();
-        }
-    };
-
     const handleSubmit = (e) => {
         e.preventDefault();
         setLoading(true);
-        console.log(imagePreview);
+        const { image, ...rest } = data;
 
         window.axios
-            .put("/admin/services/" + service?.id, {
-                name: name,
-                price: price,
-                discount: discount,
-                compare_price: comparePrice,
-                summary: summary,
-                id_collection: idCollection,
-                image: imagePreview.file,
-                content: content,
-                status: status,
-                highlighted: highlighted,
-            })
+            .put(`/admin/services/${data?.id}`, rest)
             .then((res) => {
                 if (res.data.check == true) {
                     toast.success(res.data.message);
-                    router.visit("/admin/services/" + service?.id, {
+                    router.visit("/admin/services/" + data?.id, {
                         method: "get",
                     });
                 } else {
@@ -83,7 +60,7 @@ function Edit({ service, collections, crumbs }) {
                 }
             })
             .catch((error) => {
-                toast.error(error.response.data.message);
+                toast.error(error.response?.data?.message || "Có lỗi xảy ra");
             })
             .finally(() => setLoading(false));
     };
@@ -120,30 +97,62 @@ function Edit({ service, collections, crumbs }) {
     };
 
     const handleEditorBlur = (data) => {
-        setContent(data);
+        setData({ ...data, content: data });
     };
     const formatCreatedAt = (dateString) => {
         const date = new Date(dateString);
         return date.toLocaleString();
     };
 
+    const updateFiles = (incommingFiles) => {
+        setFiles(incommingFiles.map((f) => Object.assign(f, { preview: URL.createObjectURL(f.file) })));
+    };
+
+    const onDelete = (id) => {
+        setFiles(files.filter((x) => x.id !== id));
+    };
+
+    const handleSetImage = () => {
+        if (files.length > 0) {
+            axios
+                .post(
+                    "/admin/services/" + data?.id + "/upload",
+                    { image: files[0].file },
+                    {
+                        headers: {
+                            "Content-Type": "multipart/form-data",
+                        },
+                    }
+                )
+                .then((res) => {
+                    if (res.data.check === true) {
+                        setData({ ...data, image: res.data.data?.image });
+                        toast.success(res.data.message);
+                        router.visit("/admin/services/" + data?.id, {
+                            method: "get",
+                        });
+                    } else {
+                        toast.warn(res.data.message);
+                    }
+                })
+                .catch((err) => {
+                    toast.error(err.response.data.message || "Có lỗi xảy ra");
+                })
+                .finally(() => handleClose());
+        } else {
+            toast.warning("Vui lòng chọn một ảnh.");
+        }
+    };
+
+    console.log(files);
+
     useEffect(() => {
-        setName(service.name);
-        setSlug(service.slug);
-        setPrice(service.price);
-        setComparePrice(service.compare_price);
-        setDiscount(service.discount);
-        setSummary(service.summary);
-        setIdCollection(service.id_collection);
-        setContent(service.content);
-        setFiles(service.image);
-        setStatus(service.status);
-        setHighlighted(service.highlighted);
-        setCreated(service.created_at);
-        setUpdated(service.updated_at);
-        // danh sách
+        setData({
+            ...service,
+            created: formatCreatedAt(service?.created_at),
+            updated: formatCreatedAt(service?.updated_at),
+        });
         setCollectionsData(collections);
-        console.log(files);
     }, [service, collections]);
 
     return (
@@ -187,18 +196,18 @@ function Edit({ service, collections, crumbs }) {
                                             <Card className="p-3">
                                                 <Form.Group className="mb-3" controlId="name">
                                                     <Form.Label>Nhập tên sản phẩm</Form.Label>
-                                                    <Form.Control type="text" placeholder="Tên sản phẩm..." value={name} onChange={(e) => setName(e.target.value)} />
+                                                    <Form.Control type="text" placeholder="Tên sản phẩm..." value={data?.name} onChange={(e) => setData({ ...data, name: e.target.value })} />
                                                 </Form.Group>
                                                 <Form.Group className="mb-3" controlId="slug">
                                                     <Form.Label>Slug</Form.Label>
-                                                    <Form.Control type="text" value={slug} disabled />
+                                                    <Form.Control type="text" value={data?.slug} disabled />
                                                 </Form.Group>
                                                 <Row>
                                                     <Col>
                                                         <Form.Group className="mb-3" controlId="price">
                                                             <Form.Label>Giá sản phẩm</Form.Label>
                                                             <InputGroup className="mb-3">
-                                                                <Form.Control type="number" placeholder="100000" value={price} onChange={(e) => setPrice(e.target.value)} />
+                                                                <Form.Control type="number" placeholder="100000" value={data?.price} onChange={(e) => setData({ ...data, price: e.target.value })} />
                                                                 <InputGroup.Text>VND</InputGroup.Text>
                                                             </InputGroup>
                                                         </Form.Group>
@@ -208,7 +217,7 @@ function Edit({ service, collections, crumbs }) {
                                                         <Form.Group className="mb-3" controlId="discount">
                                                             <Form.Label>Giảm giá</Form.Label>
                                                             <InputGroup className="mb-3">
-                                                                <Form.Control type="number" placeholder="10" value={discount} onChange={(e) => setDiscount(e.target.value)} />
+                                                                <Form.Control type="number" placeholder="10" value={data?.discount} onChange={(e) => setData({ ...data, discount: e.target.value })} />
                                                                 <InputGroup.Text>%</InputGroup.Text>
                                                             </InputGroup>
                                                         </Form.Group>
@@ -219,11 +228,11 @@ function Edit({ service, collections, crumbs }) {
                                                         <Form.Group className="mb-3" controlId="status">
                                                             <Form.Label>Trạng thái</Form.Label>
                                                             <Form.Check
-                                                                checked={status === 1}
+                                                                checked={data?.status === 1}
                                                                 type="switch"
                                                                 id="status"
-                                                                label={status === 1 ? "Hoạt động" : "Tạm ngừng"}
-                                                                onChange={() => setStatus(status === 1 ? 0 : 1)}
+                                                                label={data?.status === 1 ? "Hoạt động" : "Tạm ngừng"}
+                                                                onChange={() => setData({ ...data, status: data?.status === 1 ? 0 : 1 })}
                                                             />
                                                         </Form.Group>
                                                     </Col>
@@ -231,11 +240,11 @@ function Edit({ service, collections, crumbs }) {
                                                         <Form.Group className="mb-3" controlId="status">
                                                             <Form.Label>Bán chạy</Form.Label>
                                                             <Form.Check
-                                                                checked={highlighted === 1}
+                                                                checked={data?.highlighted === 1}
                                                                 type="switch"
                                                                 id="status"
-                                                                label={highlighted === 1 ? "Bán chạy" : "Không bán chạy"}
-                                                                onChange={() => setHighlighted(highlighted === 1 ? 0 : 1)}
+                                                                label={data?.highlighted === 1 ? "Bán chạy" : "Không bán chạy"}
+                                                                onChange={() => setData({ ...data, highlighted: data?.highlighted === 1 ? 0 : 1 })}
                                                             />
                                                         </Form.Group>
                                                     </Col>
@@ -244,20 +253,20 @@ function Edit({ service, collections, crumbs }) {
                                                     <Col>
                                                         <Form.Group className="mb-3" controlId="created">
                                                             <Form.Label>Ngày tạo</Form.Label>
-                                                            <Form.Control type="text" value={formatCreatedAt(created)} disabled />
+                                                            <Form.Control type="text" value={data?.created} disabled />
                                                         </Form.Group>
                                                     </Col>
                                                     <Col>
                                                         <Form.Group className="mb-3" controlId="updated">
                                                             <Form.Label>Ngầy cập nhật</Form.Label>
-                                                            <Form.Control type="text" value={formatCreatedAt(updated)} disabled />
+                                                            <Form.Control type="text" value={data?.updated} disabled />
                                                         </Form.Group>
                                                     </Col>
                                                 </Row>
                                                 {/* Nội dung chính */}
                                                 <Form.Group controlId="name">
                                                     <Form.Label>Nội dung chính</Form.Label>
-                                                    <CKEditor value={content} onBlur={handleEditorBlur} />
+                                                    <CKEditor value={data?.content} onBlur={handleEditorBlur} />
                                                 </Form.Group>
                                             </Card>
                                         </Col>
@@ -265,35 +274,16 @@ function Edit({ service, collections, crumbs }) {
                                             <Card>
                                                 <Card.Header>Hình ảnh</Card.Header>
                                                 <Card.Body>
-                                                    {files && (
-                                                        <div style={{ position: "relative", cursor: "pointer" }} onClick={() => document.getElementById("fileInput").click()}>
-                                                            <Image
-                                                                fluid
-                                                                className="mb-3 rounded-1 w-100 h-100"
-                                                                src={imagePreview ? imagePreview : `/storage/services/${files}`} // Sử dụng URL đã tạo cho ảnh xem trước
-                                                                alt={files}
-                                                            />
-                                                            <Form.Control
-                                                                id="fileInput"
-                                                                type="file"
-                                                                accept="image/*"
-                                                                onChange={handleImageChange}
-                                                                style={{ display: "none" }} // Ẩn input file
-                                                            />
-                                                        </div>
+                                                    {/* Hình ảnh */}
+                                                    {files[0] && files.length > 0 && files[0].preview ? (
+                                                        <Image fluid src={files[0].preview} alt={data?.name} className="mb-3 rounded-2" />
+                                                    ) : (
+                                                        <Image fluid src={"/storage/services/" + data?.image} alt={data?.name} className="mb-3 rounded-2" />
                                                     )}
-                                                    {!files && (
-                                                        <Form.Group>
-                                                            <Form.Label>Ảnh sản phẩm</Form.Label>
-                                                            <Form.Control
-                                                                id="fileInput"
-                                                                type="file"
-                                                                accept="image/*"
-                                                                onChange={handleImageChange}
-                                                                style={{ display: "none" }} // Ẩn input file
-                                                            />
-                                                        </Form.Group>
-                                                    )}
+                                                    <Button className="w-100" variant="primary" type="button" onClick={handleShow}>
+                                                        <i className="bi bi-images" />
+                                                        <span className="ms-2">Thay đổi ảnh</span>
+                                                    </Button>
                                                 </Card.Body>
                                             </Card>
                                             <Card className="mt-3">
@@ -301,7 +291,7 @@ function Edit({ service, collections, crumbs }) {
                                                 <Card.Body>
                                                     {/* Chọn danh mục */}
                                                     <Form.Group controlId="id_collection">
-                                                        <Form.Select name="id_collection" value={idCollection} onChange={(e) => setIdCollection(e.target.value)}>
+                                                        <Form.Select name="id_collection" value={data?.id_collection} onChange={(e) => setData({ ...data, id_collection: e.target.value })}>
                                                             <option value="">-- Chọn --</option>
                                                             {collectionsData.length > 0 ? (
                                                                 collectionsData.map((item, index) => (
@@ -318,6 +308,32 @@ function Edit({ service, collections, crumbs }) {
                                             </Card>
                                         </Col>
                                     </Row>
+
+                                    <Modal show={show} onHide={handleClose}>
+                                        <Modal.Header closeButton>
+                                            <Modal.Title>Thay đổi hình ảnh</Modal.Title>
+                                        </Modal.Header>
+                                        <Modal.Body>
+                                            {/* Chọn hiệu dữ liệu */}
+                                            <Dropzone onChange={updateFiles} className="rounded-1" accept="image/*" maxFiles={1} multiple={false} value={files}>
+                                                {files && files.length > 0 ? (
+                                                    files.map((file, index) => <FileMosaic {...file} key={index} preview info onDelete={onDelete} />)
+                                                ) : (
+                                                    <Form.Label>
+                                                        <i className="bi bi-cloud-arrow-up" style={{ fontSize: "5rem" }} />
+                                                    </Form.Label>
+                                                )}
+                                            </Dropzone>
+                                        </Modal.Body>
+                                        <Modal.Footer>
+                                            <Button variant="secondary" onClick={handleClose}>
+                                                Đóng
+                                            </Button>
+                                            <Button variant="primary" onClick={handleSetImage}>
+                                                Chọn ảnh
+                                            </Button>
+                                        </Modal.Footer>
+                                    </Modal>
                                 </Form>
                             </Box>
                         </Col>
