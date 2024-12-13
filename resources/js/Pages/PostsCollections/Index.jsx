@@ -8,6 +8,8 @@ import Swal from "sweetalert2";
 import { Helmet } from "react-helmet";
 import { toast } from "react-toastify";
 import BreadcrumbComponent from "@/Components/BreadcrumbComponent";
+import ButtonsComponent from "@/Components/ButtonsComponent";
+import ModalComponent from "@/Components/ModalComponent";
 
 function Index({ collections, crumbs }) {
     const [data, setData] = useState([]);
@@ -27,7 +29,7 @@ function Index({ collections, crumbs }) {
         setLoading(true);
 
         window.axios
-            .post("/admin/services/collections", {
+            .post("/admin/posts/collections", {
                 name: name,
             })
             .then((res) => {
@@ -54,7 +56,7 @@ function Index({ collections, crumbs }) {
 
         if (originalValue !== value) {
             window.axios
-                .put("/admin/services/collections/" + id, {
+                .put("/admin/posts/collections/" + id, {
                     [field]: value,
                 })
                 .then((res) => {
@@ -91,7 +93,7 @@ function Index({ collections, crumbs }) {
         }).then((result) => {
             if (result.isConfirmed) {
                 window.axios
-                    .delete("/admin/services/collections/" + id)
+                    .delete("/admin/posts/collections/" + id)
                     .then((res) => {
                         if (res.data.check === true) {
                             toast.success(res.data.message);
@@ -180,61 +182,38 @@ function Index({ collections, crumbs }) {
     return (
         <>
             <Helmet>
-                <title>Danh sách phân loại dịch vụ</title>
-                <meta name="description" content="Danh sách phân loại dịch vụ" />
+                <title>Danh sách chuyên đề bài viết</title>
+                <meta name="description" content="Danh sách chuyên đề bài viết" />
             </Helmet>
             <Layout>
                 <section className="container">
                     <Row>
                         <BreadcrumbComponent props={crumbs}>
-                            <Button type="button" variant="primary" onClick={handleShow}>
-                                <i className="bi bi-plus-lg" />
-                                <span className="ms-2">Thêm phân loại dịch vụ mới</span>
-                            </Button>
+                            <ButtonsComponent type="button" variant="primary" icon="add" title="Thêm mới" onClick={handleShow} />
                         </BreadcrumbComponent>
                         {/* Start Modal */}
-                        <Modal show={show} onHide={handleClose}>
-                            <Form onSubmit={handleSubmit}>
-                                <Modal.Header closeButton>
-                                    <Modal.Title>
-                                        <span>Thêm phân loại dịch vụ mới</span>
-                                    </Modal.Title>
-                                </Modal.Header>
-                                <Modal.Body>
-                                    <Form.Group className="mb-3" controlId="name">
-                                        <Form.Label>Nhập địa tên phân loại</Form.Label>
-                                        <Form.Control type="text" placeholder="name abc" name="name" onChange={(e) => setName(e.target.value)} />
+                        <ModalComponent
+                            show={show}
+                            close={handleClose}
+                            submit={handleSubmit}
+                            size="md"
+                            title="Thêm mới"
+                            loaded={loading}
+                            body={
+                                <>
+                                    <Form.Group className="mb-3">
+                                        <Form.Label>Loại dịch vụ</Form.Label>
+                                        <Form.Control type="text" placeholder="Nhập tên loại dịch vụ" name="name" value={name} onChange={(e) => setName(e.target.value)} />
                                     </Form.Group>
-                                </Modal.Body>
-                                <Modal.Footer>
-                                    <Button variant="secondary" onClick={handleClose}>
-                                        <i className="bi bi-box-arrow-right" />
-                                        <span className="ms-2">Thoát ra</span>
-                                    </Button>
-                                    <Button variant="primary" type="submit" disabled={loading}>
-                                        {loading ? (
-                                            <>
-                                                <Spinner size="sm" animation="border" variant="secondary" />
-                                                <span>Đang lưu...</span>
-                                            </>
-                                        ) : (
-                                            <>
-                                                <i className="bi bi-floppy-fill" />
-                                                <span className="ms-2">
-                                                    <span>Lưu lại</span>
-                                                </span>
-                                            </>
-                                        )}
-                                    </Button>
-                                </Modal.Footer>
-                            </Form>
-                        </Modal>
+                                </>
+                            }
+                        />
                         {/* End Modal */}
                         {/* Start DataGrid */}
                         <Col xs="12">
                             <Box sx={{ height: "70vh", width: "100%" }}>
                                 <div className="text-start">
-                                    <h4>Danh Sách Phân Loại Dịch Vụ </h4>
+                                    <h4>Danh Sách chuyên đề bài viết </h4>
                                 </div>
                                 <DataGrid
                                     rows={data}

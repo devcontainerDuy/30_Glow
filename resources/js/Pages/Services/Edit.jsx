@@ -52,9 +52,11 @@ function Edit({ service, collections, crumbs }) {
             .then((res) => {
                 if (res.data.check == true) {
                     toast.success(res.data.message);
-                    router.visit("/admin/services/" + data?.id, {
-                        method: "get",
-                    });
+                    setTimeout(() => {
+                        router.visit("/admin/services/" + data?.id, {
+                            method: "get",
+                        });
+                    }, 1000);
                 } else {
                     toast.warning(res.data.message);
                 }
@@ -99,6 +101,7 @@ function Edit({ service, collections, crumbs }) {
     const handleEditorBlur = (data) => {
         setData({ ...data, content: data });
     };
+
     const formatCreatedAt = (dateString) => {
         const date = new Date(dateString);
         return date.toLocaleString();
@@ -128,9 +131,11 @@ function Edit({ service, collections, crumbs }) {
                     if (res.data.check === true) {
                         setData({ ...data, image: res.data.data?.image });
                         toast.success(res.data.message);
-                        router.visit("/admin/services/" + data?.id, {
-                            method: "get",
-                        });
+                        setTimeout(() => {
+                            router.visit("/admin/services/" + data?.id, {
+                                method: "get",
+                            });
+                        }, 1000);
                     } else {
                         toast.warn(res.data.message);
                     }
@@ -143,8 +148,6 @@ function Edit({ service, collections, crumbs }) {
             toast.warning("Vui lòng chọn một ảnh.");
         }
     };
-
-    console.log(files);
 
     useEffect(() => {
         setData({

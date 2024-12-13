@@ -22,8 +22,8 @@ class PostCollectionsController extends Controller
     public function index()
     {
         $this->crumbs = [
-            ['name' => 'Tin Tức', 'url' => 'admin/posts'],
-            ['name' => 'Phân Loại Tin Tức', 'url' => 'admin/posts/collections'],
+            ['name' => 'Bài Viết', 'url' => 'admin/posts'],
+            ['name' => 'Chuyên Mục Bài Viết', 'url' => 'admin/posts/collections'],
         ];
         $this->data = $this->model::orderBy('id', 'desc')->get();
         return Inertia::render('PostsCollections/Index', ['collections' => $this->data, 'crumbs' => $this->crumbs]);

@@ -1,25 +1,55 @@
 import React from "react";
-import { Button, Modal } from "react-bootstrap";
+import { Form, Modal } from "react-bootstrap";
+import ButtonsComponent from "@/Components/ButtonsComponent";
+import PropTypes from "prop-types";
 
-export default function ModalComponent({ show, close, title, body }) {
+export default function ModalComponent({ show, close, size, submit, title, body, footer, loaded }) {
+    if (footer === undefined) {
+        footer = (
+            <>
+                <ButtonsComponent type="button" variant="secondary" icon="close" title="Close" onClick={close} />
+                <ButtonsComponent type="submit" variant="primary" icon="add" title="Save" loaded={loaded} />
+            </>
+        );
+    }
+
     return (
         <>
-            <Modal show={show} onHide={close}>
-                <Modal.Header closeButton>
-                    <Modal.Title>{title}</Modal.Title>
-                </Modal.Header>
-                <Modal.Body>{body}</Modal.Body>
-                <Modal.Footer>
-                    <Button variant="secondary" onClick={close}>
-                        <i className="bi bi-box-arrow-right" />
-                        <span className="ms-2">Thoát ra</span>
-                    </Button>
-                    <Button variant="primary" type="submit" onClick={close}>
-                        <i className="bi bi-floppy-fill" />
-                        <span className="ms-2">Lưu lại</span>
-                    </Button>
-                </Modal.Footer>
+            <Modal show={show} onHide={close} size={size} centered>
+                <Form onSubmit={submit}>
+                    <Modal.Header closeButton>
+                        <Modal.Title>
+                            <span>{title}</span>
+                        </Modal.Title>
+                    </Modal.Header>
+                    <Modal.Body
+                        className="overflow-auto"
+                        style={{
+                            maxHeight: "calc(100vh - 210px)",
+                        }}
+                    >
+                        {body}
+                    </Modal.Body>
+                    <Modal.Footer>{footer}</Modal.Footer>
+                </Form>
             </Modal>
         </>
     );
 }
+
+ModalComponent.defaultProps = {
+    size: "md",
+    title: "Modal Title",
+    body: "Modal Body",
+};
+
+ModalComponent.propTypes = {
+    show: PropTypes.bool,
+    close: PropTypes.func,
+    size: PropTypes.string,
+    submit: PropTypes.func,
+    title: PropTypes.string,
+    body: PropTypes.node,
+    footer: PropTypes.node,
+    loaded: PropTypes.bool,
+};

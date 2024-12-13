@@ -22,7 +22,7 @@ class ServiceCollectionsContoller extends Controller
     {
         $this->crumbs = [
             ['name' => 'Dịch Vụ', 'url' => '/admin/services'],
-            ['name' => 'Phân Loại Dịch Vụ', 'url' => '/admin/service-collections'],
+            ['name' => 'Phân Loại Dịch Vụ', 'url' => '/admin/services/collections'],
         ];
         $this->data = $this->model::orderBy('id', 'desc')->get();
         return Inertia::render('ServicesCollections/Index', ['collections' => $this->data, 'crumbs' => $this->crumbs]);

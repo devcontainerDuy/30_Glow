@@ -74,7 +74,7 @@ Route::middleware(['auth', 'auth.session', 'web', 'authen:Super Admin,Manager'])
     // Module Biils-services
     Route::resource('bills-services', App\Http\Controllers\BillServices\BillServicesController::class)->names('bill-services');
     // Module Service Collection
-    Route::resource('service-collections', App\Http\Controllers\ServicesCollections\ServiceCollectionsContoller::class)->names('service_collections');
+    Route::resource('services/collections', App\Http\Controllers\ServicesCollections\ServiceCollectionsContoller::class)->names('service_collections');
     // Module Service
     Route::resource('services', App\Http\Controllers\Services\ServiceController::class)->names('service');
     Route::controller(App\Http\Controllers\Services\ServiceController::class)->group(function () {
@@ -96,6 +96,8 @@ Route::middleware(['auth', 'auth.session', 'web', 'authen:Super Admin,Manager'])
     Route::resource('contacts', App\Http\Controllers\Contacts\ContactsController::class)->names('contacts');
     //Modele comments
     Route::resource('comments', App\Http\Controllers\Comments\CommentsController::class)->names('comments');
+    // Module PostsCollections
+    Route::resource('posts/collections', App\Http\Controllers\PostsCollections\PostCollectionsController::class)->names('posts-collections');
 });
 
 Route::middleware('web')->prefix('auth')->as('auth.')->controller(App\Http\Controllers\Auth\Admin\AuthenController::class)->group(function () {

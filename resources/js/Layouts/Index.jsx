@@ -166,11 +166,19 @@ function Layout({ children }) {
                             <MenuItem icon={<ContentPasteOutlinedIcon />} component={<Link href="/admin/services" />}>
                                 Ds dịch vụ
                             </MenuItem>
-                            <MenuItem icon={<ClassOutlinedIcon />} component={<Link href="/admin/service-collections" />}>
+                            <MenuItem icon={<ClassOutlinedIcon />} component={<Link href="/admin/services/collections" />}>
                                 Phân loại dịch vụ
                             </MenuItem>
                             <MenuItem icon={<CalendarMonthOutlinedIcon />} component={<Link href="/admin/bookings" />}>
                                 Ds lịch đặt
+                            </MenuItem>
+                        </SubMenu>
+                        <SubMenu icon={<ReceiptLongOutlinedIcon />} label="Quản lý bài viết">
+                            <MenuItem icon={<StorefrontIcon />} component={<Link href="/admin/posts" />}>
+                                Ds bài viết
+                            </MenuItem>
+                            <MenuItem icon={<StorefrontIcon />} component={<Link href="/admin/posts/collections" />}>
+                                Chuyên mục bài viết
                             </MenuItem>
                         </SubMenu>
                         <SubMenu icon={<ReceiptLongOutlinedIcon />} label="Quản lý hóa đơn">
