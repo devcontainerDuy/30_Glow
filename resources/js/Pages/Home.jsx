@@ -9,9 +9,10 @@ import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, PieChart
 function Home({
     products,
     services,
-    totalUsers,
-    totalNewUsersThisMonth,
-    currentMonthRevenue,
+    currentMonthProductRevenue,
+    currentMonthServiceRevenue,
+    productRevenuePercentageChange,
+    serviceRevenuePercentageChange,
     newOrdersCount,
     newBookingCount,
     bestSellingProduct,
@@ -96,9 +97,24 @@ function Home({
                         <Col xs={12} md={6} lg={3}>
                             <Card>
                                 <Card.Body>
-                                    <Card.Title>Tổng số người dùng</Card.Title>
+                                    <Card.Title>
+                                        Doanh thu sản phẩm
+                                        <Button
+                                            variant="link"
+                                            size="sm"
+                                            className="ms-2 float-end text-decoration-none"
+                                            onClick={() => handleList("dailyProductRevenues")}
+                                            title="Xem chi tiết trong tháng"
+                                        >
+                                            Xem Chi Tiết
+                                        </Button>
+                                    </Card.Title>
                                     <Card.Text className="h3">
-                                        {totalUsers} <Badge bg="secondary">+{totalNewUsersThisMonth}</Badge>
+                                        {formatCurrency(currentMonthProductRevenue)}{" "}
+                                        <Badge className="float-end" bg={productRevenuePercentageChange >= 0 ? "success" : "danger"}>
+                                            {productRevenuePercentageChange >= 0 ? "+" : "-"}
+                                            {Math.abs(productRevenuePercentageChange).toFixed(2)}%
+                                        </Badge>
                                     </Card.Text>
                                 </Card.Body>
                             </Card>
@@ -106,8 +122,25 @@ function Home({
                         <Col xs={12} md={6} lg={3}>
                             <Card>
                                 <Card.Body>
-                                    <Card.Title>Doanh thu tháng này</Card.Title>
-                                    <Card.Text className="h3">{formatCurrency(currentMonthRevenue)}</Card.Text>
+                                    <Card.Title>
+                                        Doanh thu dịch vụ
+                                        <Button
+                                            variant="link"
+                                            size="sm"
+                                            className="ms-2 float-end text-decoration-none"
+                                            onClick={() => handleList("dailyServiceRevenues")}
+                                            title="Xem chi tiết trong tháng"
+                                        >
+                                            Xem Chi Tiết
+                                        </Button>
+                                    </Card.Title>
+                                    <Card.Text className="h3">
+                                        {formatCurrency(currentMonthServiceRevenue)}{" "}
+                                        <Badge className="float-end" bg={serviceRevenuePercentageChange >= 0 ? "success" : "danger"}>
+                                            {serviceRevenuePercentageChange >= 0 ? "+" : "-"}
+                                            {Math.abs(serviceRevenuePercentageChange).toFixed(2)}%
+                                        </Badge>
+                                    </Card.Text>
                                 </Card.Body>
                             </Card>
                         </Col>

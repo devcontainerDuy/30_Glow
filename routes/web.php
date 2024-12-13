@@ -35,6 +35,10 @@ Route::fallback(function () {
 
 Route::middleware(['auth', 'auth.session', 'web', 'authen:Super Admin,Manager'])->prefix('admin')->as('admin.')->group(function () {
     Route::get('/', [App\Http\Controllers\Revenue\RevenueController::class, 'index'])->name('home');
+    Route::get('/dailyProductRevenues', [App\Http\Controllers\Revenue\RevenueController::class, 'billProDuctsList'])->name('dailyProductRevenues');
+    Route::get('/dailyProductRevenues/{id}/edit', [App\Http\Controllers\Revenue\RevenueController::class, 'billProDuctsDetail'])->name('dailyProductRevenues-detail');
+    Route::get('/dailyServiceRevenues', [App\Http\Controllers\Revenue\RevenueController::class, 'billServicesList'])->name('dailyServiceRevenues');
+    Route::get('/dailyServiceRevenues/{id}/edit', [App\Http\Controllers\Revenue\RevenueController::class, 'billServicesDetail'])->name('dailyServiceRevenues-detail');
     // Module User
     Route::resource('users', App\Http\Controllers\Users\UserController::class)->names('user');
     // Module Role
