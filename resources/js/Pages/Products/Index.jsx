@@ -1,6 +1,5 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { FormControlLabel, Select, Switch } from "@mui/material";
-import TableDataGrid from "@components/TableDataGrid";
 import Layout from "@/Layouts/Index";
 import { Button, Col, Form, Image, InputGroup, Modal, Row, Spinner, Tab, Tabs } from "react-bootstrap";
 import { FormControl, MenuItem } from "@mui/material";
@@ -10,6 +9,9 @@ import { Dropzone, FileMosaic } from "@dropzone-ui/react";
 import BreadcrumbComponent from "@/Components/BreadcrumbComponent";
 import { router } from "@inertiajs/react";
 import { toast } from "react-toastify";
+import Body from "@/Layouts/Body";
+import ButtonsComponent from "@/Components/ButtonsComponent";
+import ModalComponent from "@/Components/ModalComponent";
 
 function Index({ products, trashs, crumbs, categories, brands }) {
     const [data, setData] = useState([]);
@@ -415,6 +417,25 @@ function Index({ products, trashs, crumbs, categories, brands }) {
         },
     ]);
 
+    const tabsData = [
+        {
+            eventKey: "list",
+            title: "Danh sách",
+            data: data,
+            columns: columns,
+            handleCellEditStop: handleCellEditStop,
+            handleCellEditStart: handleCellEditStart,
+        },
+        {
+            eventKey: "trash",
+            title: "Thùng rác",
+            data: trash,
+            columns: columnsTrash,
+            handleCellEditStop: handleCellEditStop,
+            handleCellEditStart: handleCellEditStart,
+        },
+    ];
+
     const handleEditorBlur = (data) => {
         setContent(data);
     };
@@ -432,21 +453,19 @@ function Index({ products, trashs, crumbs, categories, brands }) {
                 <section className="container">
                     <Row>
                         <BreadcrumbComponent props={crumbs}>
-                            <Button type="button" variant="primary" onClick={handleShow}>
-                                <i className="bi bi-plus-lg" />
-                                <span className="ms-2">Thêm sản phẩm mới</span>
-                            </Button>
+                            <ButtonsComponent type="button" variant="primary" icon="add" title="Thêm mới" onClick={handleShow} />
                         </BreadcrumbComponent>
 
                         {/* Start Modal */}
-                        <Modal show={show} onHide={handleClose} size="lg" centered>
-                            <Form onSubmit={handleSubmit} encType="multipart/form-data">
-                                <Modal.Header closeButton>
-                                    <Modal.Title>
-                                        <span>Thêm sản phẩm mới</span>
-                                    </Modal.Title>
-                                </Modal.Header>
-                                <Modal.Body className="overflow-auto" style={{ maxHeight: "calc(100vh - 210px)" }}>
+                        <ModalComponent
+                            show={show}
+                            close={handleClose}
+                            submit={handleSubmit}
+                            size="xl"
+                            title="Thêm mới"
+                            loaded={loading}
+                            body={
+                                <>
                                     <Row className="row-cols-2">
                                         <Col className="d-flex flex-column">
                                             {/* Tên sản phẩm */}
@@ -532,47 +551,13 @@ function Index({ products, trashs, crumbs, categories, brands }) {
                                         <Form.Label>Nội dung chính</Form.Label>
                                         <CKEditor value={content} onBlur={handleEditorBlur} />
                                     </Form.Group>
-                                </Modal.Body>
-                                <Modal.Footer>
-                                    <Button variant="secondary" onClick={handleClose}>
-                                        <i className="bi bi-box-arrow-right" />
-                                        <span className="ms-2">Thoát ra</span>
-                                    </Button>
-                                    <Button variant="primary" type="submit" disabled={loading}>
-                                        {loading ? (
-                                            <>
-                                                <Spinner size="sm" animation="border" variant="secondary" />
-                                                <span>Đang lưu...</span>
-                                            </>
-                                        ) : (
-                                            <>
-                                                <i className="bi bi-floppy-fill" />
-                                                <span className="ms-2">Lưu lại</span>
-                                            </>
-                                        )}
-                                    </Button>
-                                </Modal.Footer>
-                            </Form>
-                        </Modal>
+                                </>
+                            }
+                        />
                         {/* End Modal */}
 
-                        <Col xs="12">
-                            <div className="text-start my-2">
-                                <h4>Danh Sách Sản Phẩm </h4>
-                            </div>
-                        </Col>
-
                         {/* Start DataGrid */}
-                        <Col xs="12">
-                            <Tabs defaultActiveKey="list" id="uncontrolled-tab-example">
-                                <Tab eventKey="list" title={"Danh sách" + " (" + data.length + ")"}>
-                                    <TableDataGrid data={data} columns={columns} handleCellEditStop={handleCellEditStop} handleCellEditStart={handleCellEditStart} />
-                                </Tab>
-                                <Tab eventKey="trash" title={"Thùng rác" + " (" + trash.length + ")"}>
-                                    <TableDataGrid data={trash} columns={columnsTrash} handleCellEditStop={handleCellEditStop} handleCellEditStart={handleCellEditStart} />
-                                </Tab>
-                            </Tabs>
-                        </Col>
+                        <Body title="Danh sách sản phẩm" data={tabsData} />
                         {/* End DataGrid */}
                     </Row>
                 </section>

@@ -1,9 +1,8 @@
 import React, { useEffect, useMemo, useState } from "react";
 import Layout from "@/Layouts/Index";
-import { Button, Col, Form, Modal, Row, Spinner } from "react-bootstrap";
-import { Box, FormControlLabel, Switch } from "@mui/material";
-import { DataGrid, GridToolbar } from "@mui/x-data-grid";
-
+import { Button, Col, Form, Row } from "react-bootstrap";
+import { FormControlLabel, Switch } from "@mui/material";
+import Body from "@/Layouts/Body";
 import Swal from "sweetalert2";
 import { Helmet } from "react-helmet";
 import { toast } from "react-toastify";
@@ -138,21 +137,6 @@ function Index({ collections, crumbs }) {
             },
         },
         {
-            field: "highlighted",
-            headerName: "Nổi bật",
-            width: 200,
-            renderCell: (params) => {
-                return (
-                    <>
-                        <FormControlLabel
-                            control={<Switch checked={params.row.highlighted === 1} onClick={() => handleCellEditStop(params.row.id, "highlighted", params.row.highlighted === 1 ? 0 : 1)} />}
-                            label={params.row.highlighted ? "Nổi bật" : "Ẩn"}
-                        />
-                    </>
-                );
-            },
-        },
-        {
             field: "created_at",
             headerName: "Ngày tạo",
             width: 180,
@@ -167,14 +151,31 @@ function Index({ collections, crumbs }) {
             renderCell: (params) => {
                 return (
                     <>
-                        <Button type="button" variant="outline-danger" className="ms-2" title="Xóa tài khoản" onClick={() => handleDelete(params.row.id)}>
-                            <i className="bi bi-trash-fill" />
-                        </Button>
+                        <ButtonsComponent type="button" variant="outline-danger" icon="delete" onClick={() => handleDelete(params.row.id)} />
                     </>
                 );
             },
         },
     ]);
+
+    const tabsData = [
+        {
+            eventKey: "list",
+            title: "Danh sách",
+            data: data,
+            columns: columns,
+            handleCellEditStop: handleCellEditStop,
+            handleCellEditStart: handleCellEditStart,
+        },
+        // {
+        //     eventKey: "trash",
+        //     title: "Thùng rác",
+        //     data: trash,
+        //     columns: columnsTrash,
+        //     handleCellEditStop: handleCellEditStop,
+        //     handleCellEditStart: handleCellEditStart,
+        // },
+    ];
 
     useEffect(() => {
         setData(collections);
@@ -182,8 +183,8 @@ function Index({ collections, crumbs }) {
     return (
         <>
             <Helmet>
-                <title>Danh sách chuyên đề bài viết</title>
-                <meta name="description" content="Danh sách chuyên đề bài viết" />
+                <title>Chuyên đề bài viết</title>
+                <meta name="description" content="Chuyên đề bài viết" />
             </Helmet>
             <Layout>
                 <section className="container">
@@ -209,45 +210,9 @@ function Index({ collections, crumbs }) {
                             }
                         />
                         {/* End Modal */}
+
                         {/* Start DataGrid */}
-                        <Col xs="12">
-                            <Box sx={{ height: "70vh", width: "100%" }}>
-                                <div className="text-start">
-                                    <h4>Danh Sách chuyên đề bài viết </h4>
-                                </div>
-                                <DataGrid
-                                    rows={data}
-                                    columns={columns}
-                                    slots={{
-                                        toolbar: GridToolbar,
-                                    }}
-                                    slotProps={{
-                                        toolbar: {
-                                            showQuickFilter: true,
-                                            quickFilterProps: {
-                                                debounceMs: 500,
-                                            },
-                                        },
-                                    }}
-                                    initialState={{
-                                        pagination: {
-                                            paginationModel: {
-                                                pageSize: 20,
-                                            },
-                                        },
-                                    }}
-                                    onCellEditStop={(params, e) => {
-                                        handleCellEditStop(params.row.id, params.field, e.target.value);
-                                    }}
-                                    onCellEditStart={(params, e) => {
-                                        handleCellEditStart(params.row.id, params.field, e.target.value);
-                                    }}
-                                    pageSizeOptions={[20, 40, 60, 80, 100]}
-                                    checkboxSelection
-                                    disableRowSelectionOnClick
-                                />
-                            </Box>
-                        </Col>
+                        <Body title="Chuyên đề bài viết" data={tabsData} />
                         {/* End DataGrid */}
                     </Row>
                 </section>

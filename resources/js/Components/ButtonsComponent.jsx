@@ -22,13 +22,13 @@ const ButtonsComponent = ({ type, variant, icon, title, onClick, loaded }) => {
 
     return (
         <>
-            <Button type={type} variant={variant} onClick={onClick}>
+            <Button type={type} variant={variant} onClick={onClick} disabled={loaded} title={title}>
                 {loaded ? (
                     <Spinner animation="border" size="sm" />
                 ) : (
                     <>
                         {tpyeIcon(icon)}
-                        <span className="ms-2">{title}</span>
+                        {title && <span className="ms-2">{title}</span>}
                     </>
                 )}
             </Button>
@@ -42,7 +42,6 @@ ButtonsComponent.defaultProps = {
     type: "button",
     variant: "primary",
     icon: "add",
-    title: "Button",
     onClick: () => {},
     loaded: false,
 };

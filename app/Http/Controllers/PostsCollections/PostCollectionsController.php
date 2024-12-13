@@ -23,7 +23,7 @@ class PostCollectionsController extends Controller
     {
         $this->crumbs = [
             ['name' => 'Bài Viết', 'url' => 'admin/posts'],
-            ['name' => 'Chuyên Mục Bài Viết', 'url' => 'admin/posts/collections'],
+            ['name' => 'Chuyên Đề Bài Viết', 'url' => '/admin/posts/collections'],
         ];
         $this->data = $this->model::orderBy('id', 'desc')->get();
         return Inertia::render('PostsCollections/Index', ['collections' => $this->data, 'crumbs' => $this->crumbs]);

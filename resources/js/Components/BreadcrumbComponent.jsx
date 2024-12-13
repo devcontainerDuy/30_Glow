@@ -5,7 +5,7 @@ import PropTypes from "prop-types";
 function BreadcrumbComponent({ props, children }) {
     const { url } = usePage();
     return (
-        <Container className="my-1">
+        <Container className="p-0 my-1 ">
             <div className="d-flex flex-wrap justify-content-md-between align-items-center bg-body-tertiary rounded-3 p-2">
                 <Breadcrumb aria-label="breadcrumb" className="mt-3 ms-3">
                     <Breadcrumb.Item href="/admin/" linkAs={Link} linkProps={{ to: "/admin/" }}>
