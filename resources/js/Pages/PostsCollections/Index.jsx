@@ -145,6 +145,14 @@ function Index({ collections, crumbs }) {
             },
         },
         {
+            field: "updated_at",
+            headerName: "Ngày cập nhật",
+            width: 180,
+            renderCell: (params) => {
+                return new Date(params.row.updated_at).toLocaleString();
+            },
+        },
+        {
             field: "action",
             headerName: "Thao tác",
             width: 160,

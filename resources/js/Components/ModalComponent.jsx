@@ -7,8 +7,8 @@ export default function ModalComponent({ show, close, size, submit, title, body,
     if (footer === undefined) {
         footer = (
             <>
-                <ButtonsComponent type="button" variant="secondary" icon="close" title="Close" onClick={close} />
-                <ButtonsComponent type="submit" variant="primary" icon="add" title="Save" loaded={loaded} />
+                <ButtonsComponent type="button" variant="secondary" icon="close" title="Thoát ra" onClick={close} />
+                <ButtonsComponent type="submit" variant="success" icon="save" title="Lưu lại" loaded={loaded} />
             </>
         );
     }

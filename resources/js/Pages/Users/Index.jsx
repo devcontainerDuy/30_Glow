@@ -1,10 +1,13 @@
 import React, { useState, useEffect, useMemo } from "react";
 import Layout from "@layouts/Index";
+import Body from "@/Layouts/Body";
 import { Button, Col, Form, Modal, Row, Spinner } from "react-bootstrap";
 import { Box, FormControl, FormControlLabel, MenuItem, Select, Switch } from "@mui/material";
 import { DataGrid, GridToolbar } from "@mui/x-data-grid";
 import Swal from "sweetalert2";
 import BreadcrumbComponent from "@/Components/BreadcrumbComponent";
+import ButtonsComponent from "@/Components/ButtonsComponent";
+import ModalComponent from "@/Components/ModalComponent";
 import { Helmet } from "react-helmet";
 import { toast } from "react-toastify";
 
@@ -214,23 +217,21 @@ function Index({ users, role, crumbs }) {
                 <section className="container">
                     <Row>
                         <BreadcrumbComponent props={crumbs}>
-                            <Button type="button" variant="primary" onClick={handleShow}>
-                                <i className="bi bi-person-fill-add" />
-                                <span className="ms-2">Thêm tài khoản mới</span>
-                            </Button>
+                            <ButtonsComponent type="button" variant="primary" icon="add" title="Thêm mới" onClick={handleShow} />
                         </BreadcrumbComponent>
 
                         {/* Start Modal */}
-                        <Modal show={show} onHide={handleClose}>
-                            <Form onSubmit={handleSubmit}>
-                                <Modal.Header closeButton>
-                                    <Modal.Title>
-                                        <span>Thêm tài khoản mới</span>
-                                    </Modal.Title>
-                                </Modal.Header>
-                                <Modal.Body>
+                        <ModalComponent
+                            show={show}
+                            close={handleClose}
+                            submit={handleSubmit}
+                            size="md"
+                            title="Thêm mới"
+                            loaded={loading}
+                            body={
+                                <>
                                     <Form.Group className="mb-3" controlId="name">
-                                        <Form.Label>Nhập địa tên người dùng</Form.Label>
+                                        <Form.Label>Nhập tên người dùng</Form.Label>
                                         <Form.Control type="text" placeholder="name abc" name="name" onChange={(e) => setName(e.target.value)} />
                                     </Form.Group>
                                     <Form.Group className="mb-3" controlId="email">
@@ -249,30 +250,9 @@ function Index({ users, role, crumbs }) {
                                                 ))}
                                         </Form.Select>
                                     </Form.Group>
-                                </Modal.Body>
-                                <Modal.Footer>
-                                    <Button variant="secondary" onClick={handleClose}>
-                                        <i className="bi bi-box-arrow-right" />
-                                        <span className="ms-2">Thoát ra</span>
-                                    </Button>
-                                    <Button variant="primary" type="submit" disabled={loading}>
-                                        {loading ? (
-                                            <>
-                                                <Spinner size="sm" animation="border" variant="secondary" />
-                                                <span>Đang lưu...</span>
-                                            </>
-                                        ) : (
-                                            <>
-                                                <i className="bi bi-floppy-fill" />
-                                                <span className="ms-2">
-                                                    <span>Lưu lại</span>
-                                                </span>
-                                            </>
-                                        )}
-                                    </Button>
-                                </Modal.Footer>
-                            </Form>
-                        </Modal>
+                                </>
+                            }
+                        />
                         {/* End Modal */}
 
                         {/* Start DataGrid */}
