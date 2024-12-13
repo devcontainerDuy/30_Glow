@@ -15,6 +15,7 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
+use Carbon\Carbon;
 
 class RevenueController extends Controller
 {
@@ -24,20 +25,37 @@ class RevenueController extends Controller
     }
     public function index()
     {
-        $totalUsers = Customers::count();
+        // Doanh thu sản phẩm tháng hiện tại
+        $currentMonthProductRevenue = Bills::whereMonth('created_at', now()->month)->sum('total');
 
-        $currentMonthRevenue = Bills::whereMonth('created_at', now()->month)
-            ->sum('total');
-        $totalNewUsersThisMonth = Customers::whereMonth('created_at', now()->month)
-            ->count();
+        // Doanh thu dịch vụ tháng hiện tại
+        $currentMonthServiceRevenue = ServiceBills::whereMonth('created_at', now()->month)->sum('total');
 
+        // Doanh thu sản phẩm tháng trước
+        $lastMonthProductRevenue = Bills::whereMonth('created_at', now()->subMonth()->month)->sum('total');
+
+        // Doanh thu dịch vụ tháng trước
+        $lastMonthServiceRevenue = ServiceBills::whereMonth('created_at', now()->subMonth()->month)->sum('total');
+
+        // Tính phần trăm thay đổi cho sản phẩm
+        $productRevenuePercentageChange = $lastMonthProductRevenue > 0
+            ? (($currentMonthProductRevenue - $lastMonthProductRevenue) / $lastMonthProductRevenue) * 100
+            : ($currentMonthProductRevenue > 0 ? 100 : 0);
+
+        // Tính phần trăm thay đổi cho dịch vụ
+        $serviceRevenuePercentageChange = $lastMonthServiceRevenue > 0
+            ? (($currentMonthServiceRevenue - $lastMonthServiceRevenue) / $lastMonthServiceRevenue) * 100
+            : ($currentMonthServiceRevenue > 0 ? 100 : 0);
+        // Số đơn hàng mới hôm nay
         $newOrdersCount = Bills::whereDate('created_at', now()->toDateString())
             ->where('status', 1)
             ->count();
 
+        // Số lượt đặt chỗ mới hôm nay
         $newBookingCount = Bookings::whereDate('created_at', now()->toDateString())
             ->count();
 
+        // Sản phẩm bán chạy nhất
         $bestSellingProduct = BillsDetail::selectRaw('id_product, SUM(quantity) as total_quantity')
             ->whereMonth('created_at', now()->month)
             ->with(['product.gallery' => function ($query) {
@@ -47,19 +65,15 @@ class RevenueController extends Controller
             ->orderByDesc('total_quantity')
             ->first();
 
-        if (!$bestSellingProduct) {
-            $bestSellingProductData = null;
-        } else {
-            $bestSellingProductData = [
-                'id' => $bestSellingProduct->product->id,
-                'name' => $bestSellingProduct->product->name,
-                'image' => $bestSellingProduct->product->gallery->first()->image ?? null,
-                'total_quantity' => $bestSellingProduct->total_quantity,
-                'price' => $bestSellingProduct->product->price,
-            ];
-        }
+        $bestSellingProductData = $bestSellingProduct ? [
+            'id' => $bestSellingProduct->product->id,
+            'name' => $bestSellingProduct->product->name,
+            'image' => $bestSellingProduct->product->gallery->first()->image ?? null,
+            'total_quantity' => $bestSellingProduct->total_quantity,
+            'price' => $bestSellingProduct->product->price,
+        ] : null;
 
-
+        // Dịch vụ bán chạy nhất
         $bestSellingService = ServiceBillsDetails::selectRaw('id_service, COUNT(*) as total_orders')
             ->whereMonth('created_at', now()->month)
             ->with(['service' => function ($query) {
@@ -69,76 +83,278 @@ class RevenueController extends Controller
             ->orderByDesc('total_orders')
             ->first();
 
-        if (!$bestSellingService) {
-            $bestSellingServiceData = null;
-        } else {
-            $bestSellingServiceData = [
-                'id' => $bestSellingService->service->id,
-                'name' => $bestSellingService->service->name,
-                'image' => $bestSellingService->service->image,
-                'total_orders' => $bestSellingService->total_orders,
-                'price' => $bestSellingService->service->price,
-            ];
-        }
+        $bestSellingServiceData = $bestSellingService ? [
+            'id' => $bestSellingService->service->id,
+            'name' => $bestSellingService->service->name,
+            'image' => $bestSellingService->service->image,
+            'total_orders' => $bestSellingService->total_orders,
+            'price' => $bestSellingService->service->price,
+        ] : null;
+
+        // Các đơn hàng sản phẩm mới nhất
         $latestProductOrders = Bills::select('uid', 'created_at', 'total')
             ->latest()
             ->take(3)
             ->get();
+
+        // Các hóa đơn dịch vụ mới nhất
         $latestServiceBills = ServiceBills::select('uid', 'created_at', 'total')
             ->latest()
             ->take(3)
             ->get();
 
+        // Doanh thu sản phẩm theo tháng
         $products = Bills::monthlyRevenue()->get()->keyBy('month');
         $productData = [];
-        $totalRevenueYear = 0;
+        $totalProductRevenueYear = 0;
         for ($month = 1; $month <= 12; $month++) {
             $totalRevenue = $products->get($month)->revenue ?? 0;
             $productData[] = [
                 'month' => $month,
                 'revenue' => $totalRevenue,
             ];
-            $totalRevenueYear += $totalRevenue;
+            $totalProductRevenueYear += $totalRevenue;
         }
 
-        $total_products = [
+        $totalProducts = [
             'monthly_revenue' => $productData,
-            'revenue_year' => $totalRevenueYear
+            'revenue_year' => $totalProductRevenueYear
         ];
 
+        // Doanh thu dịch vụ theo tháng
         $services = ServiceBills::monthlyRevenue()->get()->keyBy('month');
         $serviceData = [];
-        $totalRevenueYear = 0;
+        $totalServiceRevenueYear = 0;
         for ($month = 1; $month <= 12; $month++) {
             $totalRevenue = $services->get($month)->revenue ?? 0;
             $serviceData[] = [
                 'month' => $month,
                 'revenue' => $totalRevenue,
             ];
-            $totalRevenueYear += $totalRevenue;
+            $totalServiceRevenueYear += $totalRevenue;
         }
 
-        $total_services = [
+        $totalServices = [
             'monthly_revenue' => $serviceData,
-            'revenue_year' => $totalRevenueYear
+            'revenue_year' => $totalServiceRevenueYear
         ];
 
         // Truyền tất cả dữ liệu vào trang Vue
         return Inertia::render('Home', [
-            'products' => $total_products,
-            'services' => $total_services,
-            'totalUsers' => $totalUsers,
-            'totalNewUsersThisMonth' => $totalNewUsersThisMonth,
-            'currentMonthRevenue' => $currentMonthRevenue,
+            'products' => $totalProducts,
+            'services' => $totalServices,
+            'currentMonthProductRevenue' => $currentMonthProductRevenue,
+            'currentMonthServiceRevenue' => $currentMonthServiceRevenue,
+            'productRevenuePercentageChange' => $productRevenuePercentageChange,
+            'serviceRevenuePercentageChange' => $serviceRevenuePercentageChange,
             'newOrdersCount' => $newOrdersCount,
             'newBookingCount' => $newBookingCount,
             'bestSellingProduct' => $bestSellingProductData,
             'bestSellingService' => $bestSellingServiceData,
             'latestProductOrders' => $latestProductOrders,
             'latestServiceBills' => $latestServiceBills,
-
         ]);
     }
+    public function billProDuctsList()
+    {
+        $this->crumbs = [
+            ['name' => 'Trang chủ', 'url' => '/admin/'],
+            ['name' => 'Danh sách doanh thu trong ngày', 'url' => '/admin/dailyProductRevenues'],
+        ];
+
+        $this->data = Bills::selectRaw('DATE(created_at) as date, SUM(total) as daily_revenue, COUNT(*) as quality, payment_method')
+            ->whereMonth('created_at', now()->month)
+            ->where('payment_status', 1)
+            ->where('status', 4)
+            ->groupBy('date', 'payment_method')
+            ->orderBy('date', 'desc')
+            ->get();
+
+        $this->data = $this->data->groupBy('date')->map(function ($dayBills) {
+            $dailyRevenue = $dayBills->sum('daily_revenue');
+            $quality = $dayBills->sum('quality');
+
+            $paymentMethodTotals = $dayBills->groupBy('payment_method')->map(function ($methodBills) {
+                return [
+                    'payment_method' => $methodBills->first()->payment_method,
+                    'total_by_payment_method' => $methodBills->sum('daily_revenue'),
+                ];
+            });
+
+            return [
+                'date' => $dayBills->first()->date,
+                'daily_revenue' => $dailyRevenue,
+                'quality' => $quality,
+                'payment_method_totals' => $paymentMethodTotals,
+            ];
+        })->values();
+
+        return Inertia::render('Revenue/Index', [
+            'crumbs' => $this->crumbs,
+            'dailyRevenues' => $this->data,
+        ]);
+    }
+    public function billProDuctsDetail(string $date)
+    {
+        $this->crumbs = [
+            ['name' => 'Trang chủ', 'url' => '/admin/'],
+            ['name' => 'Danh sách doanh thu trong ngày', 'url' => '/admin/dailyProductRevenues'],
+            ['name' => 'Chi tiết doanh thu trong ngày', 'url' => '/admin/dailyProductRevenues/' . $date . '/edit']
+        ];
+
+        $this->data = Bills::with(['customer'])
+            ->whereDate('created_at', $date)
+            ->where('payment_status', 1)
+            ->where('status', 4)
+            ->get()
+            ->groupBy(function ($bill) {
+                return $bill->created_at->format('Y-m-d');
+            })
+            ->map(function ($bills) {
+                $dailyRevenue = $bills->sum('total');  // Tính tổng doanh thu trong ngày
+
+                $paymentMethodTotals = $bills->groupBy('payment_method')->map(function ($methodBills) {
+                    return [
+                        'payment_method' => $methodBills->first()->payment_method,
+                        'total_by_payment_method' => $methodBills->sum('total'),
+                    ];
+                });
+
+                $billsList = $bills->map(function ($bill) {
+                    $customer = $bill->customer;
+                    return [
+                        'uid' => $bill->uid,
+                        'total' => $bill->total,
+                        'payment_method' => $bill->payment_method,
+                        'created_at' => $bill->created_at->toDateTimeString(),
+                        'status' =>  $bill->status,
+                        'customer' => [
+                            'name' => $customer ? $customer->name : null,
+                            'phone' => $customer ? $customer->phone : null,
+                        ],
+                    ];
+                });
+
+                // Tổng tiền trong ngày là tổng của tất cả các bill trong ngày
+                $total = $bills->sum('total');
+
+                return [
+                    'date' => $bills->first()->created_at->toDateString(),
+                    'daily_revenue' => $dailyRevenue,
+                    'payment_method_totals' => $paymentMethodTotals,
+                    'bills' => $billsList,
+                    'total' => $total,  // Trả về tổng tiền trong ngày
+                ];
+            });
+
+        return Inertia::render('Revenue/Edit', [
+            'date' => $date,
+            'dailyRevenues' => $this->data,
+            'crumbs' => $this->crumbs,
+        ]);
+    }
+    public function billServicesList()
+    {
+        $this->crumbs = [
+            ['name' => 'Trang chủ', 'url' => '/admin/'],
+            ['name' => 'Danh sách doanh thu dịch vụ trong ngày', 'url' => '/admin/dailyServiceRevenues'],
+        ];
+
+        $this->data = ServiceBills::selectRaw('DATE(created_at) as date, SUM(total) as daily_revenue, COUNT(*) as quality, status')
+            ->whereMonth('created_at', now()->month)
+            ->where('status', 1)  // Assuming 1 means completed, adjust as necessary
+            ->groupBy('date', 'status')
+            ->orderBy('date', 'desc')
+            ->get();
+
+        $this->data = $this->data->groupBy('date')->map(function ($dayBills) {
+            $dailyRevenue = $dayBills->sum('daily_revenue');
+            $quality = $dayBills->sum('quality');
+
+            $statusTotals = $dayBills->groupBy('status')->map(function ($statusBills) {
+                return [
+                    'status' => $statusBills->first()->status,
+                    'total_by_status' => $statusBills->sum('daily_revenue'),
+                ];
+            });
+
+            return [
+                'date' => $dayBills->first()->date,
+                'daily_revenue' => $dailyRevenue,
+                'quality' => $quality,
+                'status_totals' => $statusTotals,
+            ];
+        })->values();
+
+        return Inertia::render('Revenue/Index', [
+            'crumbs' => $this->crumbs,
+            'dailyRevenues' => $this->data,
+        ]);
+    }
+    public function billServicesDetail(string $date)
+    {
+        $this->crumbs = [
+            ['name' => 'Trang chủ', 'url' => '/admin/'],
+            ['name' => 'Danh sách doanh thu dịch vụ trong ngày', 'url' => '/admin/dailyServiceRevenues'],
+            ['name' => 'Chi tiết doanh thu dịch vụ trong ngày', 'url' => '/admin/dailyServiceRevenues/' . $date . '/edit'],
+        ];
+
+        $this->data = ServiceBills::with(['customer', 'booking'])
+            ->whereDate('created_at', $date)
+            ->where('status', 1)  // Assuming 1 means completed, adjust as necessary
+            ->get()
+            ->groupBy(function ($bill) {
+                return $bill->created_at->format('Y-m-d');
+            })
+            ->map(function ($bills) {
+                $dailyRevenue = $bills->sum('total');  // Tính tổng doanh thu trong ngày
+
+                $statusTotals = $bills->groupBy('status')->map(function ($statusBills) {
+                    return [
+                        'status' => $statusBills->first()->status,
+                        'total_by_status' => $statusBills->sum('total'),
+                    ];
+                });
+
+                $billsList = $bills->map(function ($bill) {
+                    $customer = $bill->customer;
+                    $booking = $bill->booking;
+                    return [
+                        'uid' => $bill->uid,
+                        'total' => $bill->total,
+                        'status' => $bill->status,
+                        'created_at' => $bill->created_at->toDateTimeString(),
+                        'customer' => [
+                            'name' => $customer ? $customer->name : null,
+                            'phone' => $customer ? $customer->phone : null,
+                        ],
+                        'booking' => [
+                            'id' => $booking ? $booking->id : null,
+                            'time' => $booking ? $booking->time : null,
+                        ],
+                    ];
+                });
+
+                // Tổng tiền trong ngày là tổng của tất cả các bill trong ngày
+                $total = $bills->sum('total');
+
+                return [
+                    'date' => $bills->first()->created_at->toDateString(),
+                    'daily_revenue' => $dailyRevenue,
+                    'status_totals' => $statusTotals,
+                    'bills' => $billsList,
+                    'total' => $total,  // Trả về tổng tiền trong ngày
+                ];
+            });
+
+        return Inertia::render('Revenue/Edit', [
+            'date' => $date,
+            'dailyRevenues' => $this->data,
+            'crumbs' => $this->crumbs,
+        ]);
+    }
+
+
 
 
     //doanh thi cho bill services
