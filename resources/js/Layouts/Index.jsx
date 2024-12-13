@@ -1,7 +1,9 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { Link, router } from "@inertiajs/react";
+import ModalComponent from "@/Components/ModalComponent";
+import ButtonsComponent from "@/Components/ButtonsComponent";
 import { Sidebar, SubMenu, Menu, MenuItem, useProSidebar, sidebarClasses } from "react-pro-sidebar";
-import { Container, Form, Image, InputGroup, Navbar } from "react-bootstrap";
+import { Badge, Col, Container, Form, Image, InputGroup, ListGroup, Navbar, Row, Spinner } from "react-bootstrap";
 import HomeOutlinedIcon from "@mui/icons-material/HomeOutlined";
 import PeopleOutlinedIcon from "@mui/icons-material/PeopleOutlined";
 import ContactsOutlinedIcon from "@mui/icons-material/ContactsOutlined";
@@ -34,6 +36,10 @@ function Layout({ children }) {
     const [user, setUser] = useState(null);
     const [isExpanded, setIsExpanded] = useState(true);
     const { collapseSidebar } = useProSidebar();
+    const [show, setShow] = useState(false);
+
+    const handleShow = () => setShow(true);
+    const handleClose = () => setShow(false);
 
     useEffect(() => {
         const savedState = localStorage.getItem("isSidebarExpanded");
@@ -44,8 +50,6 @@ function Layout({ children }) {
     }, [collapseSidebar]);
 
     const handleToggle = () => {
-        console.log("handleToggle", isExpanded);
-
         if (!isExpanded) {
             collapseSidebar(false);
             setIsExpanded(true);
@@ -59,28 +63,38 @@ function Layout({ children }) {
 
     const [placeholderText, setPlaceholderText] = useState("");
     const fullText = "Bạn muốn tìm gì...?";
-    let index = 0;
-    let direction = 1;
+    const indexRef = useRef(0);
+    const directionRef = useRef(1);
+    const timeoutRef = useRef(null);
 
     useEffect(() => {
         function type() {
-            if (direction === 1 && index < fullText.length) {
-                setPlaceholderText((prev) => prev + fullText.charAt(index));
-                index++;
-                if (index === fullText.length) {
-                    direction = -1;
+            if (directionRef.current === 1 && indexRef.current < fullText.length) {
+                setPlaceholderText((prev) => prev + fullText.charAt(indexRef.current));
+                indexRef.current++;
+                if (indexRef.current === fullText.length) {
+                    directionRef.current = -1;
+                    timeoutRef.current = setTimeout(type, 1000);
+                    return;
                 }
-            } else if (direction === -1 && index > 0) {
+            } else if (directionRef.current === -1 && indexRef.current > 0) {
                 setPlaceholderText((prev) => prev.slice(0, -1));
-                index--;
-                if (index === 0) {
-                    direction = 1;
+                indexRef.current--;
+                if (indexRef.current === 0) {
+                    directionRef.current = 1;
+                    timeoutRef.current = setTimeout(type, 1000);
+                    return;
                 }
             }
-            setTimeout(type, 100);
+            timeoutRef.current = setTimeout(type, 100);
         }
-        type();
-    }, []);
+
+        timeoutRef.current = setTimeout(type, 100);
+
+        return () => {
+            clearTimeout(timeoutRef.current);
+        };
+    }, [fullText]);
 
     const handleLogout = () => {
         Swal.fire({
@@ -116,9 +130,16 @@ function Layout({ children }) {
     };
 
     useEffect(() => {
-        window.axios.get("/api/user").then((response) => {
-            setUser(response.data);
-        });
+        window.axios
+            .get("/api/user/info")
+            .then((response) => {
+                if (response.data.check === true) {
+                    setUser(response.data.data);
+                }
+            })
+            .catch((error) => {
+                toast.error(error.response.data.message || "Có lỗi xảy ra, vui lòng thử lại sau.");
+            });
     }, []);
 
     return (
@@ -232,12 +253,65 @@ function Layout({ children }) {
                             <Navbar.Collapse className="justify-content-end">
                                 <Navbar.Text>
                                     <span>Xin chào: </span>
+                                    {!user && <Spinner animation="border" size="sm" className="me-1" />}
                                     <strong>{user ? user?.name : "Đang tải..."}</strong>
                                 </Navbar.Text>
-                                <ProfileDropdown event={handleLogout} />
+                                <ProfileDropdown event={handleLogout} show={handleShow} />
                             </Navbar.Collapse>
                         </Container>
                     </Navbar>
+
+                    {/* Thông tin cá nhân */}
+                    <ModalComponent
+                        show={show}
+                        close={handleClose}
+                        title={"Thông tin cá nhân"}
+                        body={
+                            <>
+                                <ListGroup variant="flush">
+                                    <ListGroup.Item>
+                                        <strong>UID:</strong> {user?.uid}
+                                    </ListGroup.Item>
+                                    <ListGroup.Item>
+                                        <strong>Tên:</strong> {user?.name}
+                                    </ListGroup.Item>
+                                    <ListGroup.Item>
+                                        <strong>Email:</strong> {user?.email}
+                                    </ListGroup.Item>
+                                    <ListGroup.Item>
+                                        <strong>Điện thoại:</strong> {user?.phone || "Chưa cập nhật"}
+                                    </ListGroup.Item>
+                                    <ListGroup.Item>
+                                        <strong>Địa chỉ:</strong> {user?.address || "Chưa cập nhật"}
+                                    </ListGroup.Item>
+                                    <ListGroup.Item>
+                                        <strong>Trạng thái:</strong> {user?.status === 1 ? <Badge bg="success">Hoạt động</Badge> : <Badge bg="secondary">Tạm ngừng</Badge>}
+                                    </ListGroup.Item>
+                                    <ListGroup.Item>
+                                        <strong>Ngày tạo:</strong> {new Date(user?.created_at).toLocaleString()}
+                                    </ListGroup.Item>
+                                    <ListGroup.Item>
+                                        <strong>Ngày cập nhật:</strong> {new Date(user?.updated_at).toLocaleString()}
+                                    </ListGroup.Item>
+                                    <ListGroup.Item>
+                                        <strong>Vai trò:</strong>{" "}
+                                        {user?.roles.map((role) => (
+                                            <Badge bg="info" className="me-1" key={role.id}>
+                                                {role.name}
+                                            </Badge>
+                                        ))}
+                                    </ListGroup.Item>
+                                </ListGroup>
+                            </>
+                        }
+                        footer={
+                            <>
+                                <ButtonsComponent type="button" variant="secondary" icon="close" title="Thoát ra" onClick={handleClose} />
+                            </>
+                        }
+                    />
+
+                    {/* Nội dung chính */}
                     <Container fluid className="px-md-5 py-md-4 px-lg-5 py-lg-4 px-xl-5 py-xl-4">
                         {children}
                     </Container>

@@ -1,9 +1,8 @@
 import React, { useState, useEffect, useMemo } from "react";
 import Layout from "@layouts/Index";
 import Body from "@/Layouts/Body";
-import { Button, Col, Form, Modal, Row, Spinner } from "react-bootstrap";
-import { Box, FormControl, FormControlLabel, MenuItem, Select, Switch } from "@mui/material";
-import { DataGrid, GridToolbar } from "@mui/x-data-grid";
+import { Form, Row } from "react-bootstrap";
+import { FormControl, FormControlLabel, MenuItem, Select, Switch } from "@mui/material";
 import Swal from "sweetalert2";
 import BreadcrumbComponent from "@/Components/BreadcrumbComponent";
 import ButtonsComponent from "@/Components/ButtonsComponent";
@@ -190,17 +189,23 @@ function Index({ users, role, crumbs }) {
             renderCell: (params) => {
                 return (
                     <>
-                        <Button type="button" variant="outline-dark" title="Cập nhật lại mật khẩu">
-                            <i className="bi bi-bootstrap-reboot" />
-                        </Button>
-                        <Button type="button" variant="outline-danger" className="ms-2" title="Xóa tài khoản" onClick={() => handleDelete(params.row.id)}>
-                            <i className="bi bi-trash-fill" />
-                        </Button>
+                        <ButtonsComponent type="button" variant="outline-danger" icon="delete" onClick={() => handleDelete(params.row.id)} />
                     </>
                 );
             },
         },
     ]);
+
+    const tabsData = [
+        {
+            eventKey: "list",
+            title: "Danh sách",
+            data: data,
+            columns: columns,
+            handleCellEditStop: handleCellEditStop,
+            handleCellEditStart: handleCellEditStart,
+        },
+    ];
 
     useEffect(() => {
         setData(users);
@@ -256,44 +261,7 @@ function Index({ users, role, crumbs }) {
                         {/* End Modal */}
 
                         {/* Start DataGrid */}
-                        <Col xs="12">
-                            <Box sx={{ height: "70vh", width: "100%" }}>
-                                <div className="text-start">
-                                    <h4>Danh Sách Tài Khoản </h4>
-                                </div>
-                                <DataGrid
-                                    rows={data}
-                                    columns={columns}
-                                    slots={{
-                                        toolbar: GridToolbar,
-                                    }}
-                                    slotProps={{
-                                        toolbar: {
-                                            showQuickFilter: true,
-                                            quickFilterProps: {
-                                                debounceMs: 500,
-                                            },
-                                        },
-                                    }}
-                                    initialState={{
-                                        pagination: {
-                                            paginationModel: {
-                                                pageSize: 20,
-                                            },
-                                        },
-                                    }}
-                                    onCellEditStop={(params, e) => {
-                                        handleCellEditStop(params.row.id, params.field, e.target.value);
-                                    }}
-                                    onCellEditStart={(params, e) => {
-                                        handleCellEditStart(params.row.id, params.field, e.target.value);
-                                    }}
-                                    pageSizeOptions={[20, 40, 60, 80, 100]}
-                                    checkboxSelection
-                                    disableRowSelectionOnClick
-                                />
-                            </Box>
-                        </Col>
+                        <Body title="Danh sách tài khoản" data={tabsData} />
                         {/* End DataGrid */}
                     </Row>
                 </section>

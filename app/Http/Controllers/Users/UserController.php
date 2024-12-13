@@ -82,9 +82,17 @@ class UserController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(string $id)
+    public function show()
     {
-        // 
+        try {
+            $this->data = $this->model::with('roles')->where('id', Auth::user()->id)->first();
+            return response()->json(['check' => true, 'data' => $this->data], 200);
+        } catch (\Throwable $e) {
+            Log::error($e->getMessage());
+            Auth::user()->tokens()->delete();
+            Auth::logout();
+            return response()->json(['check' => false, 'message' => 'Thất bại!'], 400);
+        }
     }
 
     /**

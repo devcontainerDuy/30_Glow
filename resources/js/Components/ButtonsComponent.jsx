@@ -17,6 +17,8 @@ const ButtonsComponent = ({ type, variant, icon, title, onClick, loaded }) => {
                 return <i className="bi bi-x-circle" />;
             case "save":
                 return <i className="bi bi-save" />;
+            case "reset":
+                return <i className="bi bi-arrow-clockwise" />;
             default:
                 return <i className="bi bi-exclamation-circle" />;
         }

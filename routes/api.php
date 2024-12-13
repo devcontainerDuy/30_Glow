@@ -15,9 +15,7 @@ use Illuminate\Support\Facades\Auth;
 |
 */
 
-Route::middleware(['auth:sanctum', 'web'])->get('/user', function (Request $request) {
-    return Auth::user()->status === 1 ? $request->user() : redirect('auth/login');
-});
+Route::middleware(['auth:sanctum', 'web', 'role:Super Admin'])->get('/user/info', [App\Http\Controllers\Users\UserController::class, 'show']);
 
 Route::middleware('api')->group(function () {
     Route::controller(App\Http\Controllers\Auth\Clients\AuthenticateController::class)->group(function () {
