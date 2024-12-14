@@ -7,9 +7,9 @@ import BreadcrumbComponent from "@/Components/BreadcrumbComponent";
 import ButtonsComponent from "@/Components/ButtonsComponent";
 import ModalComponent from "@/Components/ModalComponent";
 import { Helmet } from "react-helmet";
-import useSubmitForm from "@/hooks/useSubmitForm";
-import useEditCell from "@/hooks/useEditCell";
-import useDelete from "@/hooks/useDelete";
+import useSubmitForm from "@/Hooks/useSubmitForm";
+import useEditCell from "@/Hooks/useEditCell";
+import useDelete from "@/Hooks/useDelete";
 
 function Index({ users, trashs, role, crumbs }) {
     const [data, setData] = useState([]);
@@ -190,7 +190,7 @@ function Index({ users, trashs, role, crumbs }) {
         },
     ]);
 
-    const tabsData = [
+    const tabsData = useMemo(() => [
         {
             eventKey: "list",
             title: "Danh sách",
@@ -207,7 +207,7 @@ function Index({ users, trashs, role, crumbs }) {
             handleCellEditStop: handleCellEditStop,
             handleCellEditStart: handleCellEditStart,
         },
-    ];
+    ]);
 
     useEffect(() => {
         setData(users);

@@ -417,7 +417,7 @@ function Index({ products, trashs, crumbs, categories, brands }) {
         },
     ]);
 
-    const tabsData = [
+    const tabsData = useMemo(() => [
         {
             eventKey: "list",
             title: "Danh sách",
@@ -434,7 +434,7 @@ function Index({ products, trashs, crumbs, categories, brands }) {
             handleCellEditStop: handleCellEditStop,
             handleCellEditStart: handleCellEditStart,
         },
-    ];
+    ]);
 
     const handleEditorBlur = (data) => {
         setContent(data);
