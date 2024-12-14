@@ -2,7 +2,7 @@ import { useState } from "react";
 import { toast } from "react-toastify";
 import PropTypes from "prop-types";
 
-const useEditCell = (url) => {
+const useEditCell = (url, setData) => {
     const [editingCells, setEditingCells] = useState({});
 
     const handleCellEditStart = (id, field, value) => {
@@ -18,6 +18,7 @@ const useEditCell = (url) => {
                 .then((res) => {
                     if (res.data.check === true) {
                         toast.success(res.data.message);
+                        setData(res.data.data);
                     } else {
                         toast.warning(res.data.message);
                     }
@@ -40,6 +41,7 @@ const useEditCell = (url) => {
 
 useEditCell.propTypes = {
     url: PropTypes.string.isRequired,
+    setData: PropTypes.func.isRequired,
 };
 
 export default useEditCell;

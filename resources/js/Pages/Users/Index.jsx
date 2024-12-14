@@ -29,7 +29,7 @@ function Index({ users, trashs, role, crumbs }) {
     const handleShow = () => setShow(true);
 
     const { handleSubmit, loading } = useSubmitForm("/admin/users", setData, setTrash, handleClose);
-    const { handleCellEditStart, handleCellEditStop } = useEditCell("/admin/users");
+    const { handleCellEditStart, handleCellEditStop } = useEditCell("/admin/users", setData);
     const { handleDelete, handleRestore, handleDeleteForever, loading: loaded } = useDelete("/admin/users", setData, setTrash);
 
     const columns = useMemo(() => [
