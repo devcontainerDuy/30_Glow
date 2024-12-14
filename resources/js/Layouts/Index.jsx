@@ -166,13 +166,13 @@ function Layout({ children }) {
                         </MenuItem>
                         <SubMenu icon={<PeopleOutlinedIcon />} label="Quản lý tài khoản">
                             <MenuItem icon={<BadgeOutlinedIcon />} component={<Link href="/admin/users" />}>
-                                Ds nhân viên
+                                Ds quản trị
                             </MenuItem>
                             <MenuItem icon={<PermContactCalendarOutlinedIcon />} component={<Link href="/admin/customers" />}>
                                 Ds khách hàng
                             </MenuItem>
                             <MenuItem icon={<ManageAccountsOutlinedIcon />} component={<Link href="/admin/roles" />}>
-                                Loại tài khoản
+                                Vai trò tài khoản
                             </MenuItem>
                             <MenuItem icon={<VerifiedUserOutlinedIcon />} component={<Link href="/admin/permissions" />}>
                                 Quyền tài khoản

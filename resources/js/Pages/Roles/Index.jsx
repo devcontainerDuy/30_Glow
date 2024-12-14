@@ -1,22 +1,23 @@
-import React, { useCallback, useEffect, useMemo, useState } from "react";
-import Layout from "@/Layouts/Index";
-import { Button, Card, Col, Form, Modal, Row, Spinner } from "react-bootstrap";
-
-import { Box, FormControl, MenuItem, Select } from "@mui/material";
-import { DataGrid, GridToolbar } from "@mui/x-data-grid";
-import Swal from "sweetalert2";
+import React, { useEffect, useMemo, useState } from "react";
+import Layout from "@layouts/Index";
+import Body from "@/Layouts/Body";
+import { Button, Form, Row } from "react-bootstrap";
 import makeAnimated from "react-select/animated";
 import AsyncSelect from "react-select/async";
 import BreadcrumbComponent from "@/Components/BreadcrumbComponent";
+import ButtonsComponent from "@/Components/ButtonsComponent";
+import ModalComponent from "@/Components/ModalComponent";
 import { Helmet } from "react-helmet";
 import { toast } from "react-toastify";
+import useSubmitForm from "@/Hooks/useSubmitForm";
+import useEditCell from "@/Hooks/useEditCell";
+import useDelete from "@/Hooks/useDelete";
 
 function Index({ roles, permissions, crumbs }) {
     const [data, setData] = useState([]);
     const [permissionData, setPermissionData] = useState([]);
-    const [editingCells, setEditingCells] = useState({});
     const [loading, setLoading] = useState(false);
-    const [showModal, setShowModal] = useState(false);
+    const [show, setShow] = useState(false);
     const [showDetail, setShowDetail] = useState(false);
     const [name, setName] = useState("");
     const [editingId, setEditingId] = useState({});
@@ -39,12 +40,13 @@ function Index({ roles, permissions, crumbs }) {
     };
 
     const handleClose = () => {
-        setShowModal(false);
+        setShow(false);
         setName("");
         setSelectedPermissions([]);
         setEditingId({});
     };
-    const handleShow = () => setShowModal(true);
+
+    const handleShow = () => setShow(true);
 
     const handleCloseDetail = () => {
         setShowDetail(false);
@@ -68,60 +70,12 @@ function Index({ roles, permissions, crumbs }) {
             });
     };
 
-    const handleSubmit = (e) => {
-        e.preventDefault();
+    const { handleSubmit, loading: loaded } = useSubmitForm("/admin/roles", setData, handleClose);
+    const { handleCellEditStop, handleCellEditStart } = useEditCell("/admin/roles", setData);
+    const { handleDelete } = useDelete("/admin/roles", setData);
+
+    const handleUpdate = (id) => {
         setLoading(true);
-        window.axios
-            .post("/admin/roles", { name: name })
-            .then((response) => {
-                if (response.data.check === true) {
-                    toast.success(response.data.message);
-                    setData(response.data.data);
-                    handleClose();
-                } else {
-                    toast.warning(response.data.message);
-                }
-            })
-            .catch((error) => {
-                toast.error(error.response.data.message);
-            })
-            .finally(() => setLoading(false));
-    };
-
-    const handleCellEditStart = (id, field, value) => {
-        setEditingCells((prev) => ({ ...prev, [id + "-" + field]: value }));
-    };
-
-    const handleCellEditStop = (id, field, value) => {
-        const originalValue = editingCells[id + "-" + field];
-        if (originalValue !== value) {
-            window.axios
-                .put("/admin/roles/" + id, {
-                    [field]: value,
-                })
-                .then((res) => {
-                    if (res.data.check === true) {
-                        toast.success(res.data.message);
-                        setData(res.data.data);
-                    } else {
-                        toast.warning(res.data.message);
-                    }
-                })
-                .catch((error) => {
-                    toast.error(error.response.data.message);
-                });
-        } else {
-            setEditingCells((prev) => {
-                const newEditingCells = { ...prev };
-                delete newEditingCells[id + "-" + field];
-                return newEditingCells;
-            });
-            toast.info("Không có chỉnh sửa.");
-        }
-    };
-
-    const handleUpdate = (id, e) => {
-        e.preventDefault();
         window.axios
             .post("/admin/handleRole/permission/" + id, {
                 permissions: selectedPermissions,
@@ -130,42 +84,15 @@ function Index({ roles, permissions, crumbs }) {
                 if (res.data.check === true) {
                     toast.success(res.data.message);
                     setData(res.data.data);
+                    handleCloseDetail();
                 } else {
                     toast.warning(res.data.message);
                 }
             })
             .catch((error) => {
                 toast.error(error.response.data.message);
-            });
-    };
-
-    const handleDelete = (id) => {
-        Swal.fire({
-            title: "Xóa mục?",
-            text: "Bạn chắc chắn muốn xóa mục này!",
-            icon: "error",
-            showCancelButton: true,
-            confirmButtonColor: "#3085d6",
-            cancelButtonColor: "#d33",
-            confirmButtonText: "Có, xóa",
-            cancelButtonText: "Hủy",
-        }).then((result) => {
-            if (result.isConfirmed) {
-                window.axios
-                    .delete("/admin/roles/" + id)
-                    .then((res) => {
-                        if (res.data.check === true) {
-                            toast.success(res.data.message);
-                            setData(res.data.data);
-                        } else {
-                            toast.warning(res.data.message);
-                        }
-                    })
-                    .catch((error) => {
-                        toast.error(error.response.data.message);
-                    });
-            }
-        });
+            })
+            .finally(() => setLoading(false));
     };
 
     const columns = useMemo(() => [
@@ -226,6 +153,17 @@ function Index({ roles, permissions, crumbs }) {
         },
     ]);
 
+    const tabsData = useMemo(() => [
+        {
+            eventKey: "roles",
+            title: "Danh sách",
+            data: data,
+            columns: columns,
+            handleCellEditStop: handleCellEditStop,
+            handleCellEditStart: handleCellEditStart,
+        },
+    ]);
+
     useEffect(() => {
         setData(roles);
         setPermissionData(permissions);
@@ -252,111 +190,64 @@ function Index({ roles, permissions, crumbs }) {
                 <section className="container">
                     <Row>
                         <BreadcrumbComponent props={crumbs}>
-                            <Button type="button" variant="primary" onClick={handleShow}>
-                                <i className="bi bi-plus-lg" />
-                                <span className="ms-2">Thêm vai trò mới</span>
-                            </Button>
+                            <ButtonsComponent type="button" variant="primary" icon="add" title="Thêm mới" onClick={handleShow} />
                         </BreadcrumbComponent>
 
                         {/* Start Modal */}
-                        <Modal show={showModal} onHide={handleClose}>
-                            <Form onSubmit={handleSubmit}>
-                                <Modal.Header closeButton>
-                                    <Modal.Title>Thêm vai trò mới</Modal.Title>
-                                </Modal.Header>
-                                <Modal.Body>
+                        <ModalComponent
+                            show={show}
+                            close={handleClose}
+                            submit={(e) => {
+                                e.preventDefault();
+                                handleSubmit({ name: name });
+                            }}
+                            size="md"
+                            title="Thêm mới loại tài khoản"
+                            loaded={loaded}
+                            body={
+                                <>
                                     <Form.Group className="mb-3" controlId="formBasic">
                                         <Form.Label>Tên vai trò</Form.Label>
                                         <Form.Control type="text" placeholder="Nhập tên vai trò" onChange={(e) => setName(e.target.value)} />
                                     </Form.Group>
-                                </Modal.Body>
-                                <Modal.Footer>
-                                    <Button variant="secondary" type="button" onClick={handleClose}>
-                                        <i className="bi bi-box-arrow-right" />
-                                        <span className="ms-2">Thoát ra</span>
-                                    </Button>
-                                    <Button variant="primary" type="submit" disabled={loading}>
-                                        {loading ? (
-                                            <>
-                                                <Spinner size="sm" animation="border" variant="secondary" />
-                                                <span>Đang lưu...</span>
-                                            </>
-                                        ) : (
-                                            <>
-                                                <i className="bi bi-floppy-fill" />
-                                                <span className="ms-2">
-                                                    <span>Lưu lại</span>
-                                                </span>
-                                            </>
-                                        )}
-                                    </Button>
-                                </Modal.Footer>
-                            </Form>
-                        </Modal>
+                                </>
+                            }
+                        />
                         {/* End Modal */}
 
                         {/* Start DataGrid */}
-                        <Col xs="12">
-                            <Box sx={{ height: "70vh", width: "100%" }}>
-                                <div className="text-start">
-                                    <h4>Danh Sách Vai Trò </h4>
-                                </div>
-                                <DataGrid
-                                    rows={data}
-                                    columns={columns}
-                                    slots={{
-                                        toolbar: GridToolbar,
-                                    }}
-                                    slotProps={{
-                                        toolbar: {
-                                            showQuickFilter: true,
-                                            quickFilterProps: {
-                                                debounceMs: 500,
-                                            },
-                                        },
-                                    }}
-                                    initialState={{
-                                        pagination: {
-                                            paginationModel: {
-                                                pageSize: 20,
-                                            },
-                                        },
-                                    }}
-                                    onCellEditStop={(params, e) => {
-                                        handleCellEditStop(params.row.id, params.field, e.target.value);
-                                    }}
-                                    onCellEditStart={(params, e) => {
-                                        handleCellEditStart(params.row.id, params.field, e.target.value);
-                                    }}
-                                    pageSizeOptions={[20, 40, 60, 80, 100]}
-                                    checkboxSelection
-                                    disableRowSelectionOnClick
-                                />
-                            </Box>
-                        </Col>
+                        <Body title="Danh sách vai trò" data={tabsData} />
                         {/* End DataGrid */}
-                        <Modal show={showDetail} onHide={handleCloseDetail} centered size="lg">
-                            <Form className="p-4" onSubmit={(e) => handleUpdate(editingId.id, e)}>
-                                <Modal.Header closeButton>
-                                    <Modal.Title>Thông tin & thao tác loại tài khoản</Modal.Title>
-                                </Modal.Header>
-                                <Modal.Body>
+
+                        {/* Start Modal */}
+                        <ModalComponent
+                            show={showDetail}
+                            close={handleCloseDetail}
+                            submit={(e) => {
+                                e.preventDefault();
+                                handleUpdate(editingId?.id);
+                            }}
+                            size="lg"
+                            title="Chi tiết loại tài khoản"
+                            loaded={loading}
+                            body={
+                                <>
                                     <Form.Group className="mb-3" controlId="formBasic1">
                                         <Form.Label>Tên loại tài khoản</Form.Label>
-                                        <Form.Control type="text" placeholder="Nhập tên loại tài khoản" defaultValue={editingId.name} disabled />
+                                        <Form.Control type="text" placeholder="Nhập tên loại tài khoản" defaultValue={editingId?.name} disabled />
                                     </Form.Group>
                                     <Form.Group className="mb-3" controlId="formBasic5">
                                         <Form.Label>Quyền truy cập</Form.Label>
-                                        <Form.Control type="text" placeholder="Nhập quyền truy cập" defaultValue={editingId.guard_name} disabled />
+                                        <Form.Control type="text" placeholder="Nhập quyền truy cập" defaultValue={editingId?.guard_name} disabled />
                                     </Form.Group>
                                     <div className="d-flex column-gap-2 justify-content-between">
                                         <Form.Group className="mb-3 w-50" controlId="formBasic2">
                                             <Form.Label>Ngày tạo</Form.Label>
-                                            <Form.Control type="text" value={new Date(editingId.created_at).toLocaleString()} disabled />
+                                            <Form.Control type="text" value={new Date(editingId?.created_at).toLocaleString()} disabled />
                                         </Form.Group>
                                         <Form.Group className="mb-3 w-50" controlId="formBasic3">
                                             <Form.Label>Ngày cập nhật</Form.Label>
-                                            <Form.Control type="text" value={new Date(editingId.updated_at).toLocaleString()} disabled />
+                                            <Form.Control type="text" value={new Date(editingId?.updated_at).toLocaleString()} disabled />
                                         </Form.Group>
                                     </div>
                                     <Form.Group className="mb-3" controlId="formBasic4">
@@ -386,24 +277,10 @@ function Index({ roles, permissions, crumbs }) {
                                         />
                                         {/* End Select2 */}
                                     </Form.Group>
-                                </Modal.Body>
-                                <Modal.Footer>
-                                    <Button type="button" variant="danger">
-                                        <i className="bi bi-trash-fill" />
-                                    </Button>
-
-                                    <Button type="button" variant="secondary" onClick={handleCloseDetail}>
-                                        <i className="bi bi-x-circle" />
-                                        <span className="ms-2">Hủy chỉnh sửa</span>
-                                    </Button>
-
-                                    <Button type="submit" variant="success">
-                                        <i className="bi bi-floppy" />
-                                        <span className="ms-2">Lưu lại chỉnh sửa này</span>
-                                    </Button>
-                                </Modal.Footer>
-                            </Form>
-                        </Modal>
+                                </>
+                            }
+                        />
+                        {/* End Modal */}
                     </Row>
                 </section>
             </Layout>

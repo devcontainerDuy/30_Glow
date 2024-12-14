@@ -35,7 +35,7 @@ const useSubmitForm = (url, setData, setTrash, handleClose) => {
 useSubmitForm.propTypes = {
     url: PropTypes.string.isRequired,
     setData: PropTypes.func.isRequired,
-    setTrash: PropTypes.func.isRequired,
+    setTrash: PropTypes.func,
     handleClose: PropTypes.func,
 };
 
