@@ -3,18 +3,18 @@ import Layout from "@layouts/Index";
 import Body from "@/Layouts/Body";
 import { Form, Row } from "react-bootstrap";
 import { FormControl, FormControlLabel, MenuItem, Select, Switch } from "@mui/material";
-import Swal from "sweetalert2";
 import BreadcrumbComponent from "@/Components/BreadcrumbComponent";
 import ButtonsComponent from "@/Components/ButtonsComponent";
 import ModalComponent from "@/Components/ModalComponent";
 import { Helmet } from "react-helmet";
-import { toast } from "react-toastify";
+import useSubmitForm from "@/hooks/useSubmitForm";
+import useEditCell from "@/hooks/useEditCell";
+import useDelete from "@/hooks/useDelete";
 
-function Index({ users, role, crumbs }) {
+function Index({ users, trashs, role, crumbs }) {
     const [data, setData] = useState([]);
+    const [trash, setTrash] = useState([]);
     const [rolesData, setRolesData] = useState([]);
-    const [editingCells, setEditingCells] = useState({});
-    const [loading, setLoading] = useState(false);
     const [show, setShow] = useState(false);
     const [name, setName] = useState("");
     const [email, setEmail] = useState("");
@@ -28,90 +28,9 @@ function Index({ users, role, crumbs }) {
     };
     const handleShow = () => setShow(true);
 
-    const handleSubmit = (e) => {
-        e.preventDefault();
-        setLoading(true);
-
-        window.axios
-            .post("/admin/users", {
-                name: name,
-                email: email,
-                roles: idRole,
-            })
-            .then((res) => {
-                if (res.data.check === true) {
-                    toast.success(res.data.message);
-                    setData(res.data.data);
-                    handleClose();
-                } else {
-                    toast.warning(res.data.message);
-                }
-            })
-            .catch((error) => {
-                toast.error(error.response.data.message);
-            })
-            .finally(() => setLoading(false));
-    };
-
-    const handleCellEditStart = (id, field, value) => {
-        setEditingCells((prev) => ({ ...prev, [id + "-" + field]: value }));
-    };
-
-    const handleCellEditStop = (id, field, value) => {
-        const originalValue = editingCells[id + "-" + field];
-
-        if (originalValue !== value) {
-            window.axios
-                .put("/admin/users/" + id, {
-                    [field]: value,
-                })
-                .then((res) => {
-                    if (res.data.check === true) {
-                        toast.success(res.data.message);
-                        setData(res.data.data);
-                    } else {
-                        toast.warning(res.data.message);
-                    }
-                })
-                .catch((error) => {
-                    toast.error(error.response.data.message);
-                });
-        } else {
-            setEditingCells((prev) => {
-                const newEditingCells = { ...prev };
-                delete newEditingCells[id + "-" + field];
-                return newEditingCells;
-            });
-            toast.info("Không có chỉnh sửa.");
-        }
-    };
-
-    const handleDelete = (id) => {
-        Swal.fire({
-            title: "Xóa tài khoản?",
-            text: "Bạn chắc chắn xóa tài khoản này!",
-            icon: "error",
-            showCancelButton: true,
-            confirmButtonColor: "#3085d6",
-            cancelButtonColor: "#d33",
-            confirmButtonText: "Có, xóa",
-            cancelButtonText: "Hủy",
-        }).then((result) => {
-            if (result.isConfirmed) {
-                window.axios
-                    .delete("/admin/users/" + id)
-                    .then((res) => {
-                        if (res.data.check === true) {
-                            toast.success(res.data.message);
-                            setData(res.data.data);
-                        }
-                    })
-                    .catch((error) => {
-                        toast.error(error.response.data.message);
-                    });
-            }
-        });
-    };
+    const { handleSubmit, loading } = useSubmitForm("/admin/users", setData, setTrash, handleClose);
+    const { handleCellEditStart, handleCellEditStop } = useEditCell("/admin/users");
+    const { handleDelete, handleRestore, handleDeleteForever, loading: loaded } = useDelete("/admin/users", setData, setTrash);
 
     const columns = useMemo(() => [
         { field: "uid", headerName: "ID", width: 80 },
@@ -196,6 +115,81 @@ function Index({ users, role, crumbs }) {
         },
     ]);
 
+    const columnsTrash = useMemo(() => [
+        { field: "uid", headerName: "ID", width: 80 },
+        {
+            field: "name",
+            headerName: "Tên tài khoản",
+            width: 200,
+            editable: true,
+        },
+        {
+            field: "email",
+            headerName: "Địa chỉ mail",
+            width: 200,
+            editable: true,
+            type: "email",
+        },
+        {
+            field: "roles",
+            headerName: "Loại tài khoản",
+            width: 200,
+            renderCell: (params) => {
+                let roleId = params.row.roles[0]?.name || "";
+
+                return (
+                    <>
+                        <FormControl fullWidth>
+                            <Select id="simple-select" value={roleId} displayEmpty disabled>
+                                <MenuItem value="">Chưa phân quyền</MenuItem>
+                                {rolesData.map((item, index) => (
+                                    <MenuItem key={index} value={item.name}>
+                                        {item.name || "Lỗi"}
+                                    </MenuItem>
+                                ))}
+                            </Select>
+                        </FormControl>
+                    </>
+                );
+            },
+        },
+        {
+            field: "status",
+            headerName: "Trạng thái",
+            width: 180,
+            renderCell: (params) => {
+                return (
+                    <>
+                        <FormControlLabel control={<Switch checked={params.row.status === 1} disabled />} label={params.row.status ? "Hoạt động" : "Ẩn"} />
+                    </>
+                );
+            },
+        },
+        {
+            field: "created_at",
+            headerName: "Ngày tạo",
+            width: 200,
+            renderCell: (params) => {
+                return new Date(params.row.created_at).toLocaleString();
+            },
+        },
+        {
+            field: "action",
+            headerName: "Thao tác",
+            width: 160,
+            renderCell: (params) => {
+                return (
+                    <>
+                        <div className="d-flex gap-2 align-items-center mt-2">
+                            <ButtonsComponent type="button" variant="outline-success" icon="reset" onClick={() => handleRestore(params.row.id)} />
+                            <ButtonsComponent type="button" variant="outline-danger" icon="delete" onClick={() => handleDeleteForever(params.row.id)} />
+                        </div>
+                    </>
+                );
+            },
+        },
+    ]);
+
     const tabsData = [
         {
             eventKey: "list",
@@ -205,12 +199,21 @@ function Index({ users, role, crumbs }) {
             handleCellEditStop: handleCellEditStop,
             handleCellEditStart: handleCellEditStart,
         },
+        {
+            eventKey: "trash",
+            title: "Thùng rác",
+            data: trash,
+            columns: columnsTrash,
+            handleCellEditStop: handleCellEditStop,
+            handleCellEditStart: handleCellEditStart,
+        },
     ];
 
     useEffect(() => {
         setData(users);
+        setTrash(trashs);
         setRolesData(role);
-    }, [users]);
+    }, [users, trashs, role]);
 
     return (
         <>
@@ -229,7 +232,10 @@ function Index({ users, role, crumbs }) {
                         <ModalComponent
                             show={show}
                             close={handleClose}
-                            submit={handleSubmit}
+                            submit={(e) => {
+                                e.preventDefault();
+                                handleSubmit({ name, email, roles: idRole });
+                            }}
                             size="md"
                             title="Thêm mới"
                             loaded={loading}

@@ -182,7 +182,7 @@ function Index({ products, trashs, crumbs, categories, brands }) {
             });
     };
 
-    const handleDeletePermanent = (id) => {
+    const handleDeleteForever = (id) => {
         Swal.fire({
             title: "Xóa vĩnh viễn mục?",
             text: "Bạn chắc chắn muốn xóa mục này!",
@@ -409,7 +409,7 @@ function Index({ products, trashs, crumbs, categories, brands }) {
                     <Button type="button" variant="outline-success" title="Khôi phục sản phẩm" onClick={() => handleRestore(params.row.id)}>
                         <i className="bi bi-arrow-clockwise" />
                     </Button>
-                    <Button className="ms-2" type="button" variant="outline-danger" title="Xóa vĩnh viễn sản phẩm" onClick={() => handleDeletePermanent(params.row.id)}>
+                    <Button className="ms-2" type="button" variant="outline-danger" title="Xóa vĩnh viễn sản phẩm" onClick={() => handleDeleteForever(params.row.id)}>
                         <i className="bi bi-trash-fill" />
                     </Button>
                 </>

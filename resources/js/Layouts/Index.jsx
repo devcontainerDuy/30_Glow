@@ -31,6 +31,12 @@ import { toast, ToastContainer } from "react-toastify";
 import logo from "@img/logo-30glow.jpg";
 import SearchIcon from "@mui/icons-material/Search";
 import ReceiptLongOutlinedIcon from "@mui/icons-material/ReceiptLongOutlined";
+import ListAltOutlinedIcon from "@mui/icons-material/ListAltOutlined";
+import ListOutlinedIcon from "@mui/icons-material/ListOutlined";
+import ContentPasteSearchOutlinedIcon from "@mui/icons-material/ContentPasteSearchOutlined";
+import ConfirmationNumberOutlinedIcon from "@mui/icons-material/ConfirmationNumberOutlined";
+import ArticleOutlinedIcon from "@mui/icons-material/ArticleOutlined";
+import ReceiptOutlinedIcon from "@mui/icons-material/ReceiptOutlined";
 
 function Layout({ children }) {
     const [user, setUser] = useState(null);
@@ -194,19 +200,19 @@ function Layout({ children }) {
                                 Ds lịch đặt
                             </MenuItem>
                         </SubMenu>
-                        <SubMenu icon={<ReceiptLongOutlinedIcon />} label="Quản lý bài viết">
-                            <MenuItem icon={<StorefrontIcon />} component={<Link href="/admin/posts" />}>
+                        <SubMenu icon={<ListAltOutlinedIcon />} label="Quản lý bài viết">
+                            <MenuItem icon={<ArticleOutlinedIcon />} component={<Link href="/admin/posts" />}>
                                 Ds bài viết
                             </MenuItem>
-                            <MenuItem icon={<StorefrontIcon />} component={<Link href="/admin/posts/collections" />}>
+                            <MenuItem icon={<ListOutlinedIcon />} component={<Link href="/admin/posts/collections" />}>
                                 Chuyên mục bài viết
                             </MenuItem>
                         </SubMenu>
                         <SubMenu icon={<ReceiptLongOutlinedIcon />} label="Quản lý hóa đơn">
-                            <MenuItem icon={<StorefrontIcon />} component={<Link href="/admin/bills" />}>
+                            <MenuItem icon={<ReceiptOutlinedIcon />} component={<Link href="/admin/bills" />}>
                                 Hóa đơn sản phẩm
                             </MenuItem>
-                            <MenuItem icon={<ContentPasteOutlinedIcon />} component={<Link href="/admin/bills-services" />}>
+                            <MenuItem icon={<ContentPasteSearchOutlinedIcon />} component={<Link href="/admin/bills-services" />}>
                                 Hóa đơn dịch vụ
                             </MenuItem>
                         </SubMenu>
@@ -220,8 +226,9 @@ function Layout({ children }) {
                             Slides
                         </MenuItem>
                         <MenuItem icon={<ContactsOutlinedIcon />} component={<Link href="/admin/contacts" />}>
-                            Contacts
+                            Liên hệ
                         </MenuItem>
+                        <MenuItem icon={<ConfirmationNumberOutlinedIcon />}>Mã giảm giá</MenuItem>
                         <MenuItem icon={<HelpOutlineOutlinedIcon />}>FAQ</MenuItem>
                         <MenuItem icon={<CalendarTodayOutlinedIcon />}>Calendar</MenuItem>
                     </Menu>

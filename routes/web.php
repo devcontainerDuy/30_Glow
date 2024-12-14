@@ -41,6 +41,10 @@ Route::middleware(['auth', 'auth.session', 'web', 'authen:Super Admin,Manager'])
     Route::get('/dailyServiceRevenues/{id}/edit', [App\Http\Controllers\Revenue\RevenueController::class, 'billServicesDetail'])->name('dailyServiceRevenues-detail');
     // Module User
     Route::resource('users', App\Http\Controllers\Users\UserController::class)->names('user');
+    Route::controller(App\Http\Controllers\Users\UserController::class)->group(function () {
+        Route::post('/users/{id}/restore', 'restore')->name('users.restore');
+        Route::delete('/users/{id}/permanent', 'permanent')->name('users.permanent');
+    });
     // Module Role
     Route::resource('roles', App\Http\Controllers\Roles\RoleController::class)->names('role');
     Route::post('handleRole/permission/{id}', [App\Http\Controllers\Roles\RoleController::class, 'givePermissionToRole']);

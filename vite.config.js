@@ -20,6 +20,8 @@ export default defineConfig({
         alias: {
             "@": "/resources/js",
             "@components": "/resources/js/Components",
+            "@containers": "/resources/js/Containers",
+            "@hooks": "/resources/js/Hooks",
             "@pages": "/resources/js/Pages",
             "@layouts": "/resources/js/Layouts",
             "@css": "/resources/css",

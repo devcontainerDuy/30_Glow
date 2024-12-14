@@ -15,6 +15,7 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
 class UserController extends Controller
@@ -35,13 +36,10 @@ class UserController extends Controller
             ['name' => 'Danh sách tài khoản', 'url' => '/admin/users'],
         ];
         $this->data = $this->model::with('roles')->get();
+        $trashs = $this->model::with('roles')->onlyTrashed()->get();
         // dd($this->data);
         $this->instance = Role::select('id', 'name')->get();
-        return Inertia::render('Users/Index', [
-            'users' => $this->data,
-            'role' => $this->instance,
-            'crumbs' => $this->crumbs
-        ]);
+        return Inertia::render('Users/Index', ['users' => $this->data, 'trashs' => $trashs, 'role' => $this->instance, 'crumbs' => $this->crumbs]);
     }
 
     /**
@@ -123,10 +121,42 @@ class UserController extends Controller
      */
     public function destroy(string $id)
     {
-        $this->instance = $this->model::findOrFail($id)->delete();
+        DB::beginTransaction();
+        try {
+            $this->instance = $this->model::findOrFail($id);
+            $this->instance->update(['status' => 0]);
+            $this->instance->delete();
+
+            $this->data = $this->model::with('roles')->get();
+            $trashs = $this->model::with('roles')->onlyTrashed()->get();
+
+            DB::commit();
+            return response()->json(['check' => true, 'message' => 'Xóa thành công!', 'data' => $this->data, 'trashs' => $trashs], 200);
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return response()->json(['check' => false, 'message' => 'Xóa thất bại!', 'error' => $e->getMessage()], 400);
+        }
+    }
+
+    public function restore($id)
+    {
+        $this->instance = $this->model::withTrashed()->findOrFail($id)->restore();
         if ($this->instance) {
             $this->data = $this->model::with('roles')->get();
-            return response()->json(['check' => true, 'message' => 'Xoá thành công!', 'data' => $this->data], 200);
+            $trashs = $this->model::with('roles')->onlyTrashed()->get();
+            return response()->json(['check' => true, 'message' => 'Khôi phục thành công!', 'data' => $this->data, 'trashs' => $trashs], 200);
+        }
+        return response()->json(['check' => false, 'message' => 'Khôi phục thất bại!'], 400);
+    }
+
+    public function permanent($id)
+    {
+        $this->instance = $this->model::withTrashed()->findOrFail($id);
+        $this->instance->forceDelete();
+        if ($this->instance) {
+            $this->data = $this->model::with('roles')->get();
+            $trashs = $this->model::with('roles')->onlyTrashed()->get();
+            return response()->json(['check' => true, 'message' => 'Xoá vĩnh viễn thành công!', 'data' => $this->data, 'trashs' => $trashs], 200);
         }
         return response()->json(['check' => false, 'message' => 'Xoá thất bại!'], 400);
     }

@@ -102,11 +102,11 @@ class PostCollectionsController extends Controller
         $this->instance->restore();
         if ($this->instance) {
             $this->data = $this->model::orderBy('id', 'desc')->get();
-            return response()->json(['check' => true, 'message' => 'Khôi phục tion!', 'data' => $this->data], 200);
+            return response()->json(['check' => true, 'message' => 'Khôi phục thành công!', 'data' => $this->data], 200);
         }
     }
 
-    public function forceDelete($id)
+    public function permanent($id)
     {
         $this->instance = $this->model::withTrashed()->findOrFail($id);
         $this->instance->forceDelete();
