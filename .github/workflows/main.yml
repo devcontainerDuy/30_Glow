@@ -16,7 +16,7 @@ jobs:
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
         with:
-          php-version: '8.2' # Đặt phiên bản PHP bạn muốn (8.0, 8.1, 8.2, v.v.)
+          php-version: '8.1' # Đặt phiên bản PHP bạn muốn (8.0, 8.1, 8.2, v.v.)
           ini-file: production # Hoặc development nếu cần
           extensions: mbstring, intl, pdo_mysql # Cài các extension cần thiết (nếu có)
           coverage: none # Nếu không cần công cụ coverage như Xdebug, để none
