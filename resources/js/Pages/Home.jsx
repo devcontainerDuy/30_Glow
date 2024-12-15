@@ -165,7 +165,7 @@ function Home({
                                 <Card.Body>
                                     <Row className="align-items-center">
                                         <Col xs={4}>
-                                            <img src={bestSellingProduct?.image} alt={bestSellingProduct?.name} className="img-fluid rounded" style={{ maxHeight: "80px" }} />
+                                            <img src="/storage/gallery/"+{bestSellingProduct?.image} alt={bestSellingProduct?.name} className="img-fluid rounded" style={{ maxHeight: "80px" }} />
                                         </Col>
                                         <Col xs={8}>
                                             <Card.Title className="text-uppercase text-muted mb-1">Sản phẩm bán chạy</Card.Title>
@@ -184,7 +184,7 @@ function Home({
                                 <Card.Body>
                                     <Row className="align-items-center">
                                         <Col xs={4}>
-                                            <img src={bestSellingService?.image} alt={bestSellingService?.name} className="img-fluid rounded" style={{ maxHeight: "80px" }} />
+                                            <img src="/storage/gallery/"+{bestSellingService?.image} alt={bestSellingService?.name} className="img-fluid rounded" style={{ maxHeight: "80px" }} />
                                         </Col>
                                         <Col xs={8}>
                                             <Card.Title className="text-uppercase text-muted mb-1">Dịch vụ được đặt nhiều</Card.Title>
