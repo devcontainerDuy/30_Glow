@@ -26,7 +26,7 @@ jobs:
 
       - name: Install Composer dependencies
         run: |
-          composer install --no-scripts --no-progress --no-suggest
+          composer install 
         continue-on-error: false # Capture errors, but continue to allow for the error notification
 
       - name: Update Composer dependencies
