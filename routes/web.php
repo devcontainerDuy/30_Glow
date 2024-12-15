@@ -102,6 +102,16 @@ Route::middleware(['auth', 'auth.session', 'web', 'authen:Super Admin,Manager'])
     Route::resource('comments', App\Http\Controllers\Comments\CommentsController::class)->names('comments');
     // Module PostsCollections
     Route::resource('posts/collections', App\Http\Controllers\PostsCollections\PostCollectionsController::class)->names('posts-collections');
+    Route::controller(App\Http\Controllers\PostsCollections\PostCollectionsController::class)->group(function () {
+        Route::post('/posts/collections/{id}/restore', 'restore')->name('posts-collections.restore');
+        Route::delete('/posts/collections/{id}/permanent', 'permanent')->name('posts-collections.permanent');
+    });
+    // Module Posts
+    Route::resource('posts', App\Http\Controllers\Posts\PostController::class)->names('posts');
+    Route::controller(App\Http\Controllers\Posts\PostController::class)->group(function () {
+        Route::post('/posts/{id}/restore', 'restore')->name('posts.restore');
+        Route::delete('/posts/{id}/permanent', 'permanent')->name('posts.permanent');
+    });
 });
 
 Route::middleware('web')->prefix('auth')->as('auth.')->controller(App\Http\Controllers\Auth\Admin\AuthenController::class)->group(function () {

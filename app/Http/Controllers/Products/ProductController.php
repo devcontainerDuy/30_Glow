@@ -202,7 +202,7 @@ class ProductController extends Controller
                 'price' => $item->price,
                 'discount' => $item->discount,
                 'in_stock' => $item->in_stock,
-                'content' => $item->content,
+                // 'content' => $item->content,
                 'status' => $item->status,
                 'category' => $item->category ? [
                     'name' => $item->category->name,
@@ -230,7 +230,7 @@ class ProductController extends Controller
                 'price' => $item->price,
                 'discount' => $item->discount,
                 'in_stock' => $item->in_stock,
-                'content' => $item->content,
+                // 'content' => $item->content,
                 'status' => $item->status,
                 'category' => $item->category ? [
                     'name' => $item->category->name,

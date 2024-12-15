@@ -334,13 +334,11 @@ function Index({ products, trashs, crumbs, categories, brands }) {
             field: "name",
             headerName: "Tên sản phẩm",
             width: 220,
-            editable: true,
         },
         {
             field: "price",
             headerName: "Giá",
             width: 120,
-            editable: true,
             valueFormatter: formatPrice,
         },
         {
@@ -357,7 +355,6 @@ function Index({ products, trashs, crumbs, categories, brands }) {
         {
             field: "in_stock",
             headerName: "Số lượng",
-            editable: true,
             width: 100,
         },
         {

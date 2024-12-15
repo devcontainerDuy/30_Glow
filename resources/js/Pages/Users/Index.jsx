@@ -121,13 +121,11 @@ function Index({ users, trashs, role, crumbs }) {
             field: "name",
             headerName: "Tên tài khoản",
             width: 200,
-            editable: true,
         },
         {
             field: "email",
             headerName: "Địa chỉ mail",
             width: 200,
-            editable: true,
             type: "email",
         },
         {

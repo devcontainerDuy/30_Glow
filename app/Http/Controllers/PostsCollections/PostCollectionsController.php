@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\PostsCollections\PostCollectionsRequest;
 use App\Models\PostCollections;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
 use Illuminate\Support\Str;
 
@@ -22,11 +23,12 @@ class PostCollectionsController extends Controller
     public function index()
     {
         $this->crumbs = [
-            ['name' => 'Bài Viết', 'url' => 'admin/posts'],
+            ['name' => 'Bài Viết', 'url' => '/admin/posts'],
             ['name' => 'Chuyên Đề Bài Viết', 'url' => '/admin/posts/collections'],
         ];
         $this->data = $this->model::orderBy('id', 'desc')->get();
-        return Inertia::render('PostsCollections/Index', ['collections' => $this->data, 'crumbs' => $this->crumbs]);
+        $trashs = $this->model::onlyTrashed()->orderBy('id', 'desc')->get();
+        return Inertia::render('PostsCollections/Index', ['collections' => $this->data, 'trashs' => $trashs, 'crumbs' => $this->crumbs]);
     }
 
     /**
@@ -88,21 +90,30 @@ class PostCollectionsController extends Controller
      */
     public function destroy(string $id)
     {
-        $this->instance = $this->model::findOrFail($id)->delete();
-        if ($this->instance) {
+        DB::beginTransaction();
+        try {
+            $this->instance = $this->model::findOrFail($id);
+            $this->instance->update(['status' => 0]);
+            $this->instance->delete();
+
             $this->data = $this->model::orderBy('id', 'desc')->get();
-            return response()->json(['check' => true, 'message' => 'Xóa thành công!', 'data' => $this->data], 200);
+            $trashs = $this->model::onlyTrashed()->orderBy('id', 'desc')->get();
+
+            DB::commit();
+            return response()->json(['check' => true, 'message' => 'Xóa thành công!', 'data' => $this->data, 'trashs' => $trashs], 200);
+        } catch (\Throwable $th) {
+            DB::rollBack();
+            return response()->json(['check' => false, 'message' => 'Xóa thất bại!'], 400);
         }
-        return response()->json(['check' => false, 'message' => 'Xóa thất bại!'], 400);
     }
 
     public function restore($id)
     {
-        $this->instance = $this->model::withTrashed()->findOrFail($id);
-        $this->instance->restore();
+        $this->instance = $this->model::withTrashed()->findOrFail($id)->restore();
         if ($this->instance) {
             $this->data = $this->model::orderBy('id', 'desc')->get();
-            return response()->json(['check' => true, 'message' => 'Khôi phục thành công!', 'data' => $this->data], 200);
+            $trashs = $this->model::onlyTrashed()->orderBy('id', 'desc')->get();
+            return response()->json(['check' => true, 'message' => 'Khôi phục thành công!', 'data' => $this->data, 'trashs' => $trashs], 200);
         }
     }
 
@@ -112,19 +123,46 @@ class PostCollectionsController extends Controller
         $this->instance->forceDelete();
         if ($this->instance) {
             $this->data = $this->model::orderBy('id', 'desc')->get();
-            return response()->json(['check' => true, 'message' => 'Xóa vĩnh viễn thành công!', 'data' => $this->data], 200);
+            $trashs = $this->model::onlyTrashed()->orderBy('id', 'desc')->get();
+            return response()->json(['check' => true, 'message' => 'Xóa vĩnh viễn thành công!', 'data' => $this->data, 'trashs' => $trashs], 200);
         }
     }
 
     public function apiIndex()
     {
-        $this->data = $this->model::orderBy('id', 'desc')->get();
+        $this->data = $this->model::orderBy('id', 'desc')->select('name', 'slug')->active()->get();
         return response()->json(['check' => true, 'data' => $this->data], 200);
     }
 
     public function apiShow($id)
     {
-        $this->data = $this->model::findOrFail($id);
-        return response()->json(['check' => true, 'data' => $this->data], 200);
+        $this->data = $this->model::with('posts')->where('slug', $id)->active()->first();
+
+        if (!$this->data) {
+            return response()->json(['check' => false, 'message' => 'Không tìm thấy'], 404);
+        }
+
+        $this->instance = [
+            'name' => $this->data->name,
+            'slug' => $this->data->slug,
+            'posts' => $this->data->posts ? $this->data->posts->map(function ($item) {
+                return [
+                    'id' => $item->id,
+                    'title' => $item->title,
+                    'slug' => $item->slug,
+                    'summary' => $item->summary,
+                    'image' => asset('storage/posts/' . $item->image),
+                    'collection' => $item->collection ? [
+                        'name' => $item->collection->name,
+                        'slug' => $item->collection->slug,
+                    ] : null,
+                    'status' => $item->status,
+                    'highlighted' => $item->highlighted,
+                    'created_at' => $item->created_at->format('H:i d-m-Y'),
+                ];
+            }) : null,
+            'status' => $this->data->status
+        ];
+        return response()->json(['check' => true, 'data' => $this->instance], 200);
     }
 }

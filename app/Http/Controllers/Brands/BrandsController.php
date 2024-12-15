@@ -5,8 +5,6 @@ namespace App\Http\Controllers\Brands;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Brands\BrandsRequest;
 use App\Models\Brands;
-use App\Models\Products;
-use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Illuminate\Support\Str;
 
@@ -166,7 +164,7 @@ class BrandsController extends Controller
                 'price' => $item->price,
                 'discount' => $item->discount,
                 'in_stock' => $item->in_stock,
-                'content' => $item->content,
+                // 'content' => $item->content,
                 'status' => $item->status,
                 'category' => $item->category ? [
                     'id' => $item->category->id,

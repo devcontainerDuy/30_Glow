@@ -17,14 +17,14 @@ const useEditCell = (url, setData) => {
                 .put(`${url}/${id}`, { [field]: value })
                 .then((res) => {
                     if (res.data.check === true) {
-                        toast.success(res.data.message);
-                        setData(res.data.data);
+                        toast.success(res?.data?.message);
+                        setData(res?.data?.data);
                     } else {
-                        toast.warning(res.data.message);
+                        toast.warning(res?.data?.message);
                     }
                 })
                 .catch((error) => {
-                    toast.error(error.response.data.message);
+                    toast.error(error?.response?.data?.message || "Đã xảy ra lỗi!");
                 });
         } else {
             setEditingCells((prev) => {
