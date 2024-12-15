@@ -1,7 +1,7 @@
 import React, { useEffect, useMemo, useState } from "react";
 import Layout from "@layouts/Index";
 import Body from "@/Layouts/Body";
-import { Button, Form, Row } from "react-bootstrap";
+import { Form, Row } from "react-bootstrap";
 import makeAnimated from "react-select/animated";
 import AsyncSelect from "react-select/async";
 import BreadcrumbComponent from "@/Components/BreadcrumbComponent";
@@ -142,12 +142,10 @@ function Index({ roles, permissions, crumbs }) {
             width: 160,
             renderCell: (params) => (
                 <>
-                    <Button type="button" variant="outline-info" title="Xem và sửa loại tài khoản" onClick={() => handleShowDetail(params.row.id)}>
-                        <i className="bi bi-exclamation-circle" />
-                    </Button>
-                    <Button type="button" variant="outline-danger" className="ms-2" title="Xóa loại tài khoản" onClick={() => handleDelete(params.row.id)}>
-                        <i className="bi bi-trash-fill" />
-                    </Button>
+                    <div className="d-flex gap-2 align-items-center mt-2">
+                        <ButtonsComponent type="button" variant="outline-info" icon="view" onClick={() => handleShowDetail(params.row.id)} />
+                        <ButtonsComponent type="button" variant="outline-danger" icon="delete" onClick={() => handleDelete(params.row.id)} />
+                    </div>
                 </>
             ),
         },
