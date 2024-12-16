@@ -26,8 +26,9 @@ class GalleryController extends Controller
         ];
         $this->instance = Products::all();
         $this->data = $this->model::with('parent')->get();
+        $trashs = $this->model::with('parent')->onlyTrashed()->get();
         // dd($this->data, $this->instance);
-        return Inertia::render('Gallery/Index', ['galleries' => $this->data, 'products' => $this->instance, 'crumbs' => $this->crumbs]);
+        return Inertia::render('Gallery/Index', ['galleries' => $this->data,'trashs' => $trashs, 'products' => $this->instance, 'crumbs' => $this->crumbs]);
     }
 
     /**
@@ -169,17 +170,37 @@ class GalleryController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(string $id)
+    public function destroy($id)
     {
-        $this->instance = $this->model::findOrFail($id);
-        $filePath = 'public/gallery/' . $this->instance->image;
+        $this->instance = $this->model::findOrFail($id)->load('parent');
+        $this->instance->update(['status' => 0]);
 
-        // Xóa file khỏi thư mục nếu tồn tại
-        if (Storage::exists($filePath)) {
-            Storage::delete($filePath);
+        if ($this->instance->delete()) {
+            $this->data = $this->model::with('parent')->get();
+            $trashs = $this->model::with('parent')->onlyTrashed()->get();
+            return response()->json(['check' => true, 'message' => 'Xoá thành công!', 'data' => $this->data, 'trashs' => $trashs,], 200);
         }
-        $this->instance->delete();
-        $this->data = $this->model::all();
-        return response()->json(['check' => true, 'message' => 'Xoá thành công!', 'data' => $this->data], 200);
+
+        return response()->json(['check' => false, 'message' => 'Có lỗi xảy ra khi xóa!'], 500);
+    }
+    public function restore($id)
+    {
+        $this->instance = $this->model::withTrashed()->findOrFail($id);
+        $this->instance->restore();
+        if ($this->instance) {
+            $this->data = $this->model::with('parent')->get();
+            $trashs = $this->model::with('parent')->onlyTrashed()->get();
+            return response()->json(['check' => true, 'message' => 'Khôi phục thành công!', 'data' => $this->data, 'trashs' => $trashs], 200);
+        }
+    }
+    public function permanent(string $id)
+    {
+        $this->instance = $this->model::withTrashed()->findOrFail($id);
+        $this->instance->forceDelete();
+        if ($this->instance) {
+            $this->data = $this->model::with('parent')->get();
+            $trashs = $this->model::with('parent')->onlyTrashed()->get();
+            return response()->json(['check' => true, 'message' => 'Đã xóa vĩnh viễn thành công!', 'data' => $this->data, 'trashs' => $trashs], 200);
+        }
     }
 }

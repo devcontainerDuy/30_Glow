@@ -25,7 +25,8 @@ class ServiceCollectionsContoller extends Controller
             ['name' => 'Phân Loại Dịch Vụ', 'url' => '/admin/services/collections'],
         ];
         $this->data = $this->model::orderBy('id', 'desc')->get();
-        return Inertia::render('ServicesCollections/Index', ['collections' => $this->data, 'crumbs' => $this->crumbs]);
+        $trashs = $this->model::orderBy('id', 'desc')->onlyTrashed()->get();
+        return Inertia::render('ServicesCollections/Index', ['collections' => $this->data, 'trashs' => $trashs, 'crumbs' => $this->crumbs]);
     }
 
     /**
@@ -46,7 +47,8 @@ class ServiceCollectionsContoller extends Controller
         $this->instance = $this->model::create($this->data);
         if ($this->instance) {
             $this->data = $this->model::orderBy('id', 'desc')->get();
-            return response()->json(['check' => true, 'message' => 'Thêm thành công!', 'data' => $this->data], 201);
+            $trashs = $this->model::orderBy('id', 'desc')->onlyTrashed()->get();
+            return response()->json(['check' => true, 'message' => 'Thêm thành công!', 'trashs' => $trashs, 'data' => $this->data], 201);
         }
         return response()->json(['check' => false, 'message' => 'Thêm thất bại!'], 400);
     }
@@ -77,7 +79,8 @@ class ServiceCollectionsContoller extends Controller
         $this->instance = $this->model::findOrFail($id)->update($this->data);
         if ($this->instance) {
             $this->data = $this->model::orderBy('id', 'desc')->get();
-            return response()->json(['check' => true, 'message' => 'Cập nhật thành công!', 'data' => $this->data], 200);
+            $trashs = $this->model::orderBy('id', 'desc')->onlyTrashed()->get();
+            return response()->json(['check' => true, 'message' => 'Cập nhật thành công!', 'trashs' => $trashs, 'data' => $this->data], 200);
         }
         return response()->json(['check' => false, 'message' => 'Cập nhật thất bại!'], 400);
     }
@@ -90,9 +93,32 @@ class ServiceCollectionsContoller extends Controller
         $this->instance = $this->model::findOrFail($id)->delete();
         if ($this->instance) {
             $this->data = $this->model::orderBy('id', 'desc')->get();
-            return response()->json(['check' => true, 'message' => 'Xóa thành công!', 'data' => $this->data], 200);
+            $trashs = $this->model::orderBy('id', 'desc')->onlyTrashed()->get();
+            return response()->json(['check' => true, 'message' => 'Xóa thành công!', 'trashs' => $trashs, 'data' => $this->data], 200);
         }
         return response()->json(['check' => false, 'message' => 'Xóa thất bại!'], 400);
+    }
+
+    public function restore($id)
+    {
+        $this->instance = $this->model::withTrashed()->findOrFail($id);
+        $this->instance->restore();
+        if ($this->instance) {
+            $this->data = $this->model::orderBy('id', 'desc')->get();
+            $trashs = $this->model::orderBy('id', 'desc')->onlyTrashed()->get();
+            return response()->json(['check' => true, 'message' => 'Khôi phục thành công!', 'trashs' => $trashs, 'data' => $this->data], 200);
+        }
+    }
+
+    public function permanent($id)
+    {
+        $this->instance = $this->model::withTrashed()->findOrFail($id);
+        $this->instance->forceDelete();
+        if ($this->instance) {
+            $this->data = $this->model::orderBy('id', 'desc')->get();
+            $trashs = $this->model::orderBy('id', 'desc')->onlyTrashed()->get();
+            return response()->json(['check' => true, 'message' => 'Xóa vĩnh viễn thành công!', 'trashs' => $trashs, 'data' => $this->data], 200);
+        }
     }
 
     /**

@@ -6,12 +6,67 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Comments\CommentsRequest;
 use App\Models\Comments;
 use Illuminate\Http\Request;
+use Inertia\Inertia;
 
 class CommentsController extends Controller
 {
     public function __construct()
     {
         $this->model = Comments::class;
+    }
+    public function index()
+    {
+        $this->crumbs = [
+            ['name' => 'comments', 'url' => '/admin/comments'],
+        ];
+        $this->data = $this->model::with('parent', 'product:id,slug', 'service', 'customer:id,uid,name', 'user:id,uid,name')->get();
+        $trashs = $this->model::with('parent', 'product:id,slug', 'service', 'customer:id,uid,name', 'user:id,uid,name')->onlyTrashed()->get();
+        return Inertia::render('Comments/Index', ['comment' => $this->data, 'trashs' => $trashs, 'crumbs' => $this->crumbs]);
+    }
+    public function update(Request $request, $id)
+    {
+        $this->data = $request->validate([
+            'status' => ['nullable', 'boolean'],
+        ]);
+        $this->instance = $this->model::findOrFail($id)->update($this->data);
+        if ($this->instance) {
+            $this->data = $this->model::with('parent')->get();
+            return response()->json(['check' => true, 'message' => 'Cập nhật thành công!', 'data' => $this->data], 200);
+        }
+        return response()->json(['check' => false, 'message' => 'Cập nhật thất bại!'], 400);
+    }
+    public function destroy($id)
+    {
+        $this->instance = $this->model::findOrFail($id)->load('parent', 'product:id,slug', 'service', 'customer:id,uid,name', 'user:id,uid,name');
+        $this->instance->update(['status' => 0]);
+
+        if ($this->instance->delete()) {
+            $this->data = $this->model::with('parent', 'product:id,slug', 'service', 'customer:id,uid,name', 'user:id,uid,name')->get();
+            $trashs = $this->model::with('parent', 'product:id,slug', 'service', 'customer:id,uid,name', 'user:id,uid,name')->onlyTrashed()->get();
+            return response()->json(['check' => true, 'message' => 'Xoá thành công!', 'data' => $this->data, 'trashs' => $trashs,], 200);
+        }
+
+        return response()->json(['check' => false, 'message' => 'Có lỗi xảy ra khi xóa!'], 500);
+    }
+    public function restore($id)
+    {
+        $this->instance = $this->model::withTrashed()->findOrFail($id);
+        $this->instance->restore();
+        if ($this->instance) {
+            $this->data = $this->model::with('parent', 'product:id,slug', 'service', 'customer:id,uid,name', 'user:id,uid,name')->get();
+            $trashs = $this->model::with('parent', 'product:id,slug', 'service', 'customer:id,uid,name', 'user:id,uid,name')->onlyTrashed()->get();
+            return response()->json(['check' => true, 'message' => 'Khôi phục thành công!', 'data' => $this->data, 'trashs' => $trashs], 200);
+        }
+    }
+    public function permanent(string $id)
+    {
+        $this->instance = $this->model::withTrashed()->findOrFail($id);
+        $this->instance->forceDelete();
+        if ($this->instance) {
+            $this->data = $this->model::with('parent', 'product:id,slug', 'service', 'customer:id,uid,name', 'user:id,uid,name')->get();
+            $trashs = $this->model::with('parent', 'product:id,slug', 'service', 'customer:id,uid,name', 'user:id,uid,name')->onlyTrashed()->get();
+            return response()->json(['check' => true, 'message' => 'Đã xóa vĩnh viễn thành công!', 'data' => $this->data, 'trashs' => $trashs], 200);
+        }
     }
     public function addComment(CommentsRequest $request)
     {

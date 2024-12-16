@@ -37,6 +37,7 @@ import ContentPasteSearchOutlinedIcon from "@mui/icons-material/ContentPasteSear
 import ConfirmationNumberOutlinedIcon from "@mui/icons-material/ConfirmationNumberOutlined";
 import ArticleOutlinedIcon from "@mui/icons-material/ArticleOutlined";
 import ReceiptOutlinedIcon from "@mui/icons-material/ReceiptOutlined";
+import CommentOutlinedIcon from '@mui/icons-material/CommentOutlined';
 
 function Layout({ children }) {
     const [user, setUser] = useState(null);
@@ -216,6 +217,9 @@ function Layout({ children }) {
                                 Hóa đơn dịch vụ
                             </MenuItem>
                         </SubMenu>
+                        <MenuItem icon={<CommentOutlinedIcon />} component={<Link href="/admin/comments" />}>
+                            Bình luận
+                        </MenuItem>
                         <MenuItem icon={<PermMediaOutlinedIcon />} component={<Link href="/admin/galleries" />}>
                             Bộ sưu tập
                         </MenuItem>

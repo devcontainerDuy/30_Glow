@@ -1,19 +1,20 @@
 import React, { useEffect, useMemo, useState } from "react";
 import Layout from "@/Layouts/Index";
-import { Button, Col, Form, Row } from "react-bootstrap";
+import { Button, Form, Row } from "react-bootstrap";
 import { FormControlLabel, Switch } from "@mui/material";
 import Body from "@/Layouts/Body";
-import Swal from "sweetalert2";
 import { Helmet } from "react-helmet";
-import { toast } from "react-toastify";
 import BreadcrumbComponent from "@/Components/BreadcrumbComponent";
 import ButtonsComponent from "@/Components/ButtonsComponent";
 import ModalComponent from "@/Components/ModalComponent";
+import useSubmitForm from "@/Hooks/useSubmitForm";
+import useEditCell from "@/Hooks/useEditCell";
+import useDelete from "@/Hooks/useDelete";
 
-function Index({ collections, crumbs }) {
+function Index({ collections, crumbs, trashs }) {
     const [data, setData] = useState([]);
-    const [editingCells, setEditingCells] = useState({});
-    const [loading, setLoading] = useState(false);
+    const [trash, setTrash] = useState([]);
+    // const [loading, setLoading] = useState(false);
     const [show, setShow] = useState(false);
     const [name, setName] = useState("");
 
@@ -22,91 +23,33 @@ function Index({ collections, crumbs }) {
         setName("");
     };
     const handleShow = () => setShow(true);
+    const { handleSubmit, loading } = useSubmitForm("/admin/posts/collections", setData, setTrash, handleClose);
+    const { handleCellEditStart, handleCellEditStop } = useEditCell("/admin/posts/collections", setData);
+    const { handleDelete, handleRestore, handleDeleteForever, loading: loaded } = useDelete("/admin/posts/collections", setData, setTrash);
 
-    const handleSubmit = (e) => {
-        e.preventDefault();
-        setLoading(true);
+    // const handleSubmit = (e) => {
+    //     e.preventDefault();
+    //     setLoading(true);
 
-        window.axios
-            .post("/admin/posts/collections", {
-                name: name,
-            })
-            .then((res) => {
-                if (res.data.check === true) {
-                    toast.success(res.data.message);
-                    setData(res.data.data);
-                    handleClose();
-                } else {
-                    toast.warning(res.data.message);
-                }
-            })
-            .catch((error) => {
-                toast.error(error.response.data.message);
-            })
-            .finally(() => setLoading(false));
-    };
-
-    const handleCellEditStart = (id, field, value) => {
-        setEditingCells((prev) => ({ ...prev, [id + "-" + field]: value }));
-    };
-
-    const handleCellEditStop = (id, field, value) => {
-        const originalValue = editingCells[id + "-" + field];
-
-        if (originalValue !== value) {
-            window.axios
-                .put("/admin/posts/collections/" + id, {
-                    [field]: value,
-                })
-                .then((res) => {
-                    if (res.data.check === true) {
-                        toast.success(res.data.message);
-                        setData(res.data.data);
-                    } else {
-                        toast.warning(res.data.message);
-                    }
-                })
-                .catch((error) => {
-                    toast.error(error.response.data.message);
-                });
-        } else {
-            setEditingCells((prev) => {
-                const newEditingCells = { ...prev };
-                delete newEditingCells[id + "-" + field];
-                return newEditingCells;
-            });
-            toast.info("Không có chỉnh sửa.");
-        }
-    };
-
-    const handleDelete = (id) => {
-        Swal.fire({
-            title: "Xóa mục?",
-            text: "Bạn chắc chắn muốn xóa mục này!",
-            icon: "error",
-            showCancelButton: true,
-            confirmButtonColor: "#3085d6",
-            cancelButtonColor: "#d33",
-            confirmButtonText: "Có, xóa",
-            cancelButtonText: "Hủy",
-        }).then((result) => {
-            if (result.isConfirmed) {
-                window.axios
-                    .delete("/admin/posts/collections/" + id)
-                    .then((res) => {
-                        if (res.data.check === true) {
-                            toast.success(res.data.message);
-                            setData(res.data.data);
-                        } else {
-                            toast.warning(res.data.message);
-                        }
-                    })
-                    .catch((error) => {
-                        toast.error(error.response.data.message);
-                    });
-            }
-        });
-    };
+    //     const requestData = {
+    //         name: name,
+    //     };
+    //     window.axios
+    //         .post("/admin/posts/collections", requestData)
+    //         .then((response) => {
+    //             if (response.data.check === true) {
+    //                 toast.success(response.data.message);
+    //                 setData(response.data.data);
+    //                 handleClose();
+    //             } else {
+    //                 toast.warning(response.data.message);
+    //             }
+    //         })
+    //         .catch((error) => {
+    //             toast.error(error.response.data.message);
+    //         })
+    //         .finally(() => setLoading(false));
+    // };
 
     const columns = useMemo(() => [
         { field: "id", headerName: "ID", width: 80 },
@@ -165,7 +108,60 @@ function Index({ collections, crumbs }) {
             },
         },
     ]);
-
+    const columnsTrash = useMemo(() => [
+        { field: "id", headerName: "ID", width: 80 },
+        {
+            field: "name",
+            headerName: "Tên loại dịch vụ",
+            width: 200,
+            editable: true,
+        },
+        {
+            field: "slug",
+            headerName: "Slug",
+            width: 200,
+        },
+        {
+            field: "status",
+            headerName: "Trạng thái",
+            width: 200,
+            renderCell: (params) => {
+                return (
+                    <>
+                        <FormControlLabel
+                            control={<Switch checked={params.row.status === 1} onClick={() => handleCellEditStop(params.row.id, "status", params.row.status === 1 ? 0 : 1)} />}
+                            label={params.row.status ? "Hoạt động" : "Ẩn"}
+                        />
+                    </>
+                );
+            },
+        },
+        {
+            field: "deleted_at",
+            headerName: "Ngày xóa",
+            width: 220,
+            renderCell: (params) => {
+                return new Date(params.row.deleted_at).toLocaleString();
+            },
+        },
+        {
+            field: "action",
+            headerName: "Thao tác",
+            width: 160,
+            renderCell: (params) => {
+                return (
+                    <>
+                        <Button type="button" variant="outline-success" title="Khôi phục sản phẩm" onClick={() => handleRestore(params.row.id)}>
+                            <i className="bi bi-arrow-clockwise" />
+                        </Button>
+                        <Button className="ms-2" type="button" variant="outline-danger" title="Xóa vĩnh viễn sản phẩm" onClick={() => handleDeleteForever(params.row.id)}>
+                            <i className="bi bi-trash-fill" />
+                        </Button>
+                    </>
+                );
+            },
+        },
+    ]);
     const tabsData = [
         {
             eventKey: "list",
@@ -175,19 +171,20 @@ function Index({ collections, crumbs }) {
             handleCellEditStop: handleCellEditStop,
             handleCellEditStart: handleCellEditStart,
         },
-        // {
-        //     eventKey: "trash",
-        //     title: "Thùng rác",
-        //     data: trash,
-        //     columns: columnsTrash,
-        //     handleCellEditStop: handleCellEditStop,
-        //     handleCellEditStart: handleCellEditStart,
-        // },
+        {
+            eventKey: "trash",
+            title: "Thùng rác",
+            data: trash,
+            columns: columnsTrash,
+            handleCellEditStop: handleCellEditStop,
+            handleCellEditStart: handleCellEditStart,
+        },
     ];
 
     useEffect(() => {
         setData(collections);
-    }, [collections]);
+        setTrash(trashs)
+    }, [collections, trashs]);
     return (
         <>
             <Helmet>
@@ -204,7 +201,10 @@ function Index({ collections, crumbs }) {
                         <ModalComponent
                             show={show}
                             close={handleClose}
-                            submit={handleSubmit}
+                            submit={(e) => {
+                                e.preventDefault();
+                                handleSubmit({ name });
+                            }}
                             size="md"
                             title="Thêm mới"
                             loaded={loading}

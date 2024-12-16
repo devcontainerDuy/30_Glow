@@ -73,12 +73,20 @@ Route::middleware(['auth', 'auth.session', 'web', 'authen:Super Admin,Manager'])
     });
     // Module Gallery
     Route::resource('galleries', App\Http\Controllers\Gallery\GalleryController::class)->names('gallery');
+    Route::controller(App\Http\Controllers\Gallery\GalleryController::class)->group(function () {
+        Route::post('/galleries/{id}/restore', 'restore')->name('gallery.restore');
+        Route::delete('/galleries/{id}/permanent', 'permanent')->name('gallery.permanent');
+    });
     // Module Biils
     Route::resource('bills', App\Http\Controllers\Bills\BillController::class)->names('bill');
     // Module Biils-services
     Route::resource('bills-services', App\Http\Controllers\BillServices\BillServicesController::class)->names('bill-services');
     // Module Service Collection
     Route::resource('services/collections', App\Http\Controllers\ServicesCollections\ServiceCollectionsContoller::class)->names('service_collections');
+    Route::controller(App\Http\Controllers\ServicesCollections\ServiceCollectionsContoller::class)->group(function () {
+        Route::post('/services/collections/{id}/restore', 'restore')->name('service_collections.restore');
+        Route::delete('/services/collections/{id}/permanent', 'permanent')->name('service_collections.permanent');
+    });
     // Module Service
     Route::resource('services', App\Http\Controllers\Services\ServiceController::class)->names('service');
     Route::controller(App\Http\Controllers\Services\ServiceController::class)->group(function () {
@@ -92,16 +100,36 @@ Route::middleware(['auth', 'auth.session', 'web', 'authen:Super Admin,Manager'])
     });
     // Module Sitemap
     Route::resource('sitemap', App\Http\Controllers\Sitemap\SitemapController::class)->names('sitemap');
+    Route::controller(App\Http\Controllers\Sitemap\SitemapController::class)->group(function () {
+        Route::post('/sitemap/{id}/restore', 'restore')->name('sitemap.restore');
+        Route::delete('/sitemap/{id}/permanent', 'permanent')->name('sitemap.permanent');
+    });
     // Module Slides
     Route::resource('slides', App\Http\Controllers\Slides\SlidesController::class)->names('slides');
+    Route::controller(App\Http\Controllers\Slides\SlidesController::class)->group(function () {
+        Route::post('/slides/{id}/restore', 'restore')->name('slides.restore');
+        Route::delete('/slides/{id}/permanent', 'permanent')->name('slides.permanent');
+    });
     // Module Booking
     Route::resource('bookings', App\Http\Controllers\Bookings\BookingController::class)->names('bookings');
     // Module contacts
     Route::resource('contacts', App\Http\Controllers\Contacts\ContactsController::class)->names('contacts');
+    Route::controller(App\Http\Controllers\Contacts\ContactsController::class)->group(function () {
+        Route::post('/contacts/{id}/restore', 'restore')->name('contacts.restore');
+        Route::delete('/contacts/{id}/permanent', 'permanent')->name('contacts.permanent');
+    });
     //Modele comments
     Route::resource('comments', App\Http\Controllers\Comments\CommentsController::class)->names('comments');
+    Route::controller(App\Http\Controllers\Comments\CommentsController::class)->group(function () {
+        Route::post('/comments/{id}/restore', 'restore')->name('comments.restore');
+        Route::delete('/comments/{id}/permanent', 'permanent')->name('comments.permanent');
+    });
     // Module PostsCollections
     Route::resource('posts/collections', App\Http\Controllers\PostsCollections\PostCollectionsController::class)->names('posts-collections');
+    Route::controller(App\Http\Controllers\PostsCollections\PostCollectionsController::class)->group(function () {
+        Route::post('/posts/collections/{id}/restore', 'restore')->name('posts-collections.restore');
+        Route::delete('/posts/collections/{id}/permanent', 'permanent')->name('posts-collections.permanent');
+    });
 });
 
 Route::middleware('web')->prefix('auth')->as('auth.')->controller(App\Http\Controllers\Auth\Admin\AuthenController::class)->group(function () {

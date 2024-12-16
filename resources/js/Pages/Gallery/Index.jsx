@@ -1,7 +1,7 @@
 import React, { useEffect, useMemo, useState } from "react";
 import Layout from "@/Layouts/Index";
-import { Row, Col, Button, Modal, Form, Spinner, Image } from "react-bootstrap";
-import { DataGrid, GridToolbar } from "@mui/x-data-grid";
+import Body from "@/Layouts/Body";
+import { Row, Button, Modal, Form, Spinner, Image } from "react-bootstrap";
 import {
     Box,
     FormControl,
@@ -11,17 +11,18 @@ import {
     Switch,
 } from "@mui/material";
 
-import Swal from "sweetalert2";
 import BreadcrumbComponent from "@/Components/BreadcrumbComponent";
 import { Helmet } from "react-helmet";
 import { toast } from "react-toastify";
 import { Dropzone, FileMosaic } from "@dropzone-ui/react";
+import useSubmitForm from "@/Hooks/useSubmitForm";
+import useEditCell from "@/Hooks/useEditCell";
+import useDelete from "@/Hooks/useDelete";
 
-function Index({ galleries, products, crumbs }) {
+function Index({ galleries, products, crumbs, trashs }) {
     const [data, setData] = useState([]);
+    const [trash, setTrash] = useState([]);
     const [productsData, setProductsData] = useState([]);
-    const [editingCells, setEditingCells] = useState({});
-    const [loading, setLoading] = useState(false);
     const [showModal, setShowModal] = useState(false);
     const [files, setFiles] = useState([]);
     const [productId, setProductId] = useState("");
@@ -40,111 +41,9 @@ function Index({ galleries, products, crumbs }) {
     const onDelete = (id) => {
         setFiles(files.filter((x) => x.id !== id));
     };
-
-    const handleSubmit = (e) => {
-        e.preventDefault();
-        setLoading(true);
-
-        const formData = new FormData();
-
-        if (files.length > 0) {
-            files.forEach((file) => {
-                formData.append("images[]", file.file);
-            });
-        } else {
-            window.notyf.open({
-                type: "error",
-                message: "Không có tệp nào để gửi.",
-            });
-            setLoading(false);
-            return;
-        }
-
-        formData.append("id_parent", productId);
-        formData.append("status", status);
-
-        window.axios
-            .post("/admin/galleries", formData, {
-                headers: {
-                    "Content-Type": "multipart/form-data",
-                },
-            })
-            .then((response) => {
-                if (response.data.check === true) {
-                    toast.success(response.data.message);
-                    setData(response.data.data);
-                    handleClose();
-                } else {
-                    toast.warning(response.data.message);
-                }
-            })
-            .catch((error) => {
-                toast.error(error.response.data.message);
-            })
-            .finally(() => setLoading(false));
-    };
-
-    const handleCellEditStart = (id, field, value) => {
-        setEditingCells((prev) => ({ ...prev, [id + "-" + field]: value }));
-    };
-
-    const handleCellEditStop = (id, field, value) => {
-        const originalValue = editingCells[id + "-" + field];
-        if (originalValue !== value) {
-            window.axios
-                .put("/admin/galleries/" + id, {
-                    [field]: value,
-                })
-                .then((res) => {
-                    if (res.data.check === true) {
-                        toast.success(res.data.message);
-                        setData(res.data.data);
-                    } else {
-                        toast.warning(res.data.message);
-                    }
-                })
-                .catch((error) => {
-                    toast.error(error.response.data.message);
-                });
-        } else {
-            setEditingCells((prev) => {
-                const newEditingCells = { ...prev };
-                delete newEditingCells[id + "-" + field];
-                return newEditingCells;
-            });
-            toast.info("Không có chỉnh sửa.");
-        }
-    };
-
-    const handleDelete = (id) => {
-        Swal.fire({
-            title: "Xóa mục?",
-            text: "Bạn chắc chắn muốn xóa mục này!",
-            icon: "error",
-            showCancelButton: true,
-            confirmButtonColor: "#3085d6",
-            cancelButtonColor: "#d33",
-            confirmButtonText: "Có, xóa",
-            cancelButtonText: "Hủy",
-        }).then((result) => {
-            if (result.isConfirmed) {
-                window.axios
-                    .delete("/admin/galleries/" + id)
-                    .then((res) => {
-                        if (res.data.check === true) {
-                            toast.success(res.data.message);
-                            setData(res.data.data);
-                        } else {
-                            toast.warning(res.data.message);
-                        }
-                    })
-                    .catch((error) => {
-                        toast.error(error.response.data.message);
-                    });
-            }
-        });
-    };
-
+    const { handleSubmit, loading } = useSubmitForm("/admin/galleries", setData, handleClose);
+    const { handleCellEditStop } = useEditCell("/admin/galleries", setData);
+    const { handleDelete, handleRestore, handleDeleteForever, loading: loaded } = useDelete("/admin/galleries", setData, setTrash);
     const columns = useMemo(() => [
         { field: "id", headerName: "ID", width: 80 },
         {
@@ -252,11 +151,130 @@ function Index({ galleries, products, crumbs }) {
             ),
         },
     ]);
+    const columnsTrash = useMemo(() => [
+        { field: "id", headerName: "ID", width: 80 },
+        {
+            field: "image",
+            headerName: "Hình ảnh",
+            width: 160,
+            renderCell: (params) => {
+                return (
+                    <>
+                        <Image
+                            fluid
+                            className="rounded-1 h-100 p-0 m-0"
+                            src={"/storage/gallery/" + params.value}
+                            alt={params.value}
+                        />
+                    </>
+                );
+            },
+        },
+        {
+            field: "id_parent",
+            headerName: "Sản phẩm",
+            width: 360,
+            renderCell: (params) => {
+                return (
+                    <>
+                        <FormControl fullWidth>
+                            <Select
+                                id="category-select"
+                                value={params?.value || ""}
+                                displayEmpty
+                                onChange={(e) => {
+                                    handleCellEditStop(
+                                        params.row.id,
+                                        "id_parent",
+                                        e.target.value
+                                    );
+                                }}
+                            >
+                                <MenuItem value="">
+                                    Chưa sử dụng cho sản phẩm
+                                </MenuItem>
+                                {productsData &&
+                                    productsData?.map((item, index) => (
+                                        <MenuItem key={index} value={item.id}>
+                                            {item.name}
+                                        </MenuItem>
+                                    ))}
+                            </Select>
+                        </FormControl>
+                    </>
+                );
+            },
+        },
+        {
+            field: "status",
+            headerName: "Trạng thái chính",
+            width: 220,
+            renderCell: (params) => {
+                return (
+                    <>
+                        <FormControlLabel
+                            control={
+                                <Switch
+                                    checked={params.row.status === 1}
+                                    onClick={() =>
+                                        handleCellEditStop(
+                                            params.row.id,
+                                            "status",
+                                            params.row.status === 1 ? 0 : 1
+                                        )
+                                    }
+                                />
+                            }
+                            label={params.row.status ? "Mặc định" : "Không"}
+                        />
+                    </>
+                );
+            },
+        },
+        {
+            field: "deleted_at",
+            headerName: "Ngày xóa",
+            width: 220,
+            renderCell: (params) => {
+                return new Date(params.row.deleted_at).toLocaleString();
+            },
+        },
+        {
+            field: "action",
+            headerName: "Thao tác",
+            width: 180,
+            renderCell: (params) => (
+                <>
+                    <Button type="button" variant="outline-success" title="Khôi phục sản phẩm" onClick={() => handleRestore(params.row.id)}>
+                        <i className="bi bi-arrow-clockwise" />
+                    </Button>
+                    <Button className="ms-2" type="button" variant="outline-danger" title="Xóa vĩnh viễn sản phẩm" onClick={() => handleDeleteForever(params.row.id)}>
+                        <i className="bi bi-trash-fill" />
+                    </Button>
+                </>
+            ),
+        },
+    ]);
+    const tabsData = useMemo(() => [
+        {
+            eventKey: "list",
+            title: "Danh sách",
+            data: data,
+            columns: columns,
+        },
+        {
+            eventKey: "trash",
+            title: "Thùng rác",
+            data: trash,
+            columns: columnsTrash,
+        },
+    ]);
 
     useEffect(() => {
         setData(galleries);
         setProductsData(products);
-    }, [galleries, products]);
+        setTrash(trashs)
+    }, [galleries, products, trashs]);
 
     return (
         <>
@@ -402,52 +420,9 @@ function Index({ galleries, products, crumbs }) {
                             </Form>
                         </Modal>
                         {/* End Modal */}
-                        <Col xs="12">
-                            <Box sx={{ height: "70vh", width: "100%" }}>
-                                <div className="text-start">
-                                    <h4>Bộ sưu tập </h4>
-                                </div>
-                                <DataGrid
-                                    rows={data}
-                                    columns={columns}
-                                    slots={{
-                                        toolbar: GridToolbar,
-                                    }}
-                                    slotProps={{
-                                        toolbar: {
-                                            showQuickFilter: true,
-                                            quickFilterProps: {
-                                                debounceMs: 500,
-                                            },
-                                        },
-                                    }}
-                                    initialState={{
-                                        pagination: {
-                                            paginationModel: {
-                                                pageSize: 20,
-                                            },
-                                        },
-                                    }}
-                                    onCellEditStop={(params, e) => {
-                                        handleCellEditStop(
-                                            params.row.id,
-                                            params.field,
-                                            e.target.value
-                                        );
-                                    }}
-                                    onCellEditStart={(params, e) => {
-                                        handleCellEditStart(
-                                            params.row.id,
-                                            params.field,
-                                            e.target.value
-                                        );
-                                    }}
-                                    pageSizeOptions={[20, 40, 60, 80, 100]}
-                                    checkboxSelection
-                                    disableRowSelectionOnClick
-                                />
-                            </Box>
-                        </Col>
+                        {/* Start DataGrid */}
+                        <Body title="Danh sách tài khoản" data={tabsData} />
+                        {/* End DataGrid */}
                     </Row>
                 </section>
             </Layout>

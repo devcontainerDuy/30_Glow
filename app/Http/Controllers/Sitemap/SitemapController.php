@@ -23,7 +23,8 @@ class SitemapController extends Controller
             ['name' => 'Sitemap', 'url' => '/admin/sitemaps'],
         ];
         $this->data = $this->model::orderBy('id', 'desc')->get();
-        return Inertia::render('Sitemap/Index', ['sitemap' => $this->data, 'crumbs' => $this->crumbs]);
+        $trashs = $this->model::orderBy('id', 'desc')->onlyTrashed()->get();
+        return Inertia::render('Sitemap/Index', ['sitemap' => $this->data, 'trashs' => $trashs, 'crumbs' => $this->crumbs]);
     }
 
     /**
@@ -40,20 +41,15 @@ class SitemapController extends Controller
     public function store(SitemapRequest $request)
     {
         //t kh gọi Request từ SitemapRequest
-        $this->data = $request->validate([
-            'page' => 'required|string|max:255',
-            'url' => 'required|max:255',
-            'content' => ['required', 'string'],
-            'static_page' => 'required|integer',
-        ]);
+        $this->data = $request->validated();
 
         $this->data['stastus'] = 1;
         $this->instance = $this->model::create($this->data);
 
         if ($this->instance) {
             $this->data = $this->model::orderBy('id', 'desc')->get();
-
-            return response()->json(['check' => true, 'message' => 'Tạo thành công!', 'data' => $this->data], 201);
+            $trashs = $this->model::orderBy('id', 'desc')->onlyTrashed()->get();
+            return response()->json(['check' => true, 'message' => 'Tạo thành công!', 'trashs' => $trashs, 'data' => $this->data], 201);
         }
         return response()->json(['check' => false, 'message' => 'Tạo thất bại!'], 400);
     }
@@ -91,7 +87,8 @@ class SitemapController extends Controller
         $this->instance = $this->model::findOrFail($id)->update($this->data);
         if ($this->instance) {
             $this->data = $this->model::orderBy('id', 'desc')->get();
-            return response()->json(['check' => true, 'message' => 'Cập nhật thành công!', 'data' => $this->data], 200);
+            $trashs = $this->model::orderBy('id', 'desc')->onlyTrashed()->get();
+            return response()->json(['check' => true, 'message' => 'Cập nhật thành công!', 'trashs' => $trashs, 'data' => $this->data], 200);
         }
         return response()->json(['check' => false, 'message' => 'Cập nhật thất bại!'], 400);
     }
@@ -99,14 +96,37 @@ class SitemapController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy($id)
+    public function destroy(string $id)
     {
         $this->instance = $this->model::findOrFail($id)->delete();
         if ($this->instance) {
             $this->data = $this->model::orderBy('id', 'desc')->get();
-            return response()->json(['check' => true, 'message' => 'Xoá thành công!', 'data' => $this->data], 200);
+            $trashs = $this->model::orderBy('id', 'desc')->onlyTrashed()->get();
+            return response()->json(['check' => true, 'message' => 'Xóa thành công!', 'trashs' => $trashs, 'data' => $this->data], 200);
         }
-        return response()->json(['check' => false, 'message' => 'Xoá thất bại!'], 400);
+        return response()->json(['check' => false, 'message' => 'Xóa thất bại!'], 400);
+    }
+
+    public function restore($id)
+    {
+        $this->instance = $this->model::withTrashed()->findOrFail($id);
+        $this->instance->restore();
+        if ($this->instance) {
+            $this->data = $this->model::orderBy('id', 'desc')->get();
+            $trashs = $this->model::orderBy('id', 'desc')->onlyTrashed()->get();
+            return response()->json(['check' => true, 'message' => 'Khôi phục thành công!', 'trashs' => $trashs, 'data' => $this->data], 200);
+        }
+    }
+
+    public function permanent($id)
+    {
+        $this->instance = $this->model::withTrashed()->findOrFail($id);
+        $this->instance->forceDelete();
+        if ($this->instance) {
+            $this->data = $this->model::orderBy('id', 'desc')->get();
+            $trashs = $this->model::orderBy('id', 'desc')->onlyTrashed()->get();
+            return response()->json(['check' => true, 'message' => 'Xóa vĩnh viễn thành công!', 'trashs' => $trashs, 'data' => $this->data], 200);
+        }
     }
 
     public function apiIndex()
