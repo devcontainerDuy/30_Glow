@@ -243,29 +243,34 @@ class BillController extends Controller
     public function destroy(string $id)
     {
         try {
-            $this->instance = $this->model::where('customer_id', Auth::user()->id)->where('uid', $id)->first();
+            if (Auth::check()) {
+                $this->instance = $this->model::where('customer_id', Auth::user()->id)->where('uid', $id)->first();
 
-            if (!$this->instance) {
-                return response()->json(['check' => false, 'message' => 'Đơn hàng không tồn tại!'], 404);
-            }
+                if (!$this->instance) {
+                    return response()->json(['check' => false, 'message' => 'Đơn hàng không tồn tại!'], 404);
+                }
 
-            switch ($this->instance->status) {
-                case 0:
-                case 1:
-                    $this->instance->update(['status' => 5]);
-                    return response()->json(['check' => true, 'message' => 'Đơn hàng đã được hủy thành công!'], 200);
-                case 2:
-                    return response()->json(['check' => false, 'message' => 'Đơn hàng đã giao cho đơn vị vận chuyển, không thể hủy!'], 400);
-                case 3:
-                    return response()->json(['check' => false, 'message' => 'Đơn hàng đang được giao, không thể hủy!'], 400);
-                case 4:
-                    return response()->json(['check' => false, 'message' => 'Đơn hàng đã giao, không thể hủy!'], 400);
-                case 5:
-                    return response()->json(['check' => false, 'message' => 'Đơn hàng đã bị từ chối, không thể hủy!'], 400);
-                case 6:
-                    return response()->json(['check' => false, 'message' => 'Đơn hàng đã hoàn trả, không thể hủy!'], 400);
-                default:
-                    return response()->json(['check' => false, 'message' => 'Trạng thái đơn hàng không hợp lệ!'], 400);
+                switch ($this->instance->status) {
+                    case 0:
+                    case 1:
+                        $this->instance->status = 5;
+                        $this->instance->save();
+                        return response()->json(['check' => true, 'message' => 'Đơn hàng đã được hủy thành công!'], 200);
+                    case 2:
+                        return response()->json(['check' => false, 'message' => 'Đơn hàng đã giao cho đơn vị vận chuyển, không thể hủy!'], 400);
+                    case 3:
+                        return response()->json(['check' => false, 'message' => 'Đơn hàng đang được giao, không thể hủy!'], 400);
+                    case 4:
+                        return response()->json(['check' => false, 'message' => 'Đơn hàng đã giao, không thể hủy!'], 400);
+                    case 5:
+                        return response()->json(['check' => false, 'message' => 'Đơn hàng đã bị hủy, không thể hủy!'], 400);
+                    case 6:
+                        return response()->json(['check' => false, 'message' => 'Đơn hàng đã hoàn trả, không thể hủy!'], 400);
+                    default:
+                        return response()->json(['check' => false, 'message' => 'Trạng thái đơn hàng không hợp lệ!'], 400);
+                }
+            } else {
+                return response()->json(['check' => false, 'message' => 'Không thể vào hóa đơn người khác!'], 401);
             }
         } catch (\Exception $e) {
             Log::error("Error: " . $e->getMessage());
