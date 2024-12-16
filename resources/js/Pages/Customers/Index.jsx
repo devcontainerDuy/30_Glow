@@ -14,9 +14,9 @@ import useDelete from "@/Hooks/useDelete";
 import { Helmet } from "react-helmet";
 import { toast } from "react-toastify";
 
-function Index({ customers, crumbs }) {
+function Index({ customers, trashs, crumbs }) {
     const [data, setData] = useState([]);
-    const [editingCells, setEditingCells] = useState({});
+    const [trash, setTrash] = useState([]);
     const [loading, setLoading] = useState(false);
     const [show, setShow] = useState(false);
     const [name, setName] = useState("");
@@ -29,9 +29,9 @@ function Index({ customers, crumbs }) {
     };
     const handleShow = () => setShow(true);
 
-    const { handleSubmit, loading: loaded } = useSubmitForm("/admin/customers", setData, handleClose);
+    const { handleSubmit, loading: loaded } = useSubmitForm("/admin/customers", setData, setTrash, handleClose);
     const { handleCellEditStart, handleCellEditStop } = useEditCell("/admin/customers", setData);
-    const { handleDelete } = useDelete("/admin/customers", setData);
+    const { handleDelete, handleRestore, handleDeleteForever } = useDelete("/admin/customers", setData, setTrash);
 
     const handleResetPassword = (id) => {
         setLoading(true);
@@ -123,6 +123,74 @@ function Index({ customers, crumbs }) {
         },
     ]);
 
+    const columnsTrash = useMemo(() => [
+        { field: "uid", headerName: "ID", width: 80 },
+        {
+            field: "name",
+            headerName: "Tên tài khoản",
+            width: 200,
+        },
+        {
+            field: "email",
+            headerName: "Địa chỉ mail",
+            width: 200,
+            type: "email",
+        },
+        {
+            field: "phone",
+            headerName: "Số điện thoại",
+            width: 200,
+            renderCell: (params) => {
+                if (params.row.phone === null) {
+                    return "Không có số điện thoại";
+                }
+                return (
+                    <a href={"tel:" + params.row.phone} className="text-decoration-none">
+                        {params.row.phone.toString().replace(/(\d{3})(\d{3})(\d{4})/, "$1-$2-$3")}
+                    </a>
+                );
+            },
+        },
+        {
+            field: "address",
+            headerName: "Địa chỉ",
+            width: 200,
+            renderCell: (params) => {
+                if (params.row.address === null) {
+                    return "Không có địa chỉ";
+                }
+                return params.row.address;
+            },
+        },
+        {
+            field: "status",
+            headerName: "Trạng thái",
+            width: 180,
+            renderCell: (params) => {
+                return (
+                    <>
+                        <FormControlLabel control={<Switch checked={params.row.status === 1} disabled />} label={params.row.status ? "Hoạt động" : "Ẩn"} />
+                    </>
+                );
+            },
+        },
+        {
+            field: "action",
+            headerName: "Thao tác",
+            width: 160,
+            renderCell: (params) => {
+                return (
+                    <>
+                        <div className="d-flex gap-2 align-items-center mt-2">
+                            <ButtonsComponent type="button" variant="outline-success" icon="reset" onClick={() => handleRestore(params.row.id)} />
+                            <ButtonsComponent type="button" variant="outline-danger" icon="delete" onClick={() => handleDeleteForever(params.row.id)} />
+                        </div>
+                    </>
+                );
+            },
+        },
+    ]);
+
     const tabsData = useMemo(() => [
         {
             eventKey: "roles",
@@ -132,11 +200,20 @@ function Index({ customers, crumbs }) {
             handleCellEditStop: handleCellEditStop,
             handleCellEditStart: handleCellEditStart,
         },
+        {
+            eventKey: "trash",
+            title: "Thùng rác",
+            data: trash,
+            columns: columnsTrash,
+            handleCellEditStop: handleCellEditStop,
+            handleCellEditStart: handleCellEditStart,
+        },
     ]);
 
     useEffect(() => {
         setData(customers);
-    }, [customers]);
+        setTrash(trashs);
+    }, [customers, trashs]);
 
     return (
         <>

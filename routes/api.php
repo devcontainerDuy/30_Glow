@@ -52,6 +52,7 @@ Route::middleware('api')->group(function () {
         Route::post('/bills', 'store');
         Route::get('/bills', 'create')->middleware(['auth:sanctum', 'auth.session']);
         Route::get('/bills/{id}', 'show')->middleware(['auth:sanctum', 'auth.session']);
+        Route::delete('/bills/{id}', 'destroy')->middleware(['auth:sanctum', 'auth.session']);
     });
 
     Route::controller(App\Http\Controllers\Payment\VnPayController::class)->group(function () {
@@ -66,6 +67,7 @@ Route::middleware('api')->group(function () {
             Route::get('/bookings', 'create');
             Route::get('/bookings/{id}', 'show');
             Route::put('/bookings/{id}', 'update');
+            // Route::delete('/bookings/{id}', 'destroy');
         });
     });
 

@@ -33,11 +33,9 @@ class CustomerController extends Controller
             ['name' => 'Tài khoản', 'url' => '/admin/users'],
             ['name' => 'Danh sách khách hàng', 'url' => '/admin/customers'],
         ];
-        $this->data = $this->model::all();
-        return Inertia::render('Customers/Index', [
-            'customers' => $this->data,
-            'crumbs' => $this->crumbs
-        ]);
+        $this->data = $this->model::orderBy('created_at', 'desc')->get();
+        $trashs = $this->model::onlyTrashed()->orderBy('created_at', 'desc')->get();
+        return Inertia::render('Customers/Index', ['customers' => $this->data, 'trashs' => $trashs, 'crumbs' => $this->crumbs]);
     }
 
     /**
@@ -66,9 +64,10 @@ class CustomerController extends Controller
                 'email' => $request->input('email'),
                 'password' => $password,
             ];
-            $this->data = $this->model::all();
+            $this->data = $this->model::orderBy('created_at', 'desc')->get();
+            $trashs = $this->model::onlyTrashed()->orderBy('created_at', 'desc')->get();
             Mail::to($request->input('email'))->send(new createUser($dataMail));
-            return response()->json(['check' => true, 'message' => 'Tạo tài khoản thành công!', 'data' => $this->data], 201);
+            return response()->json(['check' => true, 'message' => 'Tạo tài khoản thành công!', 'data' => $this->data, 'trashs' => $trashs], 201);
         }
         return response()->json(['check' => false, 'message' => 'Tạo tài khoản thất bại!'], 400);
     }
@@ -156,7 +155,7 @@ class CustomerController extends Controller
         $this->data = $request->validated();
         // $this->instance = $this->model::findOrFail($id)->update($this->data); gộp 1 dòng kh chạy đc mà tách ra thì đc :)))))))) 
         // à tại dòng ở trên là trả về true fail nên bị bắt lỗi kiểu dữ liệu nha
-        $this->instance = $this->model::find($id);
+        $this->instance = $this->model::findOrFail($id);
         $this->instance->update($this->data);
         if (isset($this->data['phone'])) broadcast(new PhoneChanged($this->instance))->toOthers();
         if ($this->instance) {
@@ -172,11 +171,35 @@ class CustomerController extends Controller
      */
     public function destroy(string $id)
     {
-        $this->instance = $this->model::findOrFail($id)->delete();
-        if ($this->instance) {
-            $this->data = $this->model::all();
-            return response()->json(['check' => true, 'message' => 'Xoá thành công!', 'data' => $this->data], 200);
+        $this->instance = $this->model::findOrFail($id);
+        $this->instance->update(['status' => 0]);
+        if ($this->instance->delete()) {
+            $this->data = $this->model::orderBy('created_at', 'desc')->get();
+            $trashs = $this->model::onlyTrashed()->orderBy('created_at', 'desc')->get();
+            return response()->json(['check' => true, 'message' => 'Xoá thành công!', 'data' => $this->data, 'trashs' => $trashs], 200);
         }
         return response()->json(['check' => false, 'message' => 'Xoá thất bại!'], 400);
+    }
+
+    public function restore($id)
+    {
+        $this->instance = $this->model::withTrashed()->findOrFail($id)->restore();
+        if ($this->instance) {
+            $this->data = $this->model::orderBy('created_at', 'desc')->get();
+            $trashs = $this->model::onlyTrashed()->orderBy('created_at', 'desc')->get();
+            return response()->json(['check' => true, 'message' => 'Khôi phục thành công!', 'data' => $this->data, 'trashs' => $trashs], 200);
+        }
+        return response()->json(['check' => false, 'message' => 'Khôi phục thất bại!'], 400);
+    }
+
+    public function forceDelete($id)
+    {
+        $this->instance = $this->model::withTrashed()->findOrFail($id)->forceDelete();
+        if ($this->instance) {
+            $this->data = $this->model::orderBy('created_at', 'desc')->get();
+            $trashs = $this->model::onlyTrashed()->orderBy('created_at', 'desc')->get();
+            return response()->json(['check' => true, 'message' => 'Xoá hệ thống!', 'data' => $this->data, 'trashs' => $trashs], 200);
+        }
+        return response()->json(['check' => false, 'message' => 'Xoá hệ thống thất bại!'], 400);
     }
 }

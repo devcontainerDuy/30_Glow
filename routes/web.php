@@ -52,7 +52,11 @@ Route::middleware(['auth', 'auth.session', 'web', 'authen:Super Admin,Manager'])
     Route::resource('permissions', App\Http\Controllers\Permissions\PermissionController::class)->names('permission');
     // Module Customer
     Route::resource('customers', App\Http\Controllers\Customers\CustomerController::class)->names('customers');
-    Route::post('/customers/{id}/reset-password', [App\Http\Controllers\Customers\CustomerController::class, 'resetPassword']);
+    Route::controller(App\Http\Controllers\Customers\CustomerController::class)->group(function () {
+        Route::post('/customers/{id}/reset-password',  'resetPassword')->name('customers.resetPassword');
+        Route::post('/customers/{id}/restore', 'restore')->name('customers.restore');
+        Route::delete('/customers/{id}/permanent', 'permanent')->name('customers.permanent');
+    });
     // Module Category
     Route::resource('categories', App\Http\Controllers\Categories\CategoriesController::class)->names('categories');
     Route::controller(App\Http\Controllers\Categories\CategoriesController::class)->group(function () {

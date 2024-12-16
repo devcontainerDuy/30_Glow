@@ -83,13 +83,11 @@ class BillController extends Controller
                     return response()->json(['check' => false, 'message' => 'Thông tin khách hàng không chính xác!'], 401);
                 }
 
-                if (is_null($customers->address)) {
+                if ($customers->address === null) {
                     $customers->update(['address' => $this->data['address']]);
-                } elseif ($customers->address !== $this->data['address']) {
-                    return response()->json(['check' => false, 'message' => 'Địa chỉ không khớp!'], 401);
                 }
 
-                if (is_null($customers->phone)) {
+                if ($customers->phone === null) {
                     $customers->update(['phone' => $this->data['phone']]);
                 } elseif ($customers->phone !== $this->data['phone']) {
                     return response()->json(['check' => false, 'message' => 'Số điện thoại không khớp!'], 401);
@@ -240,9 +238,38 @@ class BillController extends Controller
 
     /**
      * Remove the specified resource from storage.
+     * $id: uid của hóa đơn
      */
     public function destroy(string $id)
     {
-        //
+        try {
+            $this->instance = $this->model::where('customer_id', Auth::user()->id)->where('uid', $id)->first();
+
+            if (!$this->instance) {
+                return response()->json(['check' => false, 'message' => 'Đơn hàng không tồn tại!'], 404);
+            }
+
+            switch ($this->instance->status) {
+                case 0:
+                case 1:
+                    $this->instance->update(['status' => 5]);
+                    return response()->json(['check' => true, 'message' => 'Đơn hàng đã được hủy thành công!'], 200);
+                case 2:
+                    return response()->json(['check' => false, 'message' => 'Đơn hàng đã giao cho đơn vị vận chuyển, không thể hủy!'], 400);
+                case 3:
+                    return response()->json(['check' => false, 'message' => 'Đơn hàng đang được giao, không thể hủy!'], 400);
+                case 4:
+                    return response()->json(['check' => false, 'message' => 'Đơn hàng đã giao, không thể hủy!'], 400);
+                case 5:
+                    return response()->json(['check' => false, 'message' => 'Đơn hàng đã bị từ chối, không thể hủy!'], 400);
+                case 6:
+                    return response()->json(['check' => false, 'message' => 'Đơn hàng đã hoàn trả, không thể hủy!'], 400);
+                default:
+                    return response()->json(['check' => false, 'message' => 'Trạng thái đơn hàng không hợp lệ!'], 400);
+            }
+        } catch (\Exception $e) {
+            Log::error("Error: " . $e->getMessage());
+            return response()->json(['check' => false, 'message' => 'Có lỗi xảy ra!'], 500);
+        }
     }
 }
