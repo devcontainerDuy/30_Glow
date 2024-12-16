@@ -12,7 +12,15 @@ const useSubmitForm = (url, setData, setTrash, handleClose) => {
     const handleSubmit = ({ ...data }) => {
         setLoading(true);
         window.axios
-            .post(url, { ...data })
+            .post(
+                url,
+                { ...data },
+                {
+                    headers: {
+                        "Content-Type": "multipart/form-data",
+                    },
+                }
+            )
             .then((res) => {
                 if (res.data.check === true) {
                     toast.success(res?.data?.message);

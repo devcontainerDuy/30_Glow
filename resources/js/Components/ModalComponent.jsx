@@ -16,7 +16,7 @@ export default function ModalComponent({ show, close, size, submit, title, body,
     return (
         <>
             <Modal show={show} onHide={close} size={size} centered>
-                <Form onSubmit={submit}>
+                <Form onSubmit={submit} noValidate encType="multipart/form-data">
                     <Modal.Header closeButton>
                         <Modal.Title>
                             <span>{title}</span>

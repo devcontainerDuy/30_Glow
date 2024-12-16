@@ -7,7 +7,7 @@ const DynamicTabs = ({ tabsData }) => {
     return (
         <Tabs defaultActiveKey={tabsData[0]?.eventKey} id="dynamic-tabs">
             {tabsData.map((tab, index) => (
-                <Tab eventKey={tab.eventKey} title={`${tab.title} (${tab.data?.length})`} key={index}>
+                <Tab eventKey={tab.eventKey} title={`${tab.title} (${tab.data?.length || 0})`} key={index}>
                     <TableDataGrid data={tab.data} columns={tab.columns} handleCellEditStop={tab.handleCellEditStop} handleCellEditStart={tab.handleCellEditStart} />
                 </Tab>
             ))}

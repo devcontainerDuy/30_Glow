@@ -113,6 +113,17 @@ Route::middleware('api')->controller(App\Http\Controllers\Services\ServiceContro
     Route::get('/services/{slug}', 'apiShow');
 });
 
+Route::middleware('api')->controller(App\Http\Controllers\PostsCollections\PostCollectionsController::class)->group(function () {
+    Route::get('/posts-collections', 'apiIndex');
+    Route::get('/posts-collections/{slug}', 'apiShow');
+});
+
+Route::middleware('api')->controller(App\Http\Controllers\Posts\PostController::class)->group(function () {
+    Route::get('/posts/highlighted', 'apiHighlighted');
+    Route::get('/posts', 'apiIndex');
+    Route::get('/posts/{slug}', 'apiShow');
+});
+
 Route::middleware('api')->controller(App\Http\Controllers\Sitemap\SitemapController::class)->group(function () {
     Route::get('/sitemap', 'apiIndex');
     Route::get('/sitemap/{id}', 'apiShow');

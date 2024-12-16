@@ -141,7 +141,7 @@ class CategoriesController extends Controller
                 'price' => $item->price,
                 'discount' => $item->discount,
                 'in_stock' => $item->in_stock,
-                'content' => $item->content,
+                // 'content' => $item->content,
                 'category' => $item->category ? [
                     'name' => $item->category->name,
                     'slug' => $item->category->slug,
@@ -163,7 +163,7 @@ class CategoriesController extends Controller
                 'price' => $item->price,
                 'discount' => $item->discount,
                 'in_stock' => $item->in_stock,
-                'content' => $item->content,
+                // 'content' => $item->content,
                 'status' => $item->status,
                 'category' => $item->category ? [
                     'id' => $item->category->id,

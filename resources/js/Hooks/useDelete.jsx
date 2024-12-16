@@ -24,12 +24,12 @@ const useDelete = (url, setData, setTrash) => {
                     .then((res) => {
                         if (res.data.check === true) {
                             toast.success(res.data.message);
-                            setData(res.data.data);
-                            setTrash(res.data.trashs);
+                            setData(res?.data?.data);
+                            setTrash(res?.data?.trashs);
                         }
                     })
                     .catch((error) => {
-                        toast.error(error.response.data.message);
+                        toast.error(error?.response?.data?.message || "Đã xảy ra lỗi!");
                     })
                     .finally(() => setLoading(false));
             }
@@ -42,15 +42,15 @@ const useDelete = (url, setData, setTrash) => {
             .post(`${url}/${id}/restore`)
             .then((res) => {
                 if (res.data.check === true) {
-                    toast.success(res.data.message);
-                    setData(res.data.data);
-                    setTrash(res.data.trashs);
+                    toast.success(res?.data?.message);
+                    setData(res?.data?.data);
+                    setTrash(res?.data?.trashs);
                 } else {
                     toast.warning(res.data.message);
                 }
             })
             .catch((error) => {
-                toast.error(error.response.data.message);
+                toast.error(error?.response?.data?.message || "Đã xảy ra lỗi!");
             })
             .finally(() => setLoading(false));
     };
@@ -72,15 +72,15 @@ const useDelete = (url, setData, setTrash) => {
                     .delete(`${url}/${id}/permanent`)
                     .then((res) => {
                         if (res.data.check === true) {
-                            toast.success(res.data.message);
-                            setData(res.data.data);
-                            setTrash(res.data.trashs);
+                            toast.success(res?.data?.message);
+                            setData(res?.data?.data);
+                            setTrash(res?.data?.trashs);
                         } else {
-                            toast.warning(res.data.message);
+                            toast.warning(res?.data?.message);
                         }
                     })
                     .catch((error) => {
-                        toast.error(error.response.data.message);
+                        toast.error(error?.response?.data?.message || "Đã xảy ra lỗi!");
                     })
                     .finally(() => setLoading(false));
             }

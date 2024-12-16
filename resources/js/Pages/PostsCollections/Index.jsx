@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useState } from "react";
 import Layout from "@/Layouts/Index";
-import { Button, Form, Row } from "react-bootstrap";
+import { Form, Row } from "react-bootstrap";
 import { FormControlLabel, Switch } from "@mui/material";
 import Body from "@/Layouts/Body";
 import { Helmet } from "react-helmet";
@@ -11,10 +11,9 @@ import useSubmitForm from "@/Hooks/useSubmitForm";
 import useEditCell from "@/Hooks/useEditCell";
 import useDelete from "@/Hooks/useDelete";
 
-function Index({ collections, crumbs, trashs }) {
+function Index({ collections, trashs, crumbs }) {
     const [data, setData] = useState([]);
     const [trash, setTrash] = useState([]);
-    // const [loading, setLoading] = useState(false);
     const [show, setShow] = useState(false);
     const [name, setName] = useState("");
 
@@ -23,33 +22,10 @@ function Index({ collections, crumbs, trashs }) {
         setName("");
     };
     const handleShow = () => setShow(true);
-    const { handleSubmit, loading } = useSubmitForm("/admin/posts/collections", setData, setTrash, handleClose);
+
+    const { handleSubmit, loading } = useSubmitForm("/admin/posts/collections", setData, handleClose);
     const { handleCellEditStart, handleCellEditStop } = useEditCell("/admin/posts/collections", setData);
-    const { handleDelete, handleRestore, handleDeleteForever, loading: loaded } = useDelete("/admin/posts/collections", setData, setTrash);
-
-    // const handleSubmit = (e) => {
-    //     e.preventDefault();
-    //     setLoading(true);
-
-    //     const requestData = {
-    //         name: name,
-    //     };
-    //     window.axios
-    //         .post("/admin/posts/collections", requestData)
-    //         .then((response) => {
-    //             if (response.data.check === true) {
-    //                 toast.success(response.data.message);
-    //                 setData(response.data.data);
-    //                 handleClose();
-    //             } else {
-    //                 toast.warning(response.data.message);
-    //             }
-    //         })
-    //         .catch((error) => {
-    //             toast.error(error.response.data.message);
-    //         })
-    //         .finally(() => setLoading(false));
-    // };
+    const { handleDelete, handleRestore, handleDeleteForever } = useDelete("/admin/posts/collections", setData, setTrash);
 
     const columns = useMemo(() => [
         { field: "id", headerName: "ID", width: 80 },
@@ -108,13 +84,13 @@ function Index({ collections, crumbs, trashs }) {
             },
         },
     ]);
+
     const columnsTrash = useMemo(() => [
         { field: "id", headerName: "ID", width: 80 },
         {
             field: "name",
             headerName: "Tên loại dịch vụ",
             width: 200,
-            editable: true,
         },
         {
             field: "slug",
@@ -128,20 +104,25 @@ function Index({ collections, crumbs, trashs }) {
             renderCell: (params) => {
                 return (
                     <>
-                        <FormControlLabel
-                            control={<Switch checked={params.row.status === 1} onClick={() => handleCellEditStop(params.row.id, "status", params.row.status === 1 ? 0 : 1)} />}
-                            label={params.row.status ? "Hoạt động" : "Ẩn"}
-                        />
+                        <FormControlLabel control={<Switch checked={params.row.status === 1} disabled />} label={params.row.status ? "Hoạt động" : "Ẩn"} />
                     </>
                 );
             },
         },
         {
-            field: "deleted_at",
-            headerName: "Ngày xóa",
-            width: 220,
+            field: "created_at",
+            headerName: "Ngày tạo",
+            width: 180,
             renderCell: (params) => {
-                return new Date(params.row.deleted_at).toLocaleString();
+                return new Date(params.row.created_at).toLocaleString();
+            },
+        },
+        {
+            field: "updated_at",
+            headerName: "Ngày cập nhật",
+            width: 180,
+            renderCell: (params) => {
+                return new Date(params.row.updated_at).toLocaleString();
             },
         },
         {
@@ -151,18 +132,17 @@ function Index({ collections, crumbs, trashs }) {
             renderCell: (params) => {
                 return (
                     <>
-                        <Button type="button" variant="outline-success" title="Khôi phục sản phẩm" onClick={() => handleRestore(params.row.id)}>
-                            <i className="bi bi-arrow-clockwise" />
-                        </Button>
-                        <Button className="ms-2" type="button" variant="outline-danger" title="Xóa vĩnh viễn sản phẩm" onClick={() => handleDeleteForever(params.row.id)}>
-                            <i className="bi bi-trash-fill" />
-                        </Button>
+                        <div className="d-flex gap-2 align-items-center mt-2">
+                            <ButtonsComponent type="button" variant="outline-success" icon="reset" onClick={() => handleRestore(params.row.id)} />
+                            <ButtonsComponent type="button" variant="outline-danger" icon="delete" onClick={() => handleDeleteForever(params.row.id)} />
+                        </div>
                     </>
                 );
             },
         },
     ]);
-    const tabsData = [
+
+    const tabsData = useMemo(() => [
         {
             eventKey: "list",
             title: "Danh sách",
@@ -179,11 +159,11 @@ function Index({ collections, crumbs, trashs }) {
             handleCellEditStop: handleCellEditStop,
             handleCellEditStart: handleCellEditStart,
         },
-    ];
+    ]);
 
     useEffect(() => {
         setData(collections);
-        setTrash(trashs)
+        setTrash(trashs);
     }, [collections, trashs]);
     return (
         <>
@@ -203,7 +183,7 @@ function Index({ collections, crumbs, trashs }) {
                             close={handleClose}
                             submit={(e) => {
                                 e.preventDefault();
-                                handleSubmit({ name });
+                                handleSubmit({ name: name });
                             }}
                             size="md"
                             title="Thêm mới"
