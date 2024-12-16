@@ -10,7 +10,6 @@ import ModalComponent from "@/Components/ModalComponent";
 import useSubmitForm from "@/Hooks/useSubmitForm";
 import useEditCell from "@/Hooks/useEditCell";
 import useDelete from "@/Hooks/useDelete";
-import { use } from "react";
 
 function Index({ collections, trashs, crumbs }) {
     const [data, setData] = useState([]);

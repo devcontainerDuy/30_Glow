@@ -22,8 +22,10 @@ class ContactsRequest extends BaseRequest
             'note' => 'nullable|string|max:255',
         ];
         if ($this->routeIs('store')) {
+            $return['id'] = 'required|string|max:255'; 
             $return['replyMessage'] = 'required|string';
         } else {
+            $return['id'] = 'nullable|string|max:255'; 
             $return['replyMessage'] = 'nullable|string';
         }
     }

@@ -28,12 +28,8 @@ class SlidesController extends Controller
             ['name' => 'Danh sách Slides', 'url' => '/admin/slides'],
         ];
         $this->data = $this->model::all();
-
-        // Trả về view với dữ liệu
-        return Inertia::render('Slides/Index', [
-            'slides' => $this->data, // Dữ liệu slides
-            'crumbs' => $this->crumbs // Dữ liệu crumbs
-        ]);
+        $trashs = $this->model::onlyTrashed()->get();
+        return Inertia::render('Slides/Index', ['slides' => $this->data, 'trashs' => $trashs, 'crumbs' => $this->crumbs]);
     }
 
 
@@ -124,26 +120,56 @@ class SlidesController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy($id)
+    public function destroy(string $id)
     {
-        $this->instance = $this->model::findOrFail($id);
-        if (!$this->instance) {
-            return response()->json(['check' => false, 'message' => 'Slide không tồn tại.'], 404);
-        }
-
-        // Xóa các file ảnh liên quan nếu chúng tồn tại
-        $desktopPath = '/public/slides/desktop/' . $this->instance->desktop;
-        $mobilePath = '/public/slides/mobile/' . $this->instance->mobile;
-        if (Storage::exists($desktopPath)) {
-            Storage::delete($desktopPath);
-        }
-        if (Storage::exists($mobilePath)) {
-            Storage::delete($mobilePath);
-        }
+        $this->instance = $this->model::withTrashed()->findOrFail($id);
         $this->instance->delete();
 
-        $this->data = $this->model::all();
-        return response()->json(['check' => true, 'message' => 'Slide đã được xóa thành công!', 'data' => $this->data], 200);
+        if ($this->instance) {
+            $this->data = $this->model::all();
+            $trashs = $this->model::onlyTrashed()->get();
+            return response()->json(['check' => true, 'message' => 'Xóa thành công!', 'trashs' => $trashs, 'data' => $this->data], 200);
+        }
+        return response()->json(['check' => false, 'message' => 'Xóa thất bại!'], 400);
+    }
+
+    public function restore($id)
+    {
+        $this->instance = $this->model::withTrashed()->findOrFail($id);
+        $this->instance->restore();
+
+        if ($this->instance) {
+            $this->data = $this->model::get();
+            $trashs = $this->model::onlyTrashed()->get();
+            return response()->json(['check' => true, 'message' => 'Khôi phục thành công!', 'trashs' => $trashs, 'data' => $this->data], 200);
+        }
+
+        return response()->json(['check' => false, 'message' => 'Khôi phục thất bại!'], 400);
+    }
+
+    public function permanent($id)
+    {
+        $this->instance = $this->model::withTrashed()->findOrFail($id);
+
+        if ($this->instance) {
+            // Xóa file liên quan nếu tồn tại
+            $desktopPath = '/public/slides/desktop/' . $this->instance->desktop;
+            $mobilePath = '/public/slides/mobile/' . $this->instance->mobile;
+
+            if (Storage::exists($desktopPath)) {
+                Storage::delete($desktopPath);
+            }
+            if (Storage::exists($mobilePath)) {
+                Storage::delete($mobilePath);
+            }
+
+            $this->instance->forceDelete();
+            $this->data = $this->model::all();
+
+            return response()->json(['check' => true, 'message' => 'Xóa vĩnh viễn thành công!', 'data' => $this->data], 200);
+        }
+
+        return response()->json(['check' => false, 'message' => 'Dữ liệu không tồn tại!'], 404);
     }
 
     /**

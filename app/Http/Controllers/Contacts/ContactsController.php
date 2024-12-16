@@ -27,22 +27,25 @@ class ContactsController extends Controller
             ['name' => 'Danh sách các liên hệ', 'url' => '/admin/contacts'],
         ];
         $this->data = $this->model::orderByRaw('status = 0 desc')->orderBy('created_at', 'desc')->get();
-        return Inertia::render('Contacts/Index', ['contacts' => $this->data, 'crumbs' => $this->crumbs]);
+        $trashs = $this->model::orderByRaw('status = 0 desc')->orderBy('created_at', 'desc')->onlyTrashed()->get();
+        return Inertia::render('Contacts/Index', ['contacts' => $this->data, 'trashs' => $trashs, 'crumbs' => $this->crumbs]);
     }
     public function store(ContactsRequest $request)
     {
         $this->data = $request->validated();
-
         if ($this->data) {
             $dataMail = [
                 'name' => $request->input('name'),
                 'email' => $request->input('email'),
                 'replyMessage' => $request->input('replyMessage'),
             ];
-            $this->model::where('email', $this->data['email'])->firstOrFail()->update(['status' => 1]);
-            $this->data = $this->model::orderByRaw('status = 0 desc')->orderBy('created_at', 'desc')->get();
-            Mail::to($request->input('email'))->send(new replyContacts($dataMail));
-            return response()->json(['check' => true, 'message' => 'Email đã được gửi thành công!', 'data' => $this->data], 201);
+            $this->instance = $this->model::where('id', $request->input('id'))->firstOrFail();
+            if ($this->instance) {
+                $this->instance->update(['status' => 1, 'note' => $request->input('replyMessage')]);
+                $this->data = $this->model::orderByRaw('status = 0 desc')->orderBy('created_at', 'desc')->get();
+                Mail::to($request->input('email'))->send(new replyContacts($dataMail));
+                return response()->json(['check' => true, 'message' => 'Email đã được gửi thành công!', 'data' => $this->data], 201);
+            }
         }
         return response()->json(['check' => false, 'message' => 'Gửi email thất bại!'], status: 400);
     }
@@ -66,14 +69,37 @@ class ContactsController extends Controller
         }
         return response()->json(['check' => false, 'message' => 'Cập nhật thất bại!'], 400);
     }
-    public function destroy($id)
+    public function destroy(string $id)
     {
         $this->instance = $this->model::findOrFail($id)->delete();
         if ($this->instance) {
-            $this->data = $this->model::all();
-            return response()->json(['check' => true, 'message' => 'Xoá thành công!', 'data' => $this->data], 200);
+            $this->data = $this->model::orderByRaw('status = 0 desc')->orderBy('created_at', 'desc')->get();
+            $trashs = $this->model::orderByRaw('status = 0 desc')->orderBy('created_at', 'desc')->onlyTrashed()->get();
+            return response()->json(['check' => true, 'message' => 'Xóa thành công!', 'trashs' => $trashs, 'data' => $this->data], 200);
         }
-        return response()->json(['check' => false, 'message' => 'Xoá thất bại!'], 400);
+        return response()->json(['check' => false, 'message' => 'Xóa thất bại!'], 400);
+    }
+
+    public function restore($id)
+    {
+        $this->instance = $this->model::withTrashed()->findOrFail($id);
+        $this->instance->restore();
+        if ($this->instance) {
+            $this->data = $this->model::orderByRaw('status = 0 desc')->orderBy('created_at', 'desc')->get();
+            $trashs = $this->model::orderByRaw('status = 0 desc')->orderBy('created_at', 'desc')->onlyTrashed()->get();
+            return response()->json(['check' => true, 'message' => 'Khôi phục thành công!', 'trashs' => $trashs, 'data' => $this->data], 200);
+        }
+    }
+
+    public function permanent($id)
+    {
+        $this->instance = $this->model::withTrashed()->findOrFail($id);
+        $this->instance->forceDelete();
+        if ($this->instance) {
+            $this->data = $this->model::orderByRaw('status = 0 desc')->orderBy('created_at', 'desc')->get();
+            $trashs = $this->model::orderByRaw('status = 0 desc')->orderBy('created_at', 'desc')->onlyTrashed()->get();
+            return response()->json(['check' => true, 'message' => 'Xóa vĩnh viễn thành công!', 'trashs' => $trashs, 'data' => $this->data], 200);
+        }
     }
     public function addContacts(ContactsRequest $request)
     {

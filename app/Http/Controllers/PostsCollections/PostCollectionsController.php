@@ -49,7 +49,8 @@ class PostCollectionsController extends Controller
         $this->instance = $this->model::create($this->data);
         if ($this->instance) {
             $this->data = $this->model::orderBy('id', 'desc')->get();
-            return response()->json(['check' => true, 'message' => 'Thêm thành công!', 'data' => $this->data], 201);
+            $trashs = $this->model::orderBy('id', 'desc')->onlyTrashed()->get();
+            return response()->json(['check' => true, 'message' => 'Thêm thành công!', 'trashs' => $trashs, 'data' => $this->data], 201);
         }
         return response()->json(['check' => false, 'message' => 'Thêm thất bại!'], 400);
     }
@@ -80,7 +81,8 @@ class PostCollectionsController extends Controller
         $this->instance = $this->model::findOrFail($id)->update($this->data);
         if ($this->instance) {
             $this->data = $this->model::orderBy('id', 'desc')->get();
-            return response()->json(['check' => true, 'message' => 'Cập nhật thành công!', 'data' => $this->data], 200);
+            $trashs = $this->model::orderBy('id', 'desc')->onlyTrashed()->get();
+            return response()->json(['check' => true, 'message' => 'Cập nhật thành công!', 'trashs' => $trashs, 'data' => $this->data], 200);
         }
         return response()->json(['check' => false, 'message' => 'Cập nhật thất bại!'], 400);
     }
