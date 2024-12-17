@@ -26,16 +26,26 @@ class RevenueController extends Controller
     public function index()
     {
         // Doanh thu sản phẩm tháng hiện tại
-        $currentMonthProductRevenue = Bills::whereMonth('created_at', now()->month)->sum('total');
+        $currentMonthProductRevenue = Bills::whereMonth('created_at', now()->month)
+            ->where('payment_status', 1)
+            ->where('status', 4)
+            ->sum('total');
 
         // Doanh thu dịch vụ tháng hiện tại
-        $currentMonthServiceRevenue = ServiceBills::whereMonth('created_at', now()->month)->sum('total');
+        $currentMonthServiceRevenue = ServiceBills::whereMonth('created_at', now()->month)
+            ->where('status', 1)
+            ->sum('total');
 
         // Doanh thu sản phẩm tháng trước
-        $lastMonthProductRevenue = Bills::whereMonth('created_at', now()->subMonth()->month)->sum('total');
+        $lastMonthProductRevenue = Bills::whereMonth('created_at', now()->subMonth()->month)
+            ->where('payment_status', 1)
+            ->where('status', 4)
+            ->sum('total');
 
         // Doanh thu dịch vụ tháng trước
-        $lastMonthServiceRevenue = ServiceBills::whereMonth('created_at', now()->subMonth()->month)->sum('total');
+        $lastMonthServiceRevenue = ServiceBills::whereMonth('created_at', now()->subMonth()->month)
+            ->where('status', 1)
+            ->sum('total');
 
         // Tính phần trăm thay đổi cho sản phẩm
         $productRevenuePercentageChange = $lastMonthProductRevenue > 0
@@ -46,6 +56,7 @@ class RevenueController extends Controller
         $serviceRevenuePercentageChange = $lastMonthServiceRevenue > 0
             ? (($currentMonthServiceRevenue - $lastMonthServiceRevenue) / $lastMonthServiceRevenue) * 100
             : ($currentMonthServiceRevenue > 0 ? 100 : 0);
+            
         // Số đơn hàng mới hôm nay
         $newOrdersCount = Bills::whereDate('created_at', now()->toDateString())
             ->where('status', 1)
@@ -211,7 +222,7 @@ class RevenueController extends Controller
                 return $bill->created_at->format('Y-m-d');
             })
             ->map(function ($bills) {
-                $dailyRevenue = $bills->sum('total');  // Tính tổng doanh thu trong ngày
+                $dailyRevenue = $bills->sum('total');
 
                 $paymentMethodTotals = $bills->groupBy('payment_method')->map(function ($methodBills) {
                     return [

@@ -167,10 +167,6 @@ function Index({ bills, crumbs }) {
                 <section className="container">
                     <Row>
                         <BreadcrumbComponent props={crumbsData}>
-                            <Button type="button" variant="primary" disabled={true}>
-                                <i className="bi bi-plus-circle" />
-                                <span className="ms-2">Thêm hóa đơn mới</span>
-                            </Button>
                         </BreadcrumbComponent>
 
                         {/* Start DataGrid */}

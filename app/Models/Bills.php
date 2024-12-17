@@ -54,6 +54,8 @@ class Bills extends Model
     public function scopeMonthlyRevenue(Builder $query)
     {
         return $query->selectRaw('MONTH(created_at) as month, SUM(total) as revenue')
+            ->where('payment_status', 1)
+            ->where('status', 4)
             ->groupBy('month')
             ->orderBy('month', 'asc');
     }
