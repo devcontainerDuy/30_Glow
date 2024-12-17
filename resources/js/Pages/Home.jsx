@@ -89,9 +89,6 @@ function Home({
             <Layout>
                 <Container fluid>
                     <h1>Home</h1>
-                    <div className="mb-5">
-                        <Button onClick={notify}>Notify !</Button>
-                    </div>
                     <Row className="g-4">
                         {/* Thẻ tổng quan */}
                         <Col xs={12} md={6} lg={3}>
@@ -113,7 +110,7 @@ function Home({
                                         {formatCurrency(currentMonthProductRevenue)}{" "}
                                         <Badge className="float-end" bg={productRevenuePercentageChange >= 0 ? "success" : "danger"}>
                                             {productRevenuePercentageChange >= 0 ? "+" : "-"}
-                                            {Math.abs(productRevenuePercentageChange).toFixed(2)}%
+                                            {Math.abs(productRevenuePercentageChange).toFixed(0)}%
                                         </Badge>
                                     </Card.Text>
                                 </Card.Body>
@@ -138,7 +135,7 @@ function Home({
                                         {formatCurrency(currentMonthServiceRevenue)}{" "}
                                         <Badge className="float-end" bg={serviceRevenuePercentageChange >= 0 ? "success" : "danger"}>
                                             {serviceRevenuePercentageChange >= 0 ? "+" : "-"}
-                                            {Math.abs(serviceRevenuePercentageChange).toFixed(2)}%
+                                            {Math.abs(serviceRevenuePercentageChange).toFixed(0)}%
                                         </Badge>
                                     </Card.Text>
                                 </Card.Body>
@@ -148,7 +145,20 @@ function Home({
                             <Card>
                                 <Card.Body>
                                     <Card.Title>Đơn hàng mới trong ngày</Card.Title>
-                                    <Card.Text className="h3">{newOrdersCount}</Card.Text>
+                                    <Card.Text className="h3">
+                                        {" "}
+                                        <a
+                                            href="#"
+                                            onClick={(e) => {
+                                                handleList("bills");
+                                            }}
+                                            className="text-decoration-none"
+                                            style={{ color: "black" }}
+                                            title="Xem danh sách hóa đơn"
+                                        >
+                                            {newOrdersCount}
+                                        </a>
+                                    </Card.Text>
                                 </Card.Body>
                             </Card>
                         </Col>
@@ -156,7 +166,19 @@ function Home({
                             <Card>
                                 <Card.Body>
                                     <Card.Title>Lịch booking mới trong ngày</Card.Title>
-                                    <Card.Text className="h3">{newBookingCount}</Card.Text>
+                                    <Card.Text className="h3">
+                                        <a
+                                            href="#"
+                                            onClick={(e) => {
+                                                handleList("bookings");
+                                            }}
+                                            className="text-decoration-none"
+                                            style={{ color: "black" }}
+                                            title="Xem danh sách bookinh"
+                                        >
+                                            {newBookingCount}
+                                        </a>
+                                    </Card.Text>
                                 </Card.Body>
                             </Card>
                         </Col>
@@ -165,7 +187,7 @@ function Home({
                                 <Card.Body>
                                     <Row className="align-items-center">
                                         <Col xs={4}>
-                                            <img src={"/storage/gallery/" + bestSellingProduct?.image} alt={bestSellingProduct?.name} className="img-fluid rounded" style={{ maxHeight: "80px" }} />
+                                            <img src={`/storage/gallery/${bestSellingProduct.image}`} alt={bestSellingProduct?.name} className="img-fluid rounded" style={{ maxHeight: "80px" }} />
                                         </Col>
                                         <Col xs={8}>
                                             <Card.Title className="text-uppercase text-muted mb-1">Sản phẩm bán chạy</Card.Title>
@@ -184,7 +206,7 @@ function Home({
                                 <Card.Body>
                                     <Row className="align-items-center">
                                         <Col xs={4}>
-                                            <img src={"/storage/gallery/" + bestSellingService?.image} alt={bestSellingService?.name} className="img-fluid rounded" style={{ maxHeight: "80px" }} />
+                                            <img src={`/storage/services/${bestSellingService?.image}`} alt={bestSellingService?.name} className="img-fluid rounded" style={{ maxHeight: "80px" }} />
                                         </Col>
                                         <Col xs={8}>
                                             <Card.Title className="text-uppercase text-muted mb-1">Dịch vụ được đặt nhiều</Card.Title>
@@ -286,7 +308,7 @@ function Home({
                                     <LineChart width={730} height={250} data={productData}>
                                         <CartesianGrid strokeDasharray="3 3" />
                                         <XAxis dataKey="name" />
-                                        <YAxis domain={[0, maxProductY]} />
+                                        <YAxis domain={[0, formatCurrency(maxProductY)]} />
                                         <Tooltip formatter={(value) => formatCurrency(value)} />
                                         <Legend />
                                         <Line type="monotone" dataKey="value" stroke="#8884d8" />
@@ -301,7 +323,7 @@ function Home({
                                     <LineChart width={730} height={250} data={serviceData}>
                                         <CartesianGrid strokeDasharray="3 3" />
                                         <XAxis dataKey="name" />
-                                        <YAxis domain={[0, maxServiceY]} />
+                                        <YAxis domain={[0, formatCurrency(maxServiceY)]} />
                                         <Tooltip formatter={(value) => formatCurrency(value)} />
                                         <Legend />
                                         <Line type="monotone" dataKey="value" stroke="#82ca9d" />
