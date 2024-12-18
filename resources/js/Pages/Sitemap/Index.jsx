@@ -85,6 +85,7 @@ function Index({ sitemap, crumbs, trashs }) {
                             displayEmpty
                             onChange={(e) => {
                                 handleCellEditStop(params.row.id, "static_page", e.target.value);
+                                handleCellEditStop(params.row.id, "static_page", e.target.value);
                             }}
                         >
                             <MenuItem value={1}>Trang tĩnh</MenuItem>
@@ -184,7 +185,6 @@ function Index({ sitemap, crumbs, trashs }) {
             title: "Danh sách",
             data: data,
             columns: columns,
-            handleCellEditStop: handleCellEditStop,
             handleCellEditStart: handleCellEditStart,
         },
         {
@@ -192,7 +192,6 @@ function Index({ sitemap, crumbs, trashs }) {
             title: "Thùng rác",
             data: trash,
             columns: columnsTrash,
-            handleCellEditStop: handleCellEditStop,
             handleCellEditStart: handleCellEditStart,
         },
     ];

@@ -239,7 +239,8 @@ function Index({ collections, crumbs, trashs }) {
                         </Modal>
                         {/* End Modal */}
                         {/* Start DataGrid */}
-                        <Body title="Chuyên đề bài viết" data={tabsData} />
+                        <Body title="Danh sách phân loại dịch vụ" data={tabsData} />
+
                         {/* End DataGrid */}
                     </Row>
                 </section>

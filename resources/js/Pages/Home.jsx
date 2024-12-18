@@ -1,5 +1,6 @@
 import React from "react";
 import Layout from "../Layouts/Index";
+import BreadcrumbComponent from "@/Components/BreadcrumbComponent";
 import { Helmet } from "react-helmet";
 import { toast } from "react-toastify";
 import { router } from "@inertiajs/react";
@@ -7,6 +8,7 @@ import { Badge, Button, Card, Col, Container, ListGroup, ProgressBar, Row } from
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, PieChart, Pie, Cell } from "recharts";
 
 function Home({
+    crumbs,
     products,
     services,
     currentMonthProductRevenue,
@@ -48,9 +50,9 @@ function Home({
     const totalRevenueService = services.revenue_year;
 
     const pieData = [
-        { name: "Sản phẩm", value: totalRevenueProduct },
-        { name: "Dịch vụ", value: totalRevenueService },
-    ];
+        { name: "Sản phẩm", value: parseFloat(currentMonthProductRevenue) || 0 },
+        { name: "Dịch vụ", value: parseFloat(currentMonthServiceRevenue) || 0 },
+    ];  
 
     const COLORS = ["#0088FE", "#00C49F"];
 
@@ -284,7 +286,7 @@ function Home({
                         <Col xs={12} md={4}>
                             <Card className="shadow-sm">
                                 <Card.Body>
-                                    <Card.Title>So sánh doanh thu</Card.Title>
+                                    <Card.Title>So sánh doanh thu trong tháng</Card.Title>
                                     <PieChart width={300} height={250}>
                                         <Pie data={pieData} cx="50%" cy="50%" labelLine={false} label={renderCustomizedLabel} outerRadius={80} fill="#8884d8" dataKey="value">
                                             {pieData.map((entry, index) => (
@@ -308,7 +310,7 @@ function Home({
                                     <LineChart width={730} height={250} data={productData}>
                                         <CartesianGrid strokeDasharray="3 3" />
                                         <XAxis dataKey="name" />
-                                        <YAxis domain={[0, formatCurrency(maxProductY)]} />
+                                        <YAxis domain={[0, maxProductY]} />
                                         <Tooltip formatter={(value) => formatCurrency(value)} />
                                         <Legend />
                                         <Line type="monotone" dataKey="value" stroke="#8884d8" />
@@ -323,7 +325,7 @@ function Home({
                                     <LineChart width={730} height={250} data={serviceData}>
                                         <CartesianGrid strokeDasharray="3 3" />
                                         <XAxis dataKey="name" />
-                                        <YAxis domain={[0, formatCurrency(maxServiceY)]} />
+                                        <YAxis domain={[0, maxServiceY]} />
                                         <Tooltip formatter={(value) => formatCurrency(value)} />
                                         <Legend />
                                         <Line type="monotone" dataKey="value" stroke="#82ca9d" />

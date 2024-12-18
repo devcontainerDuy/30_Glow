@@ -28,6 +28,8 @@ class CategoriesRequest extends BaseRequest
     {
         return [
             'name' => 'nullable|string|max:255',
+            'id_parent' => 'nullable|exists:categories,id',
+            'status' => 'nullable|integer|in:0,1',
         ];
     }
 
