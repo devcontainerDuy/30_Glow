@@ -61,10 +61,12 @@ class BookingController extends Controller
                     'user' => $item->user ? [
                         'uid' => $item->user->uid,
                         'name' => $item->user->name,
+                        'phone' => $item->user->phone,
                     ] : null,
                     'customer' => $item->customer ? [
                         'uid' => $item->customer->uid,
                         'name' => $item->customer->name,
+                        'phone' => $item->customer->phone,
                     ] : null,
                     'time' => $item->time,
                     'service' => $item->service ? $item->service->map(function ($service) {
