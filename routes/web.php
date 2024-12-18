@@ -137,6 +137,7 @@ Route::middleware(['auth', 'auth.session', 'web', 'authen:Super Admin,Manager'])
     // Module Posts
     Route::resource('posts', App\Http\Controllers\Posts\PostController::class)->names('posts');
     Route::controller(App\Http\Controllers\Posts\PostController::class)->group(function () {
+        Route::post('/posts/{id}/upload', 'updateFiles')->name('posts.updateImage');
         Route::post('/posts/{id}/restore', 'restore')->name('posts.restore');
         Route::delete('/posts/{id}/permanent', 'permanent')->name('posts.permanent');
     });

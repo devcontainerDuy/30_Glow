@@ -56,7 +56,7 @@ function Index({ posts, trashs, collections, crumbs }) {
     const { handleDelete, handleRestore, handleDeleteForever } = useDelete("/admin/posts", setData, setTrash);
 
     const handleView = (id) => {
-        router.visit("/admin/services/" + id + "/edit", {
+        router.visit("/admin/posts/" + id + "/edit", {
             method: "get",
         });
     };

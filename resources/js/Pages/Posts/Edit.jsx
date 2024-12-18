@@ -13,11 +13,8 @@ import axios from "axios";
 function Edit({ service, collections, crumbs }) {
     const [data, setData] = useState({
         id: 0,
-        name: "",
+        title: "",
         slug: "",
-        price: 0,
-        discount: 0,
-        compare_price: 0,
         summary: "",
         id_collection: 0,
         image: null,
@@ -37,7 +34,7 @@ function Edit({ service, collections, crumbs }) {
 
     const handleBack = () => {
         setData({});
-        router.visit("/admin/services", {
+        router.visit("/admin/posts", {
             method: "get",
         });
     };
@@ -48,12 +45,12 @@ function Edit({ service, collections, crumbs }) {
         const { image, ...rest } = data;
 
         window.axios
-            .put(`/admin/services/${data?.id}`, rest)
+            .put(`/admin/posts/${data?.id}`, rest)
             .then((res) => {
                 if (res.data.check == true) {
                     toast.success(res.data.message);
                     setTimeout(() => {
-                        router.visit("/admin/services/" + data?.id, {
+                        router.visit("/admin/posts/" + data?.id, {
                             method: "get",
                         });
                     }, 1000);
@@ -80,11 +77,11 @@ function Edit({ service, collections, crumbs }) {
         }).then((result) => {
             if (result.isConfirmed) {
                 window.axios
-                    .delete("/admin/services/" + id)
+                    .delete("/admin/posts/" + id)
                     .then((res) => {
                         if (res.data.check) {
                             toast.success(res.data.message);
-                            router.visit("/admin/services/" + service?.id, {
+                            router.visit("/admin/posts/" + service?.id, {
                                 method: "get",
                             });
                         } else {
@@ -119,7 +116,7 @@ function Edit({ service, collections, crumbs }) {
         if (files.length > 0) {
             axios
                 .post(
-                    "/admin/services/" + data?.id + "/upload",
+                    "/admin/posts/" + data?.id + "/upload",
                     { image: files[0].file },
                     {
                         headers: {
@@ -132,7 +129,7 @@ function Edit({ service, collections, crumbs }) {
                         setData({ ...data, image: res.data.data?.image });
                         toast.success(res.data.message);
                         setTimeout(() => {
-                            router.visit("/admin/services/" + data?.id, {
+                            router.visit("/admin/posts/" + data?.id, {
                                 method: "get",
                             });
                         }, 1000);
@@ -197,35 +194,14 @@ function Edit({ service, collections, crumbs }) {
                                         <Col xs={9} className="d-flex flex-column">
                                             {/* Tên sản phẩm */}
                                             <Card className="p-3">
-                                                <Form.Group className="mb-3" controlId="name">
-                                                    <Form.Label>Nhập tên sản phẩm</Form.Label>
-                                                    <Form.Control type="text" placeholder="Tên sản phẩm..." value={data?.name} onChange={(e) => setData({ ...data, name: e.target.value })} />
+                                                <Form.Group className="mb-3" controlId="title">
+                                                    <Form.Label>Tiêu đề bài viết</Form.Label>
+                                                    <Form.Control type="text" placeholder="Tên tiêu đề bài viết..." value={data?.title} onChange={(e) => setData({ ...data, title: e.target.value })} />
                                                 </Form.Group>
                                                 <Form.Group className="mb-3" controlId="slug">
                                                     <Form.Label>Slug</Form.Label>
                                                     <Form.Control type="text" value={data?.slug} disabled />
                                                 </Form.Group>
-                                                <Row>
-                                                    <Col>
-                                                        <Form.Group className="mb-3" controlId="price">
-                                                            <Form.Label>Giá sản phẩm</Form.Label>
-                                                            <InputGroup className="mb-3">
-                                                                <Form.Control type="number" placeholder="100000" value={data?.price} onChange={(e) => setData({ ...data, price: e.target.value })} />
-                                                                <InputGroup.Text>VND</InputGroup.Text>
-                                                            </InputGroup>
-                                                        </Form.Group>
-                                                    </Col>
-                                                    <Col xs={4}>
-                                                        {/* Phần trăm giảm */}
-                                                        <Form.Group className="mb-3" controlId="discount">
-                                                            <Form.Label>Giảm giá</Form.Label>
-                                                            <InputGroup className="mb-3">
-                                                                <Form.Control type="number" placeholder="10" value={data?.discount} onChange={(e) => setData({ ...data, discount: e.target.value })} />
-                                                                <InputGroup.Text>%</InputGroup.Text>
-                                                            </InputGroup>
-                                                        </Form.Group>
-                                                    </Col>
-                                                </Row>
                                                 <Row className="row-cols-5">
                                                     <Col>
                                                         <Form.Group className="mb-3" controlId="status">
@@ -281,7 +257,7 @@ function Edit({ service, collections, crumbs }) {
                                                     {files[0] && files.length > 0 && files[0].preview ? (
                                                         <Image fluid src={files[0].preview} alt={data?.name} className="mb-3 rounded-2" />
                                                     ) : (
-                                                        <Image fluid src={"/storage/services/" + data?.image} alt={data?.name} className="mb-3 rounded-2" />
+                                                        <Image fluid src={"/storage/posts/" + data?.image} alt={data?.name} className="mb-3 rounded-2" />
                                                     )}
                                                     <Button className="w-100" variant="primary" type="button" onClick={handleShow}>
                                                         <i className="bi bi-images" />
