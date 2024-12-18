@@ -35,4 +35,14 @@ class BookingRequest extends BaseRequest
             'note' => ['nullable', 'string'],
         ];
     }
+
+    /**
+     * Get the validation rules that apply to the request.
+     */
+    public function methodDelete()
+    {
+        return [
+            'note' => ['required', 'string'],
+        ];
+    }
 }

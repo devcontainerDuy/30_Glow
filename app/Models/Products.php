@@ -61,6 +61,11 @@ class Products extends Model
         return $this->hasMany(Gallery::class, 'id_parent', 'id');
     }
 
+    public function comment(): HasMany
+    {
+        return $this->hasMany(Comments::class, 'id_product', 'id');
+    }
+
     public function scopeActive($query)
     {
         return $query->where('status', 1);

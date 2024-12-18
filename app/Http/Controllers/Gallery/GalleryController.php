@@ -28,7 +28,7 @@ class GalleryController extends Controller
         $this->data = $this->model::with('parent')->get();
         $trashs = $this->model::with('parent')->onlyTrashed()->get();
         // dd($this->data, $this->instance);
-        return Inertia::render('Gallery/Index', ['galleries' => $this->data,'trashs' => $trashs, 'products' => $this->instance, 'crumbs' => $this->crumbs]);
+        return Inertia::render('Gallery/Index', ['galleries' => $this->data, 'trashs' => $trashs, 'products' => $this->instance, 'crumbs' => $this->crumbs]);
     }
 
     /**
@@ -41,11 +41,12 @@ class GalleryController extends Controller
 
     /**
      * Store a newly created resource in storage.
+     * @param  \App\Http\Requests\Gallery\GalleryRequest  $request
      */
     public function store(GalleryRequest $request)
     {
         $this->data = $request->validated();
-        $files = $request->file('images');
+        $files = $this->data['images'];
         $parent = $this->data['id_parent'];
 
         // Kiểm tra dữ liệu hình ảnh
@@ -183,6 +184,7 @@ class GalleryController extends Controller
 
         return response()->json(['check' => false, 'message' => 'Có lỗi xảy ra khi xóa!'], 500);
     }
+
     public function restore($id)
     {
         $this->instance = $this->model::withTrashed()->findOrFail($id);
@@ -193,6 +195,7 @@ class GalleryController extends Controller
             return response()->json(['check' => true, 'message' => 'Khôi phục thành công!', 'data' => $this->data, 'trashs' => $trashs], 200);
         }
     }
+
     public function permanent(string $id)
     {
         $this->instance = $this->model::withTrashed()->findOrFail($id);

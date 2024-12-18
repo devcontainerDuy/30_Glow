@@ -249,7 +249,7 @@ class ProductController extends Controller
 
     public function apiShow($slug)
     {
-        $this->data = $this->model::with(['category', 'brand', 'gallery', 'relatedProducts'])->active()->where('slug', $slug)->first();
+        $this->data = $this->model::with(['category', 'brand', 'gallery', 'relatedProducts', 'comment.user', 'comment.customer', 'comment.parent'])->active()->where('slug', $slug)->first();
 
         if (!$this->data) {
             return response()->json(['check' => false, 'message' => 'Không tìm thấy sản phẩm'], 404);
@@ -298,7 +298,20 @@ class ProductController extends Controller
                     'gallery' => asset('storage/gallery/' . $related->gallery->firstWhere('status', 1)->image) ?? null,
                 ];
             }),
+            'comments' => $this->data->comment->filter(function ($comment) {
+                return $comment->status == 1;
+            })->map(function ($comment) {
+                return [
+                    'id' => $comment->id,
+                    'uid_client' => $comment->customer ? $comment->customer->uid : $comment->user->uid,
+                    'name_client' => $comment->customer ? $comment->customer->name : $comment->user->name,
+                    'comment' => $comment->comment,
+                    'created_at' => $comment->created_at,
+                    'id_parent' => $comment->id_parent,
+                ];
+            }),
         ];
+
         return response()->json(['check' => true, 'data' => $this->instance], 200);
     }
 

@@ -26,13 +26,15 @@ class Comments extends Model
     ];
 
     protected $dates = ['deleted_at'];
+
     public function parent()
     {
         return $this->belongsTo(Comments::class, 'id_parent');
     }
+
     public function product()
     {
-        return $this->belongsTo(Products::class, 'id_product');
+        return $this->belongsTo(Products::class, 'id_product', 'id');
     }
 
     public function service()

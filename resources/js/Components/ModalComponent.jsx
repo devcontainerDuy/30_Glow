@@ -4,11 +4,15 @@ import ButtonsComponent from "@/Components/ButtonsComponent";
 import PropTypes from "prop-types";
 
 export default function ModalComponent({ show, close, size, submit, title, body, footer, loaded }) {
+    size = size || "md";
+    title = title || "Modal Title";
+    body = body || "Modal Body";
+
     if (footer === undefined) {
         footer = (
             <>
                 <ButtonsComponent type="button" variant="secondary" icon="close" title="Thoát ra" onClick={close} />
-                <ButtonsComponent type="submit" variant="success" icon="save" title="Lưu lại" loaded={loaded} />
+                <ButtonsComponent type="submit" variant="success" icon="save" title="Lưu lại" loaded={loaded || false} />
             </>
         );
     }
@@ -37,19 +41,13 @@ export default function ModalComponent({ show, close, size, submit, title, body,
     );
 }
 
-ModalComponent.defaultProps = {
-    size: "md",
-    title: "Modal Title",
-    body: "Modal Body",
-};
-
 ModalComponent.propTypes = {
-    show: PropTypes.bool,
-    close: PropTypes.func,
+    show: PropTypes.bool.isRequired,
+    close: PropTypes.func.isRequired,
     size: PropTypes.string,
     submit: PropTypes.func,
-    title: PropTypes.string,
-    body: PropTypes.node,
+    title: PropTypes.string.isRequired,
+    body: PropTypes.node.isRequired,
     footer: PropTypes.node,
     loaded: PropTypes.bool,
 };

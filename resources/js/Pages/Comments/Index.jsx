@@ -1,72 +1,50 @@
-import React, { useEffect, useMemo, useState } from "react";
-import Body from "@/Layouts/Body";
-import { FormControlLabel, Switch } from "@mui/material";
+import { useEffect, useMemo, useState } from "react";
+import { FormControlLabel, Link, Switch } from "@mui/material";
 import Layout from "@/Layouts/Index";
-import { Button, Row } from "react-bootstrap";
+import Body from "@/Layouts/Body";
+import { Row } from "react-bootstrap";
 import BreadcrumbComponent from "@/Components/BreadcrumbComponent";
+import ButtonsComponent from "@/Components/ButtonsComponent";
+import ModalComponent from "@/Components/ModalComponent";
 import { Helmet } from "react-helmet";
-import { toast } from "react-toastify";
+import useSubmitForm from "@/Hooks/useSubmitForm";
+import useEditCell from "@/Hooks/useEditCell";
 import useDelete from "@/Hooks/useDelete";
 
 function Index({ comment, crumbs, trashs }) {
     const [data, setData] = useState([]);
     const [trash, setTrash] = useState([]);
-    const [editingCells, setEditingCells] = useState({});
 
-    const handleCellEditStop = (id, field, value) => {
-        const originalValue = editingCells[id + "-" + field];
-        if (originalValue !== value) {
-            window.axios
-                .put("/admin/comments/" + id, {
-                    [field]: value,
-                })
-                .then((res) => {
-                    if (res.data.check === true) {
-                        toast.success(res.data.message);
-                        setData(res.data.data);
-                    } else {
-                        toast.warning(res.data.message);
-                    }
-                })
-                .catch((error) => {
-                    toast.error(error.response.data.message);
-                });
-        } else {
-            setEditingCells((prev) => {
-                const newEditingCells = { ...prev };
-                delete newEditingCells[id + "-" + field];
-                return newEditingCells;
-            });
-            toast.info("Không có chỉnh sửa.");
-        }
-    };
-    const { handleDelete, handleRestore, handleDeleteForever, loading: loaded } = useDelete("/admin/comments", setData, setTrash);
+    const { handleCellEditStart, handleCellEditStop } = useEditCell("/admin/comments", setData);
+    const { handleDelete, handleRestore, handleDeleteForever } = useDelete("/admin/comments", setData, setTrash);
 
     const columns = useMemo(() => [
-        { field: "id", headerName: "ID", width: 80 },
+        { field: "id", headerName: "ID", width: 40 },
         {
             field: "product",
             headerName: "Sản phẩm/Dịch vụ",
             width: 200,
             renderCell: (params) => {
-                const productName = params.row.product ? params.row.product.slug : null;
-                const serviceName = params.row.service ? params.row.service.slug : null;
-                return productName || serviceName || "Không có dữ liệu";
+                return (
+                    <>
+                        <Link href={`/admin/products/${params.row.id_product}/edit`} target="_blank">
+                            {params.row.product ? params.row.product.name : params.row.service ? params.row.service.name : "Không có dữ liệu"}
+                        </Link>
+                    </>
+                );
             },
         },
         {
             field: "comment",
             headerName: "Nội dung",
-            width: 220,
+            width: 280,
         },
         {
             field: "id_customer",
             headerName: "Người gửi",
             width: 180,
             renderCell: (params) => {
-                const customerName = params.row.customer ? params.row.customer.name : null;
-                const userName = params.row.user ? params.row.user.name : null;
-                return customerName || userName || "Không rõ";
+                return params.row.customer ? params.row.customer.name : params.row.user ? params.row.user.name : "Không rõ";
             },
         },
         {
@@ -74,15 +52,13 @@ function Index({ comment, crumbs, trashs }) {
             headerName: "Thuộc",
             width: 80,
             renderCell: (params) => {
-                return params.row.id_parent
-                    ? `ID: ${params.row.id_parent}`
-                    : "Gốc";
+                return params.row.id_parent ? `ID: ${params.row.id_parent}` : "Gốc";
             },
         },
         {
             field: "created_at",
             headerName: "Ngày tạo",
-            width: 150,
+            width: 160,
             renderCell: (params) => new Date(params.row.created_at).toLocaleString(),
         },
         {
@@ -91,18 +67,7 @@ function Index({ comment, crumbs, trashs }) {
             width: 150,
             renderCell: (params) => (
                 <FormControlLabel
-                    control={
-                        <Switch
-                            checked={params.row.status === 1}
-                            onClick={() =>
-                                handleCellEditStop(
-                                    params.row.id,
-                                    "status",
-                                    params.row.status === 1 ? 0 : 1
-                                )
-                            }
-                        />
-                    }
+                    control={<Switch checked={params.row.status === 1} onClick={() => handleCellEditStop(params.row.id, "status", params.row.status === 1 ? 0 : 1)} />}
                     label={params.row.status ? "Hiện" : "Ẩn"}
                 />
             ),
@@ -110,47 +75,42 @@ function Index({ comment, crumbs, trashs }) {
         {
             field: "action",
             headerName: "Thao tác",
-            width: 160,
+            width: 120,
             renderCell: (params) => (
                 <>
-                    <Button
-                        className="ms-2"
-                        type="button"
-                        variant="outline-danger"
-                        title="Xóa sản phẩm"
-                        onClick={() => handleDelete(params.row.id)}
-                    >
-                        <i className="bi bi-trash-fill" />
-                    </Button>
+                    <ButtonsComponent type="button" variant="outline-danger" icon="delete" onClick={() => handleDelete(params.row.id)} />
                 </>
             ),
         },
     ]);
+
     const columnsTrash = useMemo(() => [
-        { field: "id", headerName: "ID", width: 80 },
+        { field: "id", headerName: "ID", width: 40 },
         {
             field: "product",
             headerName: "Sản phẩm/Dịch vụ",
             width: 200,
             renderCell: (params) => {
-                const productName = params.row.product ? params.row.product.slug : null;
-                const serviceName = params.row.service ? params.row.service.slug : null;
-                return productName || serviceName || "Không có dữ liệu";
+                return (
+                    <>
+                        <Link href={`/admin/products/${params.row.id_product}/edit`} target="_blank">
+                            {params.row.product ? params.row.product.name : params.row.service ? params.row.service.name : "Không có dữ liệu"}
+                        </Link>
+                    </>
+                );
             },
         },
         {
             field: "comment",
             headerName: "Nội dung",
-            width: 220,
+            width: 280,
         },
         {
             field: "id_customer",
             headerName: "Người gửi",
             width: 180,
             renderCell: (params) => {
-                const customerName = params.row.customer ? params.row.customer.name : null;
-                const userName = params.row.user ? params.row.user.name : null;
-                return customerName || userName || "Không rõ";
+                return params.row.customer ? params.row.customer.name : params.row.user ? params.row.user.name : "Không rõ";
             },
         },
         {
@@ -158,67 +118,52 @@ function Index({ comment, crumbs, trashs }) {
             headerName: "Thuộc",
             width: 80,
             renderCell: (params) => {
-                return params.row.id_parent
-                    ? `ID: ${params.row.id_parent}`
-                    : "Gốc";
+                return params.row.id_parent ? `ID: ${params.row.id_parent}` : "Gốc";
             },
         },
         {
             field: "created_at",
             headerName: "Ngày tạo",
-            width: 150,
+            width: 160,
             renderCell: (params) => new Date(params.row.created_at).toLocaleString(),
         },
         {
             field: "status",
             headerName: "Trạng thái",
             width: 150,
-            renderCell: (params) => (
-                <FormControlLabel
-                    control={
-                        <Switch
-                            checked={params.row.status === 1}
-                            onClick={() =>
-                                handleCellEditStop(
-                                    params.row.id,
-                                    "status",
-                                    params.row.status === 1 ? 0 : 1
-                                )
-                            }
-                        />
-                    }
-                    label={params.row.status ? "Hiện" : "Ẩn"}
-                />
-            ),
+            renderCell: (params) => <FormControlLabel control={<Switch checked={params.row.status === 1} disabled />} label={params.row.status ? "Hiện" : "Ẩn"} />,
         },
         {
             field: "action",
             headerName: "Thao tác",
-            width: 160,
+            width: 120,
             renderCell: (params) => (
                 <>
-                    <Button type="button" variant="outline-success" title="Khôi phục sản phẩm" onClick={() => handleRestore(params.row.id)}>
-                        <i className="bi bi-arrow-clockwise" />
-                    </Button>
-                    <Button className="ms-2" type="button" variant="outline-danger" title="Xóa vĩnh viễn sản phẩm" onClick={() => handleDeleteForever(params.row.id)}>
-                        <i className="bi bi-trash-fill" />
-                    </Button>
+                    <div className="d-flex gap-2 align-items-center mt-2">
+                        <ButtonsComponent type="button" variant="outline-success" icon="reset" onClick={() => handleRestore(params.row.id)} />
+                        <ButtonsComponent type="button" variant="outline-danger" icon="delete" onClick={() => handleDeleteForever(params.row.id)} />
+                    </div>
                 </>
             ),
         },
     ]);
+
     const tabsData = useMemo(() => [
         {
             eventKey: "list",
             title: "Danh sách",
             data: data,
             columns: columns,
+            handleCellEditStop: handleCellEditStop,
+            handleCellEditStart: handleCellEditStart,
         },
         {
             eventKey: "trash",
             title: "Thùng rác",
             data: trash,
             columns: columnsTrash,
+            handleCellEditStop: handleCellEditStop,
+            handleCellEditStart: handleCellEditStart,
         },
     ]);
 
@@ -237,9 +182,10 @@ function Index({ comment, crumbs, trashs }) {
                 <section className="container">
                     <Row>
                         <BreadcrumbComponent props={crumbs}>
+                            <ButtonsComponent type="button" variant="primary" icon="add" title="Thêm mới" disabled={true} onClick={() => console.log("Thêm mới")} />
                         </BreadcrumbComponent>
                         {/* Start DataGrid */}
-                        <Body title="Danh sách tài khoản" data={tabsData} />
+                        <Body title="Danh sách bình luận" data={tabsData} />
                         {/* End DataGrid */}
                     </Row>
                 </section>

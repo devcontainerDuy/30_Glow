@@ -2,7 +2,7 @@ import React from "react";
 import { Button, Spinner } from "react-bootstrap";
 import PropTypes from "prop-types";
 
-const ButtonsComponent = ({ type, variant, icon, title, onClick, loaded }) => {
+const ButtonsComponent = ({ type, variant, icon, title, onClick, loaded, disabled }) => {
     const tpyeIcon = (i) => {
         switch (i) {
             case "add":
@@ -26,7 +26,7 @@ const ButtonsComponent = ({ type, variant, icon, title, onClick, loaded }) => {
 
     return (
         <>
-            <Button type={type} variant={variant} onClick={onClick} disabled={loaded} title={title}>
+            <Button type={type} variant={variant} onClick={onClick} disabled={loaded || disabled || false} title={title}>
                 {loaded ? (
                     <Spinner animation="border" size="sm" />
                 ) : (
@@ -42,19 +42,12 @@ const ButtonsComponent = ({ type, variant, icon, title, onClick, loaded }) => {
 
 export default ButtonsComponent;
 
-ButtonsComponent.defaultProps = {
-    type: "button",
-    variant: "primary",
-    icon: "add",
-    onClick: () => {},
-    loaded: false,
-};
-
 ButtonsComponent.propTypes = {
-    type: PropTypes.string,
-    variant: PropTypes.string,
+    type: PropTypes.string.isRequired,
+    variant: PropTypes.string.isRequired,
     icon: PropTypes.string,
     title: PropTypes.string,
     onClick: PropTypes.func,
     loaded: PropTypes.bool,
+    disabled: PropTypes.bool,
 };

@@ -5,6 +5,7 @@ namespace App\Http\Middleware;
 use Closure;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Illuminate\Support\Facades\Auth;
 
 class CheckLogin
 {
@@ -15,8 +16,8 @@ class CheckLogin
      */
     public function handle(Request $request, Closure $next): Response
     {
-        if (!$request->session()->has('user')) {
-            return redirect('/auth/login');
+        if (!Auth::check()) {
+            return redirect(env('CLIENT_URL') . '/dang-nhap');
         }
 
         return $next($request);

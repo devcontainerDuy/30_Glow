@@ -4,16 +4,14 @@ namespace App\Http\Controllers\BillServices;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\BillServiceRequest\BillServiceRequest;
-use App\Models\BookingHasService;
 use App\Models\Bookings;
-use App\Models\Customers;
 use App\Models\ServiceBills;
 use App\Models\ServiceBillsDetails;
 use App\Traits\GeneratesUniqueId;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Inertia\Inertia;
+use Illuminate\Support\Facades\Auth;
 
 class BillServicesController extends Controller
 {
@@ -71,6 +69,7 @@ class BillServicesController extends Controller
     /**
      * Store a newly created resource in storage.
      * status: 0 - Chưa thanh toán, 1 - Đã thanh toán, 2 - Thanh toán thất bại
+     * booking status: 0 - Đang chờ xếp nhân viên, 1 - Đã xếp nhân viên, 2 - Đang thực hiện, 3 - Thành công, 4 - Đã thanh toán, 5 - Thất bại
      */
     public function store(BillServiceRequest $request)
     {
@@ -80,15 +79,19 @@ class BillServicesController extends Controller
 
             $booking = Bookings::findOrFail($this->data['booking_id'])->load('user', 'customer', 'service', 'service.collection');
 
-            if ($booking->status < 3) {
-                return response()->json(['check' => false, 'message' => 'Không thể thanh toán! Dịch vụ chưa hoàn thành.'], 400);
-            } elseif ($booking->status > 3) {
-                return response()->json(['check' => false, 'message' => 'Không thể thanh toán! Dịch vụ đã thanh toán.'], 400);
-            } elseif ($booking->status === 5) {
-                return response()->json(['check' => false, 'message' => 'Không thể thanh toán! Dịch vụ đã bị hủy.'], 400);
+            switch ($booking->status) {
+                case $booking->status < 3:
+                    DB::rollBack();
+                    return response()->json(['check' => false, 'message' => 'Không thể thanh toán! Dịch vụ chưa hoàn thành.'], 400);
+                case $booking->status > 3:
+                    DB::rollBack();
+                    return response()->json(['check' => false, 'message' => 'Không thể thanh toán! Dịch vụ đã thanh toán.'], 400);
+                case 5:
+                    DB::rollBack();
+                    return response()->json(['check' => false, 'message' => 'Không thể thanh toán! Dịch vụ đã bị hủy.'], 400);
             }
 
-            if ($this->model::where('id_booking', $this->data['booking_id'])->first()) {
+            if ($this->model::where('id_booking', $this->data['booking_id'])->exists()) {
                 return response()->json(['check' => false, 'message' => 'Hóa đơn cho booking này đã tồn tại!'], 400);
             }
 
@@ -205,102 +208,56 @@ class BillServicesController extends Controller
     {
         //
     }
-    //api for manager
-    public function apiByCustomer($id)
-    {
-        $bills = ServiceBills::where('id_customer', $id)
-            ->with(['customer', 'booking', 'serviceBillDetails.service'])
-            ->get();
 
-        if ($bills->isEmpty()) {
-            return response()->json([
-                'check' => false,
-                'message' => 'Khách hành này chưa có bất kỳ bill dịch vụ nào!!',
-            ], 404);
+    /**
+     * Get all bill services by customer
+     */
+    public function apiIndex()
+    {
+        if (!Auth::check()) {
+            return response()->json(['check' => false, 'message' => 'Chưa đăng nhập!'], 401);
         }
 
-        $data = $bills->map(function ($bill) {
+        $this->data = $this->model::with(['booking'])->where('id_customer', Auth::user()->id)->get();
+
+        if ($this->data->isEmpty()) {
+            return response()->json(['check' => false, 'data' => [], 'message' => 'Chưa tạo hóa đơn'], 200);
+        }
+
+        $this->data->transform(function ($item) {
             return [
-                'bill_uid' => $bill->uid,
-                'customer' => $bill->customer ? [
-                    'uid' => $bill->customer->uid,
-                    'name' => $bill->customer->name,
-                    'email' => $bill->customer->email,
-                    'phone' => $bill->customer->phone,
-                    'address' => $bill->customer->address,
-                ] : null,
-                'booking' => $bill->booking ? [
-                    'booking_id' => $bill->booking->id,
-                    'time' => $bill->booking->time,
-                    'status' => $bill->booking->status,
-                ] : null,
-                'services' => $bill->serviceBillDetails->map(function ($serviceDetail) {
-                    return [
-                        'name' => $serviceDetail->service->name,
-                        'slug' => $serviceDetail->service->slug,
-                        'image' => asset('storage/products/' . $serviceDetail->service->image),
-                        'unit_price' => (float) $serviceDetail->unit_price,
-                    ];
-                })->toArray(),
-                'total' => (float) $bill->total,
-                'status' => $bill->status,
-                'created_at' => $bill->created_at,
+                'uid' => $item->uid,
+                'time' => $item->booking->time,
+                'total' => (float) $item->total,
+                'status' => $item->status,
+                'created_at' => $item->created_at,
             ];
         });
 
-        return response()->json([
-            'check' => true,
-            'data' => $data,
-        ], 200);
+        return response()->json(['check' => true, 'data' => $this->data], 200);
     }
 
-    public function apiByUser($id)
+    /**
+     * Get detail bill services by customer
+     * @param  string  $id : uid of bill
+     */
+    public function apiShow(string $id)
     {
-        $bookings = Bookings::where('id_user', $id)
-            ->with(['user', 'customer', 'services'])
-            ->get();
-
-        if ($bookings->isEmpty()) {
-            return response()->json([
-                'status' => 'error',
-                'message' => 'Nhân viên này chưa có bất kỳ booking nào!!',
-            ], 404);
-        }
-
-        $data = $bookings->map(function ($booking) {
-            return [
-                'id' => $booking->id,
-                'user' => $booking->user ? [
-                    'uid' => $booking->user->uid,
-                    'name' => $booking->user->name,
-                    'email' => $booking->user->email,
-                    'phone' => $booking->user->phone,
-                    'address' => $booking->user->address,
-                ] : null,
-                'customer' => $booking->customer ? [
-                    'uid' => $booking->customer->uid,
-                    'name' => $booking->customer->name,
-                    'email' => $booking->customer->email,
-                    'phone' => $booking->customer->phone,
-                    'address' => $booking->customer->address,
-                ] : null,
-                'time' => $booking->time,
-                'services' => $booking->services->map(function ($service) {
-                    return [
-                        'name' => $service->name,
-                        'slug' => $service->slug,
-                        'image' => asset('storage/products/' . $service->image),
-                        'price' => $service->price,
-                    ];
-                })->toArray(),
-                'status' => $booking->status,
-                'created_at' => $booking->created_at,
-            ];
-        });
-
-        return response()->json([
-            'status' => 'success',
-            'data' => $data,
-        ], 200);
+        $this->data = $this->model::with(['booking', 'serviceBillDetails.service'])->where('id_customer', Auth::user()->id)->where('uid', $id)->first();
+        $this->instance = [
+            'uid' => $this->data->uid,
+            'time' => $this->data->booking->time,
+            'service' => $this->data->serviceBillDetails ? $this->data->serviceBillDetails->map(function ($item) {
+                return [
+                    'name' => $item->service->name,
+                    'slug' => $item->service->slug,
+                    'unit_price' => $item->unit_price,
+                ];
+            })->toArray() : null,
+            'total' => $this->data->total,
+            'status' => $this->data->status,
+            'created_at' => $this->data->created_at,
+        ];
+        return response()->json(['check' => true, 'data' => $this->instance], 200);
     }
 }

@@ -18,6 +18,7 @@ use Illuminate\Support\Facades\Auth;
 Route::middleware(['auth:sanctum', 'web', 'role:Super Admin'])->get('/user/info', [App\Http\Controllers\Users\UserController::class, 'show']);
 
 Route::middleware('api')->group(function () {
+    // Auth client
     Route::controller(App\Http\Controllers\Auth\Clients\AuthenticateController::class)->group(function () {
         Route::post('register', 'register');
         Route::post('login', 'login');
@@ -26,58 +27,88 @@ Route::middleware('api')->group(function () {
         Route::get('auth/google/callback', 'handleAuthCallback');
     });
 
+    // Reset password
     Route::controller(App\Http\Controllers\Auth\Clients\ResetPasswordController::class)->group(function () {
         Route::post('reset-password', 'sendMail');
         Route::put('reset-password/{token}', 'reset');
     });
 
+    // Auth manager
     Route::controller(App\Http\Controllers\Auth\Admin\AuthenController::class)->group(function () {
         Route::post('login-manager', 'loginManager')->middleware(['throttle:5,1']);
         Route::post('logout-manager', 'handleLogoutManager')->middleware(['auth:sanctum', 'auth.session', 'role:Manager|Staff']);
     });
 
+    // Cart for client not auth
     Route::post('/carts/loadCart', [App\Http\Controllers\Carts\CartController::class, 'loadCart']);
 
-    Route::middleware(['auth:sanctum', 'auth.session'])->group(function () {
+    Route::middleware(['auth:sanctum', 'auth.session', 'check_login'])->group(function () {
+        // Cart for client auth
         Route::apiResource('carts', App\Http\Controllers\Carts\CartController::class);
 
+        // Customer
         Route::controller(App\Http\Controllers\Customers\CustomerController::class)->group(function () {
             Route::get('/customers', 'show');
             Route::put('/customers/edit', 'edit');
             Route::post('/customers/change-password', 'changePassword');
         });
+
+        // Comment
+        Route::controller(App\Http\Controllers\Comments\CommentsController::class)->group(function () {
+            Route::post('/comments', 'addComment');
+            // Route::get('/comments/product/{id}', 'getCommentsByProduct');
+            // Route::get('/comments/service/{id}', 'getCommentsByService');
+        });
     });
 
+    // Bill for client not auth (guest)
     Route::controller(App\Http\Controllers\Bills\BillController::class)->group(function () {
         Route::post('/bills', 'store');
-        Route::get('/bills', 'create')->middleware(['auth:sanctum', 'auth.session']);
-        Route::get('/bills/{id}', 'show')->middleware(['auth:sanctum', 'auth.session']);
-        Route::delete('/bills/{id}', 'destroy')->middleware(['auth:sanctum', 'auth.session']);
+        // Bill for client auth
+        Route::middleware(['auth:sanctum', 'auth.session', 'check_login'])->group(function () {
+            Route::get('/bills', 'create');
+            Route::get('/bills/{id}', 'show');
+            Route::delete('/bills/{id}', 'destroy');
+            Route::put('/bills/{id}', 'refund');
+        });
     });
 
+    // Payment with VnPay
     Route::controller(App\Http\Controllers\Payment\VnPayController::class)->group(function () {
         Route::get('/vnpay/create-payment', 'createPayment');
         Route::get('/vnpay/return-payment', 'vnpayReturn');
     });
 
+    // Booking
     Route::controller(App\Http\Controllers\Bookings\BookingController::class)->group(function () {
         Route::post('/bookings', 'store');
+        // Booking for client auth
+        Route::middleware(['auth:sanctum', 'auth.session', 'check_login'])->group(function () {
+            Route::get('/bookings/customer', 'apiIndex');
+            Route::get('/bookings/customer/{id}', 'apiShow');
+            Route::delete('/bookings/customer/{id}', 'destroy');
+        });
 
+        // Booking for manager and staff
         Route::middleware(['auth:sanctum', 'auth.session', 'role:Manager|Staff'])->group(function () {
             Route::get('/bookings', 'create');
             Route::get('/bookings/{id}', 'show');
             Route::put('/bookings/{id}', 'update');
-            // Route::delete('/bookings/{id}', 'destroy');
         });
     });
 
-    Route::middleware(['auth:sanctum', 'auth.session', 'role:Manager|Staff|Super Admin'])->group(function () {
-        Route::resource('/bill-services', App\Http\Controllers\BillServices\BillServicesController::class);
-        Route::middleware('api')->controller(App\Http\Controllers\BillServices\BillServicesController::class)->group(function () {
-            Route::get('/bill-services/user/{id}', 'apiByUser');
-            Route::get('/bill-services/customer/{id}', 'apiByCustomer');
-        });
+    // Bill for client auth
+    Route::middleware(['auth:sanctum', 'auth.session', 'check_login'])->controller(App\Http\Controllers\BillServices\BillServicesController::class)->group(function () {
+        Route::get('/bill-services/customer', 'apiIndex');
+        Route::get('/bill-services/customer/{id}', 'apiShow');
+    });
 
+    // Manager and Staff
+    Route::middleware(['auth:sanctum', 'auth.session', 'role:Manager|Staff|Super Admin'])->group(function () {
+        // Bill Services for Manager 
+        Route::resource('/bill-services', App\Http\Controllers\BillServices\BillServicesController::class);
+
+        // Info user
         Route::controller(App\Http\Controllers\Users\UserController::class)->group(function () {
             Route::get('/staff', 'apiIndex');
             Route::get('/staff/{id}', 'apiShow');
@@ -140,7 +171,7 @@ Route::middleware('api')->controller(App\Http\Controllers\Contacts\ContactsContr
     Route::post('/addContacts', 'addContacts');
 });
 
-Route::middleware('api')->controller(App\Http\Controllers\Revenue\RevenueController::class)->group(function () {
+Route::middleware(['api', 'auth:sanctum', 'auth.session'])->controller(App\Http\Controllers\Revenue\RevenueController::class)->group(function () {
     Route::get('/revenue/service', 'getRevenueAllServices');
     Route::get('/revenue/service/{id}', 'getRevenueByService');
     Route::get('/revenue/customer/service/{id}', 'getRevenueByCustomer');
@@ -150,9 +181,4 @@ Route::middleware('api')->controller(App\Http\Controllers\Revenue\RevenueControl
     Route::get('/revenue/products/{id}', 'getRevenueByProduct');
     Route::get('/revenue/customer/products/{id}', 'getRevenueProductByCustomer');
     Route::post('/revenue/dateRange/products', 'getRevenueByDateRangeProduct');
-});
-Route::middleware('api')->controller(App\Http\Controllers\Comments\CommentsController::class)->group(function () {
-    Route::post('/addComment', 'addComment');
-    Route::get('/comments/product/{id}', 'getCommentsByProduct');
-    Route::get('/comments/service/{id}', 'getCommentsByService');
 });

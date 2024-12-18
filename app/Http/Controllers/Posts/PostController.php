@@ -205,7 +205,7 @@ class PostController extends Controller
 
     public function apiIndex()
     {
-        $this->data = $this->model::with('collection')->active()->orderBy('id', 'desc')->paginate(10);
+        $this->data = $this->model::with('collection')->active()->orderBy('id', 'desc')->paginate(20);
 
         $this->data->getCollection()->transform(function ($item) {
             return [
@@ -230,7 +230,7 @@ class PostController extends Controller
 
     public function apiShow($id)
     {
-        $this->data = $this->model::with('collection')->where('slug', $id)->active()->first();
+        $this->data = $this->model::with('collection', 'relatedPosts')->where('slug', $id)->active()->first();
 
         if (!$this->data) {
             return response()->json(['check' => false, 'message' => 'Không tìm thấy bài viết'], 404);
@@ -250,6 +250,22 @@ class PostController extends Controller
             'status' => $this->data->status,
             'highlighted' => $this->data->highlighted,
             'created_at' => $this->data->created_at->format('H:i d-m-Y'),
+            'related' => $this->data->relatedPosts ? $this->data->relatedPosts->take(4)->map(function ($item) {
+                return [
+                    'id' => $item->id,
+                    'title' => $item->title,
+                    'slug' => $item->slug,
+                    'summary' => $item->summary,
+                    'image' => asset('storage/posts/' . $item->image),
+                    'collection' => $item->collection ? [
+                        'name' => $item->collection->name,
+                        'slug' => $item->collection->slug,
+                    ] : null,
+                    'status' => $item->status,
+                    'highlighted' => $item->highlighted,
+                    'created_at' => $item->created_at->format('H:i d-m-Y'),
+                ];
+            }) : null
         ];
 
         return response()->json(['check' => true, 'data' => $this->instance], 200);

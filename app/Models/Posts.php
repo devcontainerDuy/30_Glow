@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Posts extends Model
@@ -43,5 +44,10 @@ class Posts extends Model
     public function scopeHighlighted($query)
     {
         return $query->where('highlighted', 1);
+    }
+
+    public function relatedPosts(): HasMany
+    {
+        return $this->hasMany(self::class, 'id_collection', 'id_collection')->where('id', '!=', $this->id)->active();
     }
 }

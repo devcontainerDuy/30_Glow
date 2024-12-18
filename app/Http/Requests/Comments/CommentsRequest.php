@@ -16,11 +16,8 @@ class CommentsRequest extends BaseRequest
     {
         return [
             'id_product'   => 'nullable|exists:products,id',
-            'id_customer'  => 'nullable|exists:customers,id',
-            'id_user'      => 'nullable|exists:users,id',
             'id_service'   => 'nullable|exists:services,id',
             'comment'      => 'required|string',
-            'status'       => 'nullable|in:0,1',
             'id_parent'    => 'nullable|exists:comment,id',
         ];
     }
@@ -32,9 +29,7 @@ class CommentsRequest extends BaseRequest
      */
     public function methodPut()
     {
-        return [
-            
-        ];
+        return [];
     }
 
     /**

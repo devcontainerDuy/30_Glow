@@ -267,9 +267,116 @@ class BookingController extends Controller
 
     /**
      * Remove the specified resource from storage.
+     * @param string $id of id booking
+     * Cho khách hàng hủy lịch
      */
-    public function destroy(string $id)
+    public function destroy(BookingRequest $request, string $id)
     {
-        //
+        DB::beginTransaction();
+        try {
+            if (!Auth::check()) {
+                return response()->json(['check' => false, 'message' => 'Chưa đăng nhập!'], 401);
+            }
+
+            $this->data = $request->validated();
+            $this->instance = $this->model::where('id_customer', Auth::user()->id)->where('id', $id)->first();
+
+            if (!$this->instance) {
+                return response()->json(['check' => false, 'message' => 'Không tìm thấy lịch đặt!'], 404);
+            }
+
+            switch ($this->instance->status) {
+                case 0:
+                case 1:
+                    $this->instance->status = 5;
+                    $this->instance->note = $this->data['note'];
+                    $this->instance->save();
+                    broadcast(new BookingUpdatedEvent($this->instance))->toOthers();
+                    DB::commit();
+                    return response()->json(['check' => true, 'message' => 'Hủy lịch thành công!'], 200);
+                case 2:
+                case 3:
+                case 4:
+                case 5:
+                    DB::rollBack();
+                    return response()->json(['check' => false, 'message' => 'Lịch khóa, không thể hủy!'], 400);
+            }
+        } catch (\Throwable $th) {
+            DB::rollBack();
+            return response()->json(['check' => false, 'message' => 'Hủy lịch thất bại!'], 400);
+        }
+    }
+
+    /**
+     * Get all booking of customer
+     */
+    public function apiIndex()
+    {
+        if (!Auth::check()) {
+            return response()->json(['check' => false, 'message' => 'Chưa đăng nhập!'], 401);
+        }
+
+        $this->data = $this->model::with('user', 'service')->where('id_customer', Auth::user()->id)->get();
+
+        if ($this->data->isEmpty()) {
+            return response()->json(['check' => false, 'data' => [], 'message' => 'Chưa tạo lịch'], 200);
+        }
+
+        $this->data->transform(function ($item) {
+            return [
+                'id' => $item->id,
+                'user' => $item->user ? [
+                    'name' => $item->user->name,
+                    'phone' => $item->user->phone,
+                ] : null,
+                'time' => $item->time,
+                'note' => $item->note,
+                'status' => $item->status,
+                'created_at' => $item->created_at,
+            ];
+        });
+
+        return response()->json(['check' => true, 'data' => $this->data], 200);
+    }
+
+    /**
+     * Get booking of customer by id
+     */
+    public function apiShow(string $id)
+    {
+        if (!Auth::check()) {
+            return response()->json(['check' => false, 'message' => 'Chưa đăng nhập!'], 401);
+        }
+
+        $this->data = $this->model::with('user', 'service')->where('id_customer', Auth::user()->id)->where('id', $id)->first();
+
+        if (!$this->data) {
+            return response()->json(['check' => false, 'message' => 'Không tìm thấy lịch đặt!'], 404);
+        }
+
+        $this->instance = [
+            'id' => $this->data->id,
+            'user' => $this->data->user ? [
+                'name' => $this->data->user->name,
+                'phone' => $this->data->user->phone,
+            ] : null,
+            'time' => $this->data->time,
+            'service' => $this->data->service ? $this->data->service->map(function ($service) {
+                return [
+                    'name' => $service->name,
+                    'slug' => $service->slug,
+                    'price' => $service->price,
+                    'compare_price' => $service->compare_price,
+                    'discount' => $service->discount,
+                    'image' => asset('storage/services/' . $service->image),
+                    'highlighted' => $service->highlighted,
+                ];
+            }) : null,
+            'note' => $this->data->note,
+            'status' => $this->data->status,
+            'created_at' => $this->data->created_at,
+        ];
+
+        return response()->json(['check' => true, 'data' => $this->instance], 200);
     }
 }

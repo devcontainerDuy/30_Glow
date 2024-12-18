@@ -43,10 +43,14 @@ class BillController extends Controller
      */
     public function create()
     {
+        if (!Auth::check()) {
+            return response()->json(['check' => false, 'message' => 'Chưa đăng nhập!'], 401);
+        }
+
         $this->data = $this->model::where('customer_id', Auth::user()->id)->orderBy('created_at', 'desc')->get();
 
         if ($this->data->isEmpty()) {
-            return response()->json(['check' => false, 'message' => 'Không có hóa đơn nào cho khách hàng với ID này!',], 404);
+            return response()->json(['check' => false, 'data' => [], 'message' => 'Chưa tạo hóa đơn'], 200);
         }
 
         $this->data->transform(function ($item) {
@@ -153,6 +157,8 @@ class BillController extends Controller
 
     /**
      * Display the specified resource.
+     * $id: uid của hóa đơn
+     * Cho khách hàng lấy chi tiết hóa đơn
      */
     public function show(string $id)
     {
@@ -239,6 +245,7 @@ class BillController extends Controller
     /**
      * Remove the specified resource from storage.
      * $id: uid của hóa đơn
+     * Cho khách hàng hủy hóa đơn
      */
     public function destroy(string $id)
     {
@@ -274,6 +281,42 @@ class BillController extends Controller
             }
         } catch (\Exception $e) {
             Log::error("Error: " . $e->getMessage());
+            return response()->json(['check' => false, 'message' => 'Có lỗi xảy ra!'], 500);
+        }
+    }
+
+    /**
+     * Refund the specified resource from storage.
+     * $id: uid của hóa đơn
+     */
+    public function refund(string $id)
+    {
+        try {
+            if (Auth::check()) {
+                $this->instance = $this->model::where('customer_id', Auth::user()->id)->where('uid', $id)->first();
+
+                if (!$this->instance) {
+                    return response()->json(['check' => false, 'message' => 'Đơn hàng không tồn tại!'], 404);
+                }
+
+                switch ($this->instance->status) {
+                    case  $this->instance->status <= 3:
+                        return response()->json(['check' => false, 'message' => 'Đơn hàng chưa giao, không thể hoàn trả!'], 400);
+                    case 4:
+                        $this->instance->status = 6;
+                        $this->instance->save();
+                        return response()->json(['check' => true, 'message' => 'Đơn hàng được hoàn trả thành công!'], 200);
+                    case 5:
+                        return response()->json(['check' => false, 'message' => 'Đơn hàng đã hủy, không thể hoàn trả!'], 400);
+                    case 6:
+                        return response()->json(['check' => false, 'message' => 'Đơn hàng đã hoàn trả, không thể hoàn trả!'], 400);
+                    default:
+                        return response()->json(['check' => false, 'message' => 'Trạng thái đơn hàng không hợp lệ!'], 400);
+                }
+            } else {
+                return response()->json(['check' => false, 'message' => 'Không thể vào hóa đơn người khác!'], 401);
+            }
+        } catch (\Throwable $th) {
             return response()->json(['check' => false, 'message' => 'Có lỗi xảy ra!'], 500);
         }
     }
