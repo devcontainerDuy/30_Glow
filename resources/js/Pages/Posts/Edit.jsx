@@ -9,6 +9,7 @@ import BreadcrumbComponent from "@/Components/BreadcrumbComponent";
 import { router } from "@inertiajs/react";
 import { toast } from "react-toastify";
 import axios from "axios";
+import { Helmet } from "react-helmet";
 
 function Edit({ service, collections, crumbs }) {
     const [data, setData] = useState({
@@ -157,6 +158,10 @@ function Edit({ service, collections, crumbs }) {
 
     return (
         <>
+            <Helmet>
+                <title>Cập nhật bài viết </title>
+                <meta name="description" content="Cập nhật bài viết " />
+            </Helmet>
             <Layout>
                 <section className="container">
                     <Row>
@@ -187,7 +192,7 @@ function Edit({ service, collections, crumbs }) {
                         <Col xs="12">
                             <Box sx={{ height: "70vh", width: "100%" }}>
                                 <div className="text-start">
-                                    <h4>Danh sách sản phẩm</h4>
+                                    <h4>Cập nhật bài viết</h4>
                                 </div>
                                 <Form onSubmit={handleSubmit} encType="multipart/form-data">
                                     <Row>

@@ -27,7 +27,7 @@ class SlidesController extends Controller
         $this->crumbs = [
             ['name' => 'Danh sách Slides', 'url' => '/admin/slides'],
         ];
-        $this->data = $this->model::all();
+        $this->data = $this->model::orderBy('created_at', 'desc')->get();
         $trashs = $this->model::onlyTrashed()->get();
         return Inertia::render('Slides/Index', ['slides' => $this->data, 'trashs' => $trashs, 'crumbs' => $this->crumbs]);
     }
@@ -74,13 +74,7 @@ class SlidesController extends Controller
         Storage::putFileAs('/public/slides/desktop', $desktopImage, $desktopFilename);
         Storage::putFileAs('/public/slides/mobile', $mobileImage, $mobileFilename);
 
-        $this->instance = $this->model::create([
-            'name' => $data['name'],
-            'slug' => $data['slug'],
-            'status' => $data['status'],
-            'desktop' => $desktopFilename,
-            'mobile' => $mobileFilename,
-        ]);
+        $this->instance = $this->model::create(['name' => $data['name'], 'slug' => $data['slug'], 'status' => $data['status'], 'desktop' => $desktopFilename, 'mobile' => $mobileFilename,]);
     }
 
     /**
@@ -108,7 +102,7 @@ class SlidesController extends Controller
         if (isset($this->data['name'])) $this->data['slug'] = Str::slug($this->data['name']);
         $this->instance = $this->model::findOrFail($id)->update($this->data);
         if ($this->instance) {
-            $this->data = $this->model::all();
+            $this->data = $this->model::orderBy('created_at', 'desc')->get();
             return response()->json(['check' => true, 'message' => 'Cập nhật thành công!', 'data' => $this->data], 200);
         }
 
@@ -126,7 +120,7 @@ class SlidesController extends Controller
         $this->instance->delete();
 
         if ($this->instance) {
-            $this->data = $this->model::all();
+            $this->data = $this->model::orderBy('created_at', 'desc')->get();
             $trashs = $this->model::onlyTrashed()->get();
             return response()->json(['check' => true, 'message' => 'Xóa thành công!', 'trashs' => $trashs, 'data' => $this->data], 200);
         }
@@ -139,7 +133,7 @@ class SlidesController extends Controller
         $this->instance->restore();
 
         if ($this->instance) {
-            $this->data = $this->model::get();
+            $this->data = $this->model::orderBy('created_at', 'desc')->get();
             $trashs = $this->model::onlyTrashed()->get();
             return response()->json(['check' => true, 'message' => 'Khôi phục thành công!', 'trashs' => $trashs, 'data' => $this->data], 200);
         }
@@ -164,9 +158,11 @@ class SlidesController extends Controller
             }
 
             $this->instance->forceDelete();
-            $this->data = $this->model::all();
 
-            return response()->json(['check' => true, 'message' => 'Xóa vĩnh viễn thành công!', 'data' => $this->data], 200);
+            $this->data = $this->model::orderBy('created_at', 'desc')->get();
+            $trashs = $this->model::onlyTrashed()->get();
+
+            return response()->json(['check' => true, 'message' => 'Xóa vĩnh viễn thành công!', 'data' => $this->data, 'trashs' => $trashs], 200);
         }
 
         return response()->json(['check' => false, 'message' => 'Dữ liệu không tồn tại!'], 404);

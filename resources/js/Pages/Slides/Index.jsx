@@ -1,8 +1,8 @@
 import React, { useEffect, useMemo, useState } from "react";
-import { Box, FormControlLabel, Select, Switch } from "@mui/material";
+import { FormControlLabel, Switch } from "@mui/material";
 import Layout from "@/Layouts/Index";
 import Body from "@/Layouts/Body";
-import { Row, Col, Button, Modal, Form, Spinner, Image } from "react-bootstrap";
+import { Row, Col, Button, Form, Image } from "react-bootstrap";
 import { Dropzone, FileMosaic } from "@dropzone-ui/react";
 import BreadcrumbComponent from "@/Components/BreadcrumbComponent";
 import ButtonsComponent from "@/Components/ButtonsComponent";
@@ -18,11 +18,9 @@ function Index({ slides, crumbs, trashs }) {
     const [trash, setTrash] = useState([]);
     const [show, setshow] = useState(false);
     const [name, setName] = useState("");
-    const [loading, setLoading] = useState(false);
-    const [files, setFiles] = useState([]);
     const [desktop, setDesktop] = useState([]);
     const [mobile, setMobile] = useState([]);
-    const [status, setStatus] = useState(1);
+    const [status, setStatus] = useState(0);
 
     const handleClose = () => {
         setshow(false);
@@ -33,6 +31,7 @@ function Index({ slides, crumbs, trashs }) {
     };
 
     const handleShow = () => setshow(true);
+
     const updateFiles = (files, type) => {
         if (type === "desktop") {
             setDesktop(files);
@@ -40,6 +39,7 @@ function Index({ slides, crumbs, trashs }) {
             setMobile(files);
         }
     };
+
     const onDelete = (file, type) => {
         if (type === "desktop") {
             setDesktop(desktop.filter((f) => f !== file));
@@ -48,45 +48,46 @@ function Index({ slides, crumbs, trashs }) {
         }
     };
 
+    const { handleSubmit, loading } = useSubmitForm("/admin/slides", setData, setTrash, handleClose);
     const { handleCellEditStart, handleCellEditStop } = useEditCell("/admin/slides", setData);
-    const { handleDelete, handleRestore, handleDeleteForever, loading: loaded } = useDelete("/admin/slides", setData, setTrash);
+    const { handleDelete, handleRestore, handleDeleteForever } = useDelete("/admin/slides", setData, setTrash);
 
-    const handleSubmit = (e) => {
-        e.preventDefault();
-        setLoading(true);
+    // const handleSubmit = (e) => {
+    //     e.preventDefault();
+    //     setLoading(true);
 
-        const formData = new FormData();
-        formData.append("name", name);
-        formData.append("status", 1);
+    //     const formData = new FormData();
+    //     formData.append("name", name);
+    //     formData.append("status", 1);
 
-        // Thêm các file desktop vào dưới dạng mảng
-        desktop.forEach((file) => {
-            formData.append("desktop[]", file.file); // hoặc file, tùy theo cấu trúc dữ liệu
-        });
+    //     // Thêm các file desktop vào dưới dạng mảng
+    //     desktop.forEach((file) => {
+    //         formData.append("desktop[]", file.file); // hoặc file, tùy theo cấu trúc dữ liệu
+    //     });
 
-        // Thêm các file mobile vào dưới dạng mảng
-        mobile.forEach((file) => {
-            formData.append("mobile[]", file.file);
-        });
+    //     // Thêm các file mobile vào dưới dạng mảng
+    //     mobile.forEach((file) => {
+    //         formData.append("mobile[]", file.file);
+    //     });
 
-        window.axios
-            .post("/admin/slides", formData, {
-                headers: { "Content-Type": "multipart/form-data" },
-            })
-            .then((res) => {
-                if (res.data.check === true) {
-                    toast.success(res.data.message);
-                    setData(res.data.data);
-                    handleClose();
-                } else {
-                    toast.warning(res.data.message);
-                }
-            })
-            .catch((error) => {
-                toast.error(error.response.data.message);
-            })
-            .finally(() => setLoading(false));
-    };
+    //     window.axios
+    //         .post("/admin/slides", formData, {
+    //             headers: { "Content-Type": "multipart/form-data" },
+    //         })
+    //         .then((res) => {
+    //             if (res.data.check === true) {
+    //                 toast.success(res.data.message);
+    //                 setData(res.data.data);
+    //                 handleClose();
+    //             } else {
+    //                 toast.warning(res.data.message);
+    //             }
+    //         })
+    //         .catch((error) => {
+    //             toast.error(error.response.data.message);
+    //         })
+    //         .finally(() => setLoading(false));
+    // };
 
     const columns = useMemo(() => [
         { field: "id", headerName: "ID", width: 80 },
@@ -169,6 +170,7 @@ function Index({ slides, crumbs, trashs }) {
             ),
         },
     ]);
+
     const columnsTrash = useMemo(() => [
         { field: "id", headerName: "ID", width: 80 },
         {
@@ -219,18 +221,7 @@ function Index({ slides, crumbs, trashs }) {
             width: 180,
             renderCell: (params) => (
                 <>
-                    <FormControlLabel
-                        control={
-                            <Switch
-                                checked={params.row.status === 1}
-                                onChange={() => {
-                                    const newStatus = params.row.status === 1 ? 0 : 1; // Lấy trạng thái mới
-                                    handleCellEditStop(params.row.id, "status", newStatus); // Gửi dữ liệu đi
-                                }}
-                            />
-                        }
-                        label={params.row.status ? "Hoạt động" : "Ẩn"}
-                    />
+                    <FormControlLabel control={<Switch checked={params.row.status === 1} disabled />} label={params.row.status ? "Hoạt động" : "Ẩn"} />
                 </>
             ),
         },
@@ -240,16 +231,15 @@ function Index({ slides, crumbs, trashs }) {
             width: 160,
             renderCell: (params) => (
                 <>
-                    <Button type="button" variant="outline-success" title="Khôi phục sản phẩm" onClick={() => handleRestore(params.row.id)}>
-                        <i className="bi bi-arrow-clockwise" />
-                    </Button>
-                    <Button className="ms-2" type="button" variant="outline-danger" title="Xóa slide" onClick={() => handleDelete(params.row.id)}>
-                        <i className="bi bi-trash-fill" />
-                    </Button>
+                    <div className="d-flex gap-2 align-items-center mt-2">
+                        <ButtonsComponent type="button" variant="outline-success" icon="reset" onClick={() => handleRestore(params.row.id)} />
+                        <ButtonsComponent type="button" variant="outline-danger" icon="delete" onClick={() => handleDeleteForever(params.row.id)} />
+                    </div>
                 </>
             ),
         },
     ]);
+
     const tabsData = [
         {
             eventKey: "list",
@@ -277,8 +267,8 @@ function Index({ slides, crumbs, trashs }) {
     return (
         <>
             <Helmet>
-                <title>Sitemap </title>
-                <meta name="description" content="Sitemap " />
+                <title>Danh sách slides</title>
+                <meta name="description" content="Danh sách slides " />
             </Helmet>
             <Layout>
                 <section className="container">
@@ -291,7 +281,10 @@ function Index({ slides, crumbs, trashs }) {
                         <ModalComponent
                             show={show}
                             close={handleClose}
-                            submit={handleSubmit}
+                            submit={(e) => {
+                                e.preventDefault();
+                                handleSubmit({ name: name, desktop: desktop.map((f) => f.file), mobile: mobile.map((f) => f.file), status: status });
+                            }}
                             size="md"
                             title="Thêm mới"
                             loaded={loading}
@@ -299,11 +292,21 @@ function Index({ slides, crumbs, trashs }) {
                                 <>
                                     <Form>
                                         <Row className="row-cols-1">
-                                            <Col className="d-flex flex-column">
+                                            <Col>
                                                 {/* Tiêu đề slide */}
                                                 <Form.Group className="mb-3" controlId="name">
                                                     <Form.Label>Nhập Tiêu Đề Slide</Form.Label>
                                                     <Form.Control type="text" placeholder="Tiêu đề slide..." name="name" required onChange={(e) => setName(e.target.value)} />
+                                                </Form.Group>
+                                            </Col>
+                                            <Col>
+                                                {/* Tiêu đề slide */}
+                                                <Form.Group className="mb-3" controlId="status">
+                                                    <Form.Label>Trạng thái</Form.Label>
+                                                    <Form.Select native value={status} onChange={(e) => setStatus(e.target.value)}>
+                                                        <option value={0}>Vô hiệu hóa</option>
+                                                        <option value={1}>Hoạt động</option>
+                                                    </Form.Select>
                                                 </Form.Group>
                                             </Col>
                                         </Row>
@@ -311,7 +314,13 @@ function Index({ slides, crumbs, trashs }) {
                                             <Col>
                                                 <Form.Group className="mb-3" controlId="formBasic">
                                                     <Form.Label>Hình ảnh Desktop</Form.Label>
-                                                    <Dropzone onChange={(files) => updateFiles(files, "desktop")} className="mb-3" accept="chỉ nhận file (.jpeg, .png, .jpg, .gif)" value={desktop}>
+                                                    <Dropzone
+                                                        onChange={(files) => updateFiles(files, "desktop")}
+                                                        className="mb-3"
+                                                        accept="chỉ nhận file (.jpeg, .png, .jpg, .gif)"
+                                                        maxFiles={1}
+                                                        value={desktop}
+                                                    >
                                                         {desktop &&
                                                             desktop.length > 0 &&
                                                             desktop.map((file, index) => <FileMosaic {...file} key={index} preview info onDelete={() => onDelete(file, "desktop")} />)}
@@ -321,7 +330,13 @@ function Index({ slides, crumbs, trashs }) {
                                             <Col>
                                                 <Form.Group className="mb-3" controlId="formBasic">
                                                     <Form.Label>Hình ảnh Mobile</Form.Label>
-                                                    <Dropzone onChange={(files) => updateFiles(files, "mobile")} className="mb-3" accept="chỉ nhận file (.jpeg, .png, .jpg, .gif)" value={mobile}>
+                                                    <Dropzone
+                                                        onChange={(files) => updateFiles(files, "mobile")}
+                                                        className="mb-3"
+                                                        accept="chỉ nhận file (.jpeg, .png, .jpg, .gif)"
+                                                        maxFiles={1}
+                                                        value={mobile}
+                                                    >
                                                         {mobile &&
                                                             mobile.length > 0 &&
                                                             mobile.map((file, index) => <FileMosaic {...file} key={index} preview info onDelete={() => onDelete(file, "mobile")} />)}
@@ -336,7 +351,7 @@ function Index({ slides, crumbs, trashs }) {
                         {/* End Modal */}
 
                         {/* Start DataGrid */}
-                        <Body title="Sitemap" data={tabsData} />
+                        <Body title="Danh sách slides" data={tabsData} />
                         {/* End DataGrid */}
                     </Row>
                 </section>

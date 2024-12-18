@@ -19,6 +19,12 @@ const ButtonsComponent = ({ type, variant, icon, title, onClick, loaded, disable
                 return <i className="bi bi-save" />;
             case "reset":
                 return <i className="bi bi-arrow-clockwise" />;
+            case "image":
+                return <i className="bi bi-image" />;
+            case "back":
+                return <i className="bi bi-arrow-left" />;
+            case "upload":
+                return <i className="bi bi-cloud-upload" />;
             default:
                 return <i className="bi bi-exclamation-circle" />;
         }

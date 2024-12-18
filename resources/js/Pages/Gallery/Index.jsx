@@ -275,7 +275,7 @@ function Index({ galleries, products, crumbs, trashs }) {
                         />
                         {/* End Modal */}
                         {/* Start DataGrid */}
-                        <Body title="Danh sách tài khoản" data={tabsData} />
+                        <Body title="Bộ sưu tập" data={tabsData} />
                         {/* End DataGrid */}
                     </Row>
                 </section>

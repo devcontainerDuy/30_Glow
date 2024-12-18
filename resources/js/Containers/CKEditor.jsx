@@ -18,7 +18,7 @@ const CKEditor = React.memo(({ onBlur, value }) => {
             if (editorElement) {
                 editorRef.current = window.CKEDITOR.replace(editorElement, options);
                 // Set editor height
-                editorRef.current.config.height = 300;
+                editorRef.current.config.height = 500;
 
                 // Set initial value
                 editorRef.current.setData(value);

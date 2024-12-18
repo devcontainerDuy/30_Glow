@@ -1,25 +1,25 @@
-import React, { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { FormControlLabel, Select, Switch } from "@mui/material";
 import Layout from "@/Layouts/Index";
-import { Button, Col, Form, Image, InputGroup, Modal, Row, Spinner, Tab, Tabs } from "react-bootstrap";
+import Body from "@/Layouts/Body";
+import { Col, Form, Image, InputGroup, Row } from "react-bootstrap";
 import { FormControl, MenuItem } from "@mui/material";
-import Swal from "sweetalert2";
 import CKEditor from "@/Containers/CKEditor";
 import { Dropzone, FileMosaic } from "@dropzone-ui/react";
 import BreadcrumbComponent from "@/Components/BreadcrumbComponent";
-import { router } from "@inertiajs/react";
-import { toast } from "react-toastify";
-import Body from "@/Layouts/Body";
 import ButtonsComponent from "@/Components/ButtonsComponent";
 import ModalComponent from "@/Components/ModalComponent";
+import useSubmitForm from "@/Hooks/useSubmitForm";
+import useEditCell from "@/Hooks/useEditCell";
+import useDelete from "@/Hooks/useDelete";
+import { router } from "@inertiajs/react";
+import { Helmet } from "react-helmet";
 
 function Index({ products, trashs, crumbs, categories, brands }) {
     const [data, setData] = useState([]);
     const [trash, setTrash] = useState([]);
     const [category, setCategory] = useState([]);
     const [brand, setBrand] = useState([]);
-    const [editingCells, setEditingCells] = useState({});
-    const [loading, setLoading] = useState(false);
     const [show, setShow] = useState(false);
     const [name, setName] = useState("");
     const [price, setPrice] = useState(0);
@@ -51,166 +51,27 @@ function Index({ products, trashs, crumbs, categories, brands }) {
         }).format(params);
     };
 
-    const updateFiles = (incommingFiles) => {
-        setFiles(incommingFiles);
-    };
-
     const handleView = (id) => {
         router.visit("/admin/products/" + id + "/edit", {
             method: "get",
         });
     };
 
+    const updateFiles = (incommingFiles) => {
+        setFiles(incommingFiles);
+    };
+
     const onDelete = (id) => {
         setFiles(files.filter((x) => x.id !== id));
     };
 
-    const handleSubmit = (e) => {
-        e.preventDefault();
-        setLoading(true);
-
-        const formData = new FormData();
-        formData.append("name", name);
-        formData.append("price", price);
-        formData.append("discount", discount);
-        formData.append("content", content);
-        formData.append("id_category", idCategory);
-        formData.append("id_brand", idBrand);
-        formData.append("in_stock", inStock);
-
-        files.forEach((file, index) => {
-            formData.append(`image[${index}]`, file.file);
-        });
-
-        window.axios
-            .post("/admin/products", formData, {
-                headers: { "Content-Type": "multipart/form-data" },
-            })
-            .then((res) => {
-                if (res.data.check === true) {
-                    toast.success(res.data.message);
-                    setData(res.data.data);
-                    handleClose();
-                } else {
-                    toast.warning(res.data.message);
-                }
-            })
-            .catch((error) => {
-                toast.error(error.response.data.message);
-            })
-            .finally(() => setLoading(false));
+    const handleEditorBlur = (data) => {
+        setContent(data);
     };
 
-    const handleCellEditStart = (id, field, value) => {
-        setEditingCells((prev) => ({ ...prev, [id + "-" + field]: value }));
-    };
-
-    const handleCellEditStop = (id, field, value) => {
-        const originalValue = editingCells[id + "-" + field];
-
-        if (originalValue !== value) {
-            window.axios
-                .put("/admin/products/" + id, {
-                    [field]: value,
-                })
-                .then((res) => {
-                    if (res.data.check) {
-                        toast.success(res.data.message);
-                        setData(res.data.data);
-                        handleClose();
-                    } else {
-                        toast.warning(res.data.message);
-                    }
-                })
-                .catch((error) => {
-                    toast.error(error.response.data.message);
-                });
-        } else {
-            setEditingCells((prev) => {
-                const newEditingCells = { ...prev };
-                delete newEditingCells[id + "-" + field];
-                return newEditingCells;
-            });
-            toast.info("Không có chỉnh sửa.");
-        }
-    };
-
-    const handleDelete = (id) => {
-        Swal.fire({
-            title: "Xóa mục?",
-            text: "Bạn chắc chắn muốn xóa mục này!",
-            icon: "error",
-            showCancelButton: true,
-            confirmButtonColor: "#3085d6",
-            cancelButtonColor: "#d33",
-            confirmButtonText: "Có, xóa",
-            cancelButtonText: "Hủy",
-        }).then((result) => {
-            if (result.isConfirmed) {
-                window.axios
-                    .delete("/admin/products/" + id)
-                    .then((res) => {
-                        if (res.data.check === true) {
-                            toast.success(res.data.message);
-                            setData(res.data.data);
-                            setTrash(res.data.trashs);
-                        } else {
-                            toast.warning(res.data.message);
-                        }
-                    })
-                    .catch((error) => {
-                        toast.error(error.response.data.message);
-                    });
-            }
-        });
-    };
-
-    const handleRestore = (id) => {
-        window.axios
-            .post("/admin/products/" + id + "/restore")
-            .then((res) => {
-                if (res.data.check === true) {
-                    toast.success(res.data.message);
-                    setData(res.data.data);
-                    setTrash(res.data.trashs);
-                } else {
-                    toast.warning(res.data.message);
-                }
-            })
-            .catch((error) => {
-                toast.error(error.response.data.message);
-            });
-    };
-
-    const handleDeleteForever = (id) => {
-        Swal.fire({
-            title: "Xóa vĩnh viễn mục?",
-            text: "Bạn chắc chắn muốn xóa mục này!",
-            icon: "error",
-            showCancelButton: true,
-            confirmButtonColor: "#3085d6",
-            cancelButtonColor: "#d33",
-            confirmButtonText: "Có, xóa",
-            cancelButtonText: "Hủy",
-        }).then((result) => {
-            if (result.isConfirmed) {
-                window.axios
-                    .delete("/admin/products/" + id + "/permanent")
-                    .then((res) => {
-                        if (res.data.check === true) {
-                            toast.success(res.data.message);
-                            setData(res.data.data);
-                            setTrash(res.data.trashs);
-                        } else {
-                            toast.warning(res.data.message);
-                        }
-                    })
-                    .catch((error) => {
-                        toast.error(error.response.data.message);
-                    });
-            }
-        });
-    };
+    const { handleSubmit, loading } = useSubmitForm("/admin/products", setData, setTrash, handleClose);
+    const { handleCellEditStart, handleCellEditStop } = useEditCell("/admin/products", setData);
+    const { handleDelete, handleRestore, handleDeleteForever } = useDelete("/admin/products", setData, setTrash);
 
     const columns = useMemo(() => [
         {
@@ -318,12 +179,10 @@ function Index({ products, trashs, crumbs, categories, brands }) {
             width: 160,
             renderCell: (params) => (
                 <>
-                    <Button type="button" variant="outline-info" title="Xem chi tiết sản phẩm" onClick={() => handleView(params.row.id)}>
-                        <i className="bi bi-exclamation-circle" />
-                    </Button>
-                    <Button className="ms-2" type="button" variant="outline-danger" title="Xóa sản phẩm" onClick={() => handleDelete(params.row.id)}>
-                        <i className="bi bi-trash-fill" />
-                    </Button>
+                    <div className="d-flex gap-2 align-items-center mt-2">
+                        <ButtonsComponent type="button" variant="outline-info" icon="view" onClick={() => handleView(params.row.id)} />
+                        <ButtonsComponent type="button" variant="outline-danger" icon="delete" onClick={() => handleDelete(params.row.id)} />
+                    </div>
                 </>
             ),
         },
@@ -403,12 +262,10 @@ function Index({ products, trashs, crumbs, categories, brands }) {
             width: 160,
             renderCell: (params) => (
                 <>
-                    <Button type="button" variant="outline-success" title="Khôi phục sản phẩm" onClick={() => handleRestore(params.row.id)}>
-                        <i className="bi bi-arrow-clockwise" />
-                    </Button>
-                    <Button className="ms-2" type="button" variant="outline-danger" title="Xóa vĩnh viễn sản phẩm" onClick={() => handleDeleteForever(params.row.id)}>
-                        <i className="bi bi-trash-fill" />
-                    </Button>
+                    <div className="d-flex gap-2 align-items-center mt-2">
+                        <ButtonsComponent type="button" variant="outline-success" icon="reset" onClick={() => handleRestore(params.row.id)} />
+                        <ButtonsComponent type="button" variant="outline-danger" icon="delete" onClick={() => handleDeleteForever(params.row.id)} />
+                    </div>
                 </>
             ),
         },
@@ -433,10 +290,6 @@ function Index({ products, trashs, crumbs, categories, brands }) {
         },
     ]);
 
-    const handleEditorBlur = (data) => {
-        setContent(data);
-    };
-
     useEffect(() => {
         setData(products);
         setTrash(trashs);
@@ -446,6 +299,10 @@ function Index({ products, trashs, crumbs, categories, brands }) {
 
     return (
         <>
+            <Helmet>
+                <title>Danh sách sản phẩm </title>
+                <meta name="description" content="Danh sách sản phẩm " />
+            </Helmet>
             <Layout>
                 <section className="container">
                     <Row>
@@ -457,9 +314,21 @@ function Index({ products, trashs, crumbs, categories, brands }) {
                         <ModalComponent
                             show={show}
                             close={handleClose}
-                            submit={handleSubmit}
+                            submit={(e) => {
+                                e.preventDefault();
+                                handleSubmit({
+                                    name: name,
+                                    price: price,
+                                    discount: discount,
+                                    id_category: idCategory,
+                                    id_brand: idBrand,
+                                    in_stock: inStock,
+                                    image: files.map((f) => f.file),
+                                    content: content,
+                                });
+                            }}
                             size="xl"
-                            title="Thêm mới"
+                            title="Thêm mới sản phẩm"
                             loaded={loading}
                             body={
                                 <>
@@ -470,24 +339,31 @@ function Index({ products, trashs, crumbs, categories, brands }) {
                                                 <Form.Label>Nhập tên sản phẩm</Form.Label>
                                                 <Form.Control type="text" placeholder="Tên sản phẩm..." name="name" required onChange={(e) => setName(e.target.value)} />
                                             </Form.Group>
-                                            <Row>
+                                            <Row className="row-cols-3">
                                                 <Col>
                                                     <Form.Group className="mb-3" controlId="price">
                                                         <Form.Label>Giá sản phẩm</Form.Label>
                                                         <InputGroup className="mb-3">
-                                                            <Form.Control type="number" placeholder="100000" required onChange={(e) => setPrice(e.target.value)} />
+                                                            <Form.Control type="number" placeholder="100000" min={0} required onChange={(e) => setPrice(e.target.value)} />
                                                             <InputGroup.Text>VND</InputGroup.Text>
                                                         </InputGroup>
                                                     </Form.Group>
                                                 </Col>
-                                                <Col xs={4}>
+                                                <Col>
                                                     {/* Phần trăm giảm */}
                                                     <Form.Group className="mb-3" controlId="discount">
                                                         <Form.Label>Giảm giá</Form.Label>
                                                         <InputGroup className="mb-3">
-                                                            <Form.Control type="number" placeholder="10" required onChange={(e) => setDiscount(e.target.value)} />
+                                                            <Form.Control type="number" placeholder="10" min={0} required onChange={(e) => setDiscount(e.target.value)} />
                                                             <InputGroup.Text>%</InputGroup.Text>
                                                         </InputGroup>
+                                                    </Form.Group>
+                                                </Col>
+                                                <Col>
+                                                    {/* Số lượng trong kho */}
+                                                    <Form.Group className="mb-3" controlId="in_stock">
+                                                        <Form.Label>Số lượng trong kho</Form.Label>
+                                                        <Form.Control type="number" placeholder="Số lượng..." min={0} required onChange={(e) => setInStock(e.target.value)} />
                                                     </Form.Group>
                                                 </Col>
                                             </Row>
@@ -539,13 +415,8 @@ function Index({ products, trashs, crumbs, categories, brands }) {
                                         </Col>
                                     </Row>
 
-                                    {/* Số lượng trong kho */}
-                                    <Form.Group className="mb-3" controlId="in_stock">
-                                        <Form.Label>Số lượng trong kho</Form.Label>
-                                        <Form.Control type="number" placeholder="Số lượng..." required onChange={(e) => setInStock(e.target.value)} />
-                                    </Form.Group>
-                                    <Form.Group className="mb-3" controlId="name">
-                                        <Form.Label>Nội dung chính</Form.Label>
+                                    <Form.Group className="mb-3" controlId="note">
+                                        <Form.Label>Mô tả sản phẩm</Form.Label>
                                         <CKEditor value={content} onBlur={handleEditorBlur} />
                                     </Form.Group>
                                 </>

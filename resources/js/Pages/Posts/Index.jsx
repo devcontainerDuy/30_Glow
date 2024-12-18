@@ -12,6 +12,7 @@ import useSubmitForm from "@/Hooks/useSubmitForm";
 import useEditCell from "@/Hooks/useEditCell";
 import useDelete from "@/Hooks/useDelete";
 import { router } from "@inertiajs/react";
+import { Helmet } from "react-helmet";
 
 function Index({ posts, trashs, collections, crumbs }) {
     const [data, setData] = useState([]);
@@ -259,6 +260,10 @@ function Index({ posts, trashs, collections, crumbs }) {
 
     return (
         <>
+            <Helmet>
+                <title>Danh sách bài viết</title>
+                <meta name="description" content="Danh sách bài viết" />
+            </Helmet>
             <Layout>
                 <section className="container">
                     <Row>
