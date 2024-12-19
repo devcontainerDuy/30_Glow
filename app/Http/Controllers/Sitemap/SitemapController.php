@@ -20,7 +20,7 @@ class SitemapController extends Controller
     public function index()
     {
         $this->crumbs = [
-            ['name' => 'Sitemap', 'url' => '/admin/sitemaps'],
+            ['name' => 'Sitemap', 'url' => '/admin/sitemap'],
         ];
         $this->data = $this->model::orderBy('id', 'desc')->get();
         $trashs = $this->model::orderBy('id', 'desc')->onlyTrashed()->get();

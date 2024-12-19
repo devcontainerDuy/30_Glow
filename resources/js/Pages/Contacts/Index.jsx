@@ -3,12 +3,14 @@ import Body from "@/Layouts/Body";
 import { CheckCircle, Error } from "@mui/icons-material";
 import { green, blue } from "@mui/material/colors";
 import Layout from "@/Layouts/Index";
-import { Button, Col, Form, Modal, Row, Spinner } from "react-bootstrap";
-import ModalComponent from "@/Components/ModalComponent";
+import { Col, Form, Row } from "react-bootstrap";
 import BreadcrumbComponent from "@/Components/BreadcrumbComponent";
-import { Helmet } from "react-helmet";
-import useDelete from "@/Hooks/useDelete";
+import ButtonsComponent from "@/Components/ButtonsComponent";
+import ModalComponent from "@/Components/ModalComponent";
 import useSubmitForm from "@/Hooks/useSubmitForm";
+import useEditCell from "@/Hooks/useEditCell";
+import useDelete from "@/Hooks/useDelete";
+import { Helmet } from "react-helmet";
 
 function Index({ contacts, crumbs, trashs }) {
     const [data, setData] = useState(contacts || []);
@@ -40,7 +42,6 @@ function Index({ contacts, crumbs, trashs }) {
         setNote(contact.note);
         setShow(true);
         console.log(id);
-        
     };
 
     const { handleSubmit, loading } = useSubmitForm("/admin/contacts", setData, setTrash, handleClose);
@@ -114,16 +115,15 @@ function Index({ contacts, crumbs, trashs }) {
             width: 160,
             renderCell: (params) => (
                 <>
-                    <Button type="button" variant="outline-info" title="Xem chi tiết liên hệ" onClick={() => handleShow(params.row.id)}>
-                        <i className="bi bi-envelope" />
-                    </Button>
-                    <Button className="ms-2" type="button" variant="outline-danger" title="Xóa liên hệ" onClick={() => handleDelete(params.row.id)}>
-                        <i className="bi bi-trash-fill" />
-                    </Button>
+                    <div className="d-flex gap-2 align-items-center mt-2">
+                        <ButtonsComponent type="button" variant="outline-info" icon="view" onClick={() => handleView(params.row.id)} />
+                        <ButtonsComponent type="button" variant="outline-danger" icon="delete" onClick={() => handleDelete(params.row.id)} />
+                    </div>
                 </>
             ),
         },
     ]);
+
     const columnsTrash = useMemo(() => [
         { field: "id", headerName: "ID", width: 80 },
         {
@@ -146,7 +146,7 @@ function Index({ contacts, crumbs, trashs }) {
             headerName: "Trạng thái",
             width: 180,
             renderCell: (params) => (
-                <div onClick={() => handleCellEditStop(params.row.id, "status", params.row.status === 1 ? 0 : 1)} style={{ cursor: "pointer" }}>
+                <div style={{ cursor: "pointer" }}>
                     {params.row.status === 1 ? <CheckCircle style={{ color: green[500], marginRight: 8 }} /> : <Error style={{ color: blue[500], marginRight: 8 }} />}
                     <span>{params.row.status === 1 ? "Đã trả lời" : "Mới"}</span>
                 </div>
@@ -165,16 +165,15 @@ function Index({ contacts, crumbs, trashs }) {
             width: 160,
             renderCell: (params) => (
                 <>
-                    <Button type="button" variant="outline-success" title="Khôi phục sản phẩm" onClick={() => handleRestore(params.row.id)}>
-                        <i className="bi bi-arrow-clockwise" />
-                    </Button>
-                    <Button className="ms-2" type="button" variant="outline-danger" title="Xóa liên hệ" onClick={() => handleDelete(params.row.id)}>
-                        <i className="bi bi-trash-fill" />
-                    </Button>
+                    <div className="d-flex gap-2 align-items-center mt-2">
+                        <ButtonsComponent type="button" variant="outline-success" icon="reset" onClick={() => handleRestore(params.row.id)} />
+                        <ButtonsComponent type="button" variant="outline-danger" icon="delete" onClick={() => handleDeleteForever(params.row.id)} />
+                    </div>
                 </>
             ),
         },
     ]);
+
     const tabsData = useMemo(() => [
         {
             eventKey: "list",
@@ -207,13 +206,13 @@ function Index({ contacts, crumbs, trashs }) {
     return (
         <>
             <Helmet>
-                <title>Thông tin liên hệ</title>
-                <meta name="description" content="Thông tin liên hệ" />
+                <title>Liên hệ</title>
+                <meta name="description" content="Liên hệ" />
             </Helmet>
             <Layout>
                 <section className="container">
                     <Row>
-                        <BreadcrumbComponent props={crumbs}></BreadcrumbComponent>
+                        <BreadcrumbComponent props={crumbs} />
                         {/* Start Modal */}
                         <ModalComponent
                             show={show}
@@ -246,7 +245,7 @@ function Index({ contacts, crumbs, trashs }) {
                                             <Col>
                                                 <Form.Group className="mb-3" controlId="phone">
                                                     <Form.Label>Số điện thoại</Form.Label>
-                                                    <Form.Control type="text" value={phone} disabled />
+                                                    <Form.Control type="text" value={phone} min={0} disabled />
                                                 </Form.Group>
                                             </Col>
                                         </Row>
@@ -276,7 +275,7 @@ function Index({ contacts, crumbs, trashs }) {
                         {/* End Modal */}
 
                         {/* Start DataGrid */}
-                        <Body title="Danh sách tài khoản" data={tabsData} />
+                        <Body title="Liên hệ" data={tabsData} />
                         {/* End DataGrid */}
                     </Row>
                 </section>

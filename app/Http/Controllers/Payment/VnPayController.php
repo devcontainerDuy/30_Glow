@@ -127,7 +127,7 @@ class VnPayController extends Controller
                     'transaction_id' => $request->vnp_TransactionNo,
                     'updated_at' => now()
                 ]);
-                return redirect()->away(url(env('CLIENT_URL') . '/thanh-toan-thanh-cong') . '?uid=' . $request->vnp_TxnRef . '&status=1');
+                return redirect()->away(url(env('CLIENT_URL') . '/thanh-toan-thanh-cong') . '?orderID=' . $request->vnp_TxnRef . '&orderTotal=' . $request->vnp_Amount / 100);
             } else {
                 // Thanh toán không thành công
                 $this->instance->update([
@@ -135,11 +135,11 @@ class VnPayController extends Controller
                     'transaction_id' => $request->vnp_TransactionNo,
                     'updated_at' => now()
                 ]);
-                return redirect()->away(url(env('CLIENT_URL') . '/thanh-toan-that-bai') . '?uid=' . $request->vnp_TxnRef . '&status=2');
+                return redirect()->away(url(env('CLIENT_URL') . '/thanh-toan-that-bai') . '?orderID=' . $request->vnp_TxnRef . '&orderTotal=' . $request->vnp_Amount / 100);
             }
         } else {
             // Dữ liệu không hợp lệ
-            return redirect()->away(url(env('CLIENT_URL') . '/thanh-toan-that-bai') . '?uid=' . $request->vnp_TxnRef . '&status=2');
+            return redirect()->away(url(env('CLIENT_URL') . '/thanh-toan-that-bai') . '?orderID=' . $request->vnp_TxnRef . '&orderTotal=' . $request->vnp_Amount / 100);
         }
     }
 }

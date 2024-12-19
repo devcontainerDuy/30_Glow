@@ -24,7 +24,6 @@ class ContactsController extends Controller
     {
         $this->crumbs = [
             ['name' => 'Liên hệ', 'url' => '/admin/contacts'],
-            ['name' => 'Danh sách các liên hệ', 'url' => '/admin/contacts'],
         ];
         $this->data = $this->model::orderByRaw('status = 0 desc')->orderBy('created_at', 'desc')->get();
         $trashs = $this->model::orderByRaw('status = 0 desc')->orderBy('created_at', 'desc')->onlyTrashed()->get();
