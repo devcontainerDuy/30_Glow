@@ -62,7 +62,7 @@ function Edit({ products, crumbs, categories, brands }) {
         setFiles(files.filter((x) => x.id !== id));
     };
 
-    const handleEditorBlur = (data) => {
+    const handleEditorBlur = (content) => {
         setData((prev) => ({ ...prev, content }));
     };
 

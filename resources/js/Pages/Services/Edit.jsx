@@ -100,7 +100,7 @@ function Edit({ service, collections, crumbs }) {
         });
     };
 
-    const handleEditorBlur = (data) => {
+    const handleEditorBlur = (content) => {
         setData((prev) => ({ ...prev, content }));
     };
 
