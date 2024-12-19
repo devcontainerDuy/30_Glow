@@ -116,7 +116,7 @@ function Index({ contacts, crumbs, trashs }) {
             renderCell: (params) => (
                 <>
                     <div className="d-flex gap-2 align-items-center mt-2">
-                        <ButtonsComponent type="button" variant="outline-info" icon="view" onClick={() => handleView(params.row.id)} />
+                        <ButtonsComponent type="button" variant="outline-info" icon="view" onClick={() => handleShow(params.row.id)} />
                         <ButtonsComponent type="button" variant="outline-danger" icon="delete" onClick={() => handleDelete(params.row.id)} />
                     </div>
                 </>
