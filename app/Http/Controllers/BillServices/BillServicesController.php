@@ -190,6 +190,7 @@ class BillServicesController extends Controller
                 return response()->json(['check' => false, 'message' => 'Hóa đơn đã thanh toán!'], 400);
             }
 
+            $this->instance->booking->update(['status' => 4]);
             $this->instance->update(['status' => $this->data['status']]);
 
             DB::commit();

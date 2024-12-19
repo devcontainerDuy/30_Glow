@@ -250,6 +250,12 @@ class BillController extends Controller
                         'quantity' => $item['quantity'],
                         'unit_price' => $item['unit_price']
                     ]);
+
+                    if ($item['quantity'] > $item['product']->in_stock) {
+                        throw new \Exception('Số lượng sản phẩm không đủ!');
+                    }
+
+                    $item['product']->decrement('in_stock', $item['quantity']);
                 }
 
                 $customer->carts()->delete();
