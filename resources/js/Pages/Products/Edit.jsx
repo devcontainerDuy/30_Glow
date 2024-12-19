@@ -143,7 +143,9 @@ function Edit({ products, crumbs, categories, brands }) {
                 .then((response) => {
                     if (response.data.check === true) {
                         toast.success(response.data.message);
-                        handleResset();
+                        const newData = response.data.data.filter((x) => x.id_parent === data.id);
+                        newData && setData((prev) => ({ ...prev, gallery: newData }));
+                        setFiles([]);
                     } else {
                         toast.warning(response.data.message);
                     }
@@ -157,18 +159,19 @@ function Edit({ products, crumbs, categories, brands }) {
     };
 
     const handleStatus = (image) => {
-        console.log(image);
         window.axios
             .put("/admin/galleries/" + image.id, {
                 status: image.status === 0 ? 1 : 0,
                 id_parent: image.id_parent,
             })
-            .then((res) => {
-                if (res.data.check == true) {
-                    toast.success(res.data.message);
-                    handleResset();
+            .then((response) => {
+                if (response.data.check == true) {
+                    toast.success(response.data.message);
+                    const newData = response.data.data.filter((x) => x.id_parent === data.id);
+                    newData && setData((prev) => ({ ...prev, gallery: newData }));
+                    setFiles([]);
                 } else {
-                    toast.warning(res.data.message);
+                    toast.warning(response.data.message);
                 }
             })
             .catch((error) => {
@@ -190,16 +193,18 @@ function Edit({ products, crumbs, categories, brands }) {
             if (result.isConfirmed) {
                 window.axios
                     .delete("/admin/galleries/" + id)
-                    .then((res) => {
-                        if (res.data.check === true) {
-                            toast.success(res.data.message);
-                            handleResset();
+                    .then((response) => {
+                        if (response.data.check === true) {
+                            toast.success(response.data.message);
+                            const newData = response.data.data.filter((x) => x.id_parent === data.id && x.deleted_at === null);
+                            newData && setData((prev) => ({ ...prev, gallery: newData }));
+                            setFiles([]);
                         } else {
                             toast.warning(res.data.message);
                         }
                     })
                     .catch((error) => {
-                        toast.error(error.response.data.message);
+                        toast.error(error?.response?.data?.message);
                     });
             }
         });
@@ -210,8 +215,6 @@ function Edit({ products, crumbs, categories, brands }) {
         setCategory(categories);
         setBrand(brands);
     }, [products, categories, brands]);
-
-    console.log(data?.gallery);
 
     return (
         <>

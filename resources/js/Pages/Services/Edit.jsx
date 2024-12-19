@@ -57,7 +57,7 @@ function Edit({ service, collections, crumbs }) {
             .then((res) => {
                 if (res.data.check == true) {
                     toast.success(res.data.message);
-                    const newData = res.data.data.find((x) => x.id === products.id);
+                    const newData = res.data.data.find((x) => x.id === data.id);
                     newData && setData(newData);
                 } else {
                     toast.warning(res.data.message);
@@ -117,7 +117,8 @@ function Edit({ service, collections, crumbs }) {
         setFiles(files.filter((x) => x.id !== id));
     };
 
-    const handleSetImage = () => {
+    const handleSetImage = (e) => {
+        e.preventDefault();
         if (files.length > 0) {
             axios
                 .post(
@@ -131,13 +132,10 @@ function Edit({ service, collections, crumbs }) {
                 )
                 .then((res) => {
                     if (res.data.check === true) {
-                        setData({ ...data, image: res.data.data?.image });
                         toast.success(res.data.message);
-                        setTimeout(() => {
-                            router.visit("/admin/services/" + data?.id, {
-                                method: "get",
-                            });
-                        }, 1000);
+                        const newData = res.data.data.find((x) => x.id === data.id);
+                        newData && setData(newData);
+                        setFiles([]);
                     } else {
                         toast.warn(res.data.message);
                     }
@@ -273,7 +271,7 @@ function Edit({ service, collections, crumbs }) {
                                                 <Card.Header>Hình ảnh</Card.Header>
                                                 <Card.Body>
                                                     {/* Hình ảnh */}
-                                                    {files[0] && files.length > 0 && files[0].preview ? (
+                                                    {files[0] !== null && files.length > 0 && files[0].preview ? (
                                                         <Image fluid src={files[0].preview} alt={data?.name} className="mb-3 rounded-2" />
                                                     ) : (
                                                         <Image fluid src={"/storage/services/" + data?.image} alt={data?.name} className="mb-3 rounded-2" />
@@ -310,6 +308,7 @@ function Edit({ service, collections, crumbs }) {
                                     <ModalComponent
                                         show={show}
                                         close={handleClose}
+                                        submit={handleSetImage}
                                         title="Thay đổi ảnh"
                                         body={
                                             <>
@@ -326,11 +325,6 @@ function Edit({ service, collections, crumbs }) {
                                                         )}
                                                     </Dropzone>
                                                 </Form.Group>
-                                            </>
-                                        }
-                                        footer={
-                                            <>
-                                                <ButtonsComponent type="button" variant="secondary" icon="close" title="Thoát ra" onClick={handleClose} />
                                             </>
                                         }
                                     />

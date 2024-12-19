@@ -124,7 +124,7 @@ class GalleryController extends Controller
         $this->instance = $this->model::findOrFail($id);
         // dd($this->instance);
 
-        if (is_null($this->instance->id_parent) && $this->instance->id_parent == null) {
+        if ($this->instance->id_parent === null) {
             if (isset($this->data['status']) && $this->data['status'] == 1) {
                 return response()->json(['check' => false, 'message' => 'Không thể đặt làm ảnh chính'], 400);
             } else {
@@ -157,9 +157,7 @@ class GalleryController extends Controller
 
     private function updateInstance()
     {
-        $this->instance = $this->instance->update($this->data);
-
-        if ($this->instance) {
+        if ($this->instance->update($this->data)) {
             $this->data = $this->model::all();
             return response()->json(['check' => true, 'message' => 'Cập nhật thành công!', 'data' => $this->data], 200);
         }

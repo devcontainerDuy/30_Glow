@@ -28,7 +28,7 @@ class BillRequest extends BaseRequest
             'transaction_id' => ['nullable', 'sometimes', 'string', 'max:255'],
             'total' => ['required', 'numeric'],
             'cart' => ['sometimes', 'array'],
-            'cart.*.product_id' => ['required_with:cart', 'integer'],
+            'cart.*.id' => ['required_with:cart', 'integer'],
             'cart.*.quantity' => ['required_with:cart', 'integer', 'min:1'],
             'cart.*.unit_price' => ['required_with:cart', 'numeric', 'min:0'],
         ];
