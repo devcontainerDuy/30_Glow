@@ -169,11 +169,9 @@ class BillController extends Controller
         return DB::transaction(function () use ($data) {
             try {
 
-                $customer = Customers::where('uid', $data['uid'])->active()->first();
-                $customer->load('carts.product');
-
-                if ($customer) {
-
+                if ($data['uid'] !== null && !empty($data['cart'])) {
+                    $customer = Customers::where('uid', $data['uid'])->active()->first();
+                    $customer->load('carts.product');
                     if ($customer->name !== $data['name'] || $customer->email !== $data['email']) {
                         return response()->json(['check' => false, 'message' => 'Thông tin khách hàng không chính xác!'], 401);
                     }

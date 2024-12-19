@@ -13,7 +13,7 @@ class BillRequest extends BaseRequest
     public function methodPost()
     {
         return [
-            'uid' => ['sometimes', 'exists:customers,uid'],
+            'uid' => ['nullable', 'sometimes', 'string', 'exists:customers,uid'],
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'string', 'email', 'max:255'],
             'phone' => ['required', 'numeric'],
