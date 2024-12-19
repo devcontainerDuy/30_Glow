@@ -40,10 +40,6 @@ function Index({ posts, trashs, collections, crumbs }) {
         console.log(incommingFiles);
     };
 
-    useEffect(() => {
-        console.log("files: ", files[0]?.file);
-    }, [files]);
-
     const onDelete = (id) => {
         setFiles(files.filter((x) => x.id !== id));
     };

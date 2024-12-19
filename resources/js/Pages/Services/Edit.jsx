@@ -101,7 +101,7 @@ function Edit({ service, collections, crumbs }) {
     };
 
     const handleEditorBlur = (data) => {
-        setData({ ...data, content: data });
+        setData((prev) => ({ ...prev, content }));
     };
 
     const formatCreatedAt = (dateString) => {

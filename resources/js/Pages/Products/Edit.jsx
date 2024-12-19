@@ -63,7 +63,7 @@ function Edit({ products, crumbs, categories, brands }) {
     };
 
     const handleEditorBlur = (data) => {
-        setData({ ...data, content: data });
+        setData((prev) => ({ ...prev, content }));
     };
 
     const handleSubmit = (e) => {

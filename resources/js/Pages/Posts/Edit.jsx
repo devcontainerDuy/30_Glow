@@ -13,7 +13,6 @@ import { Helmet } from "react-helmet";
 
 function Edit({ service, collections, crumbs }) {
     const [data, setData] = useState({
-        id: 0,
         title: "",
         slug: "",
         summary: "",
@@ -26,9 +25,9 @@ function Edit({ service, collections, crumbs }) {
         updated: "",
     });
     const [collectionsData, setCollectionsData] = useState([]);
-    const [files, setFiles] = useState([]);
     const [loading, setLoading] = useState(false);
     const [show, setShow] = useState(false);
+    const [files, setFiles] = useState([]);
 
     const handleClose = () => setShow(false);
     const handleShow = () => setShow(true);
@@ -43,10 +42,10 @@ function Edit({ service, collections, crumbs }) {
     const handleSubmit = (e) => {
         e.preventDefault();
         setLoading(true);
-        const { image, ...rest } = data;
+        const { image, ...newData } = data;
 
         window.axios
-            .put(`/admin/posts/${data?.id}`, rest)
+            .put(`/admin/posts/${data?.id}`, { ...newData })
             .then((res) => {
                 if (res.data.check == true) {
                     toast.success(res.data.message);
@@ -96,8 +95,8 @@ function Edit({ service, collections, crumbs }) {
         });
     };
 
-    const handleEditorBlur = (data) => {
-        setData({ ...data, content: data });
+    const handleEditorBlur = (content) => {
+        setData((prev) => ({ ...prev, content }));
     };
 
     const formatCreatedAt = (dateString) => {
