@@ -7,6 +7,7 @@ use App\Http\Requests\Bills\BillRequest;
 use App\Models\Bills;
 use App\Models\BillsDetail;
 use App\Models\Customers;
+use App\Models\Products;
 use App\Traits\GeneratesUniqueId;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\Request;
@@ -168,7 +169,8 @@ class BillController extends Controller
         return DB::transaction(function () use ($data) {
             try {
 
-                $customer = Customers::with('carts.product')->where('uid', $data['uid'])->active()->first();
+                $customer = Customers::where('uid', $data['uid'])->active()->first();
+                $customer->load('carts.product');
 
                 if ($customer) {
 
@@ -255,11 +257,15 @@ class BillController extends Controller
                         'unit_price' => $item['unit_price']
                     ]);
 
-                    if ($item['quantity'] > $item['product']->in_stock) {
-                        throw new \Exception('Số lượng sản phẩm không đủ!');
+                    $product = Products::find($item['id_product']);
+                    if ($product) {
+                        if ($item['quantity'] > $product->in_stock) {
+                            throw new \Exception('Số lượng sản phẩm không đủ!');
+                        }
+                        $product->decrement('in_stock', $item['quantity']);
+                    } else {
+                        throw new \Exception('Sản phẩm không tồn tại!');
                     }
-
-                    $item['product']->decrement('in_stock', $item['quantity']);
                 }
 
                 $customer->carts()->delete();
