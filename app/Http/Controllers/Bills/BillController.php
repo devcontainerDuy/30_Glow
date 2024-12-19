@@ -106,7 +106,7 @@ class BillController extends Controller
                         return response()->json(['check' => false, 'message' => 'Sản phẩm không tồn tại!'], 401);
                     }
                     return [
-                        'id_product' => $item->id_product,
+                        'id_product' => $item->product_id,
                         'quantity' => $item->quantity,
                         'unit_price' => $item->product->price * (1 - $item->product->discount / 100),
                     ];
