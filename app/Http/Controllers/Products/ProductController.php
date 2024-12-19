@@ -121,8 +121,12 @@ class ProductController extends Controller
         $this->data = $request->validated();
         try {
             if (isset($this->data['name'])) $this->data['slug'] = Str::slug($this->data['name']);
-            $this->instance = $this->model::findOrFail($id)->update($this->data);
-            if ($this->instance) {
+            if (isset($this->data['id_category'])) {
+                $category = Categories::findOrFail($this->data['id_category']);
+                if ($category->id_parent === null) return response()->json(['check' => false, 'message' => 'Danh mục cha, không thể thêm sản phẩm!'], 400);
+            }
+            $this->instance = $this->model::with('category', 'brand', 'gallery')->findOrFail($id);
+            if ($this->instance->update($this->data)) {
                 $this->data = $this->model::with('category', 'brand', 'gallery')->orderBy('id', 'desc')->get();
                 $categories = Categories::with('parent', 'products')->withCount('products')->get();
                 $brands = Brands::with('products')->withCount('products')->get();
@@ -142,9 +146,8 @@ class ProductController extends Controller
     {
         $this->instance = $this->model::with('gallery')->findOrFail($id);
         $this->instance->update(['status' => 0, 'highlighted' => 0]);
-        $this->instance = $this->instance->delete();
 
-        if ($this->instance) {
+        if ($this->instance->delete()) {
             $this->data = $this->model::with('category', 'brand', 'gallery')->orderBy('id', 'desc')->get();
             $trashs = $this->model::with('category', 'brand', 'gallery')->orderBy('id', 'desc')->onlyTrashed()->get();
             $categories = Categories::with('parent')->withCount('products')->get();
@@ -166,26 +169,31 @@ class ProductController extends Controller
 
     public function permanent(string $id)
     {
-        $this->instance = $this->model::with('gallery')->withTrashed()->findOrFail($id);
-        if ($this->instance->gallery->isEmpty()) {
-            return response()->json(['check' => false, 'message' => 'Không có ảnh liên quan để xóa'], 404);
-        }
-
-        foreach ($this->instance->gallery as $item) {
-            $imagePath = "public/gallery/{$item->image}";
-            if (Storage::exists($imagePath)) {
-                Storage::delete($imagePath);
+        try {
+            $this->instance = $this->model::with('gallery')->withTrashed()->findOrFail($id);
+            if ($this->instance->gallery->isEmpty()) {
+                return response()->json(['check' => false, 'message' => 'Không có ảnh liên quan để xóa'], 404);
             }
-            $item->forceDelete();
+
+            foreach ($this->instance->gallery as $item) {
+                $imagePath = "public/gallery/{$item->image}";
+                if (Storage::exists($imagePath)) {
+                    Storage::delete($imagePath);
+                }
+                $item->forceDelete();
+            }
+
+            $this->instance->forceDelete();
+
+            $this->data = $this->model::with('category', 'brand', 'gallery')->orderBy('id', 'desc')->get();
+            $trashs = $this->model::with('category', 'brand', 'gallery')->orderBy('id', 'desc')->onlyTrashed()->get();
+            $categories = Categories::with('parent')->withCount('products')->get();
+
+            return response()->json(['check' => true, 'message' => 'Đã xóa vĩnh viễn thành công!', 'data' => $this->data, 'trashs' => $trashs, 'categories' => $categories], 200);
+        } catch (\Throwable $e) {
+            Log::error("Error: " . $e->getMessage());
+            return response()->json(['check' => false, 'message' => 'Xóa vĩnh viễn thất bại!'], 400);
         }
-
-        $this->instance->forceDelete();
-
-        $this->data = $this->model::with('category', 'brand', 'gallery')->orderBy('id', 'desc')->get();
-        $trashs = $this->model::with('category', 'brand', 'gallery')->orderBy('id', 'desc')->onlyTrashed()->get();
-        $categories = Categories::with('parent')->withCount('products')->get();
-
-        return response()->json(['check' => true, 'message' => 'Đã xóa vĩnh viễn thành công!', 'data' => $this->data, 'trashs' => $trashs, 'categories' => $categories], 200);
     }
 
     /**

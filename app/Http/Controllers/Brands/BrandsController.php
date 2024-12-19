@@ -20,8 +20,8 @@ class BrandsController extends Controller
             ['name' => 'Sản phẩm', 'url' => '/admin/products'],
             ['name' => 'Danh sách thương hiệu', 'url' => '/admin/brands'],
         ];
-        $this->data = $this->model::with('products.gallery')->withCount('products')->get();
-        $trashs = $this->model::with('products.gallery')->withCount('products')->onlyTrashed()->get();
+        $this->data = $this->model::with('products.gallery')->withCount('products')->orderBy('id', 'desc')->get();
+        $trashs = $this->model::with('products.gallery')->withCount('products')->orderBy('id', 'desc')->onlyTrashed()->get();
         return Inertia::render('Brands/Index', ['brands' => $this->data, 'trashs' => $trashs, 'crumbs' => $this->crumbs]);
     }
 
@@ -105,9 +105,8 @@ class BrandsController extends Controller
         }
 
         $this->instance->update(['status' => 0]);
-        $this->instance = $this->instance->delete();
 
-        if ($this->instance) {
+        if ($this->instance->delete()) {
             $this->data = $this->model::with('products.gallery')->withCount('products')->orderBy('id', 'desc')->get();
             $trashs = $this->model::with('products.gallery')->withCount('products')->orderBy('id', 'desc')->onlyTrashed()->get();
             return response()->json(['check' => true, 'message' => 'Xoá thành công!', 'data' => $this->data, 'trashs' => $trashs,], 200);
@@ -120,8 +119,8 @@ class BrandsController extends Controller
     {
         $this->instance = $this->model::withTrashed()->findOrFail($id);
         $this->instance->update(['status' => 1]);
-        $this->instance->restore();
-        if ($this->instance) {
+
+        if ($this->instance->restore()) {
             $this->data = $this->model::with('products.gallery')->withCount('products')->orderBy('id', 'desc')->get();
             $trashs = $this->model::with('products.gallery')->withCount('products')->orderBy('id', 'desc')->onlyTrashed()->get();
             return response()->json(['check' => true, 'message' => 'Khôi phục thành công!', 'data' => $this->data, 'trashs' => $trashs], 200);
@@ -131,8 +130,8 @@ class BrandsController extends Controller
     public function permanent(string $id)
     {
         $this->instance = $this->model::withTrashed()->findOrFail($id);
-        $this->instance->forceDelete();
-        if ($this->instance) {
+
+        if ($this->instance->forceDelete()) {
             $this->data = $this->model::with('products.gallery')->withCount('products')->orderBy('id', 'desc')->get();
             $trashs = $this->model::with('products.gallery')->withCount('products')->orderBy('id', 'desc')->onlyTrashed()->get();
             return response()->json(['check' => true, 'message' => 'Đã xóa vĩnh viễn thành công!', 'data' => $this->data, 'trashs' => $trashs], 200);

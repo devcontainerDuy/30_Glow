@@ -1,12 +1,16 @@
 import React, { useState, useEffect, useMemo } from "react";
 import Layout from "@/Layouts/Index";
-import { Button, Card, Col, Form, Row, Modal, Spinner, Tab, Tabs } from "react-bootstrap";
+import Body from "@/Layouts/Body";
+import { Button, Card, Col, Form, Row } from "react-bootstrap";
 import { FormControlLabel, Switch, FormControl, Select, MenuItem } from "@mui/material";
-import TableDataGrid from "@components/TableDataGrid";
-import Swal from "sweetalert2";
 import { Helmet } from "react-helmet";
 import { toast } from "react-toastify";
 import BreadcrumbComponent from "@/Components/BreadcrumbComponent";
+import ButtonsComponent from "@/Components/ButtonsComponent";
+import ModalComponent from "@/Components/ModalComponent";
+import useSubmitForm from "@/Hooks/useSubmitForm";
+import useEditCell from "@/Hooks/useEditCell";
+import useDelete from "@/Hooks/useDelete";
 
 function Index({ categories, trashs, crumbs }) {
     const [data, setData] = useState([]);
@@ -14,8 +18,6 @@ function Index({ categories, trashs, crumbs }) {
     const [show, setShow] = useState(false);
     const [showProductsModal, setShowProductsModal] = useState(false);
     const [selectedProducts, setSelectedProducts] = useState([]);
-    const [loading, setLoading] = useState(false);
-    const [editingCells, setEditingCells] = useState({});
     const [name, setName] = useState("");
     const [idParent, setIdParent] = useState("");
     const [categoryId, setCategoryId] = useState(null);
@@ -45,174 +47,15 @@ function Index({ categories, trashs, crumbs }) {
         }
         setShowProductsModal(true);
     };
+
     const handleCloseProducts = () => {
         setShowProductsModal(false);
         setSelectedProducts([]);
     };
 
-    const handleSubmit = (e) => {
-        e.preventDefault();
-        setLoading(true);
-
-        window.axios
-            .post("/admin/categories", {
-                name: name,
-                id_parent: idParent || null,
-            })
-            .then((res) => {
-                if (res.data.check) {
-                    toast.success(res.data.message);
-                    setData(res.data.data);
-                    handleClose();
-                } else {
-                    toast.warning(res.data.message);
-                }
-            })
-            .catch((error) => {
-                toast.error(error.response.data.message);
-            })
-            .finally(() => setLoading(false));
-    };
-
-    const handleCellEditStart = (id, field, value) => {
-        setEditingCells((prev) => ({ ...prev, [id + "-" + field]: value }));
-    };
-
-    const handleCellEditStop = (id, field, value) => {
-        if (field === "id_parent") {
-            const childCategories = data.filter((category) => category.id_parent === id);
-            if (childCategories.length > 0) {
-                Swal.fire({
-                    title: "Cập nhật các danh mục con?",
-                    text: "Danh mục này có các danh mục con. Bạn có muốn cập nhật các danh mục con của nó không?",
-                    icon: "warning",
-                    showCancelButton: true,
-                    confirmButtonColor: "#3085d6",
-                    cancelButtonColor: "#d33",
-                    confirmButtonText: "Có, cập nhật",
-                    cancelButtonText: "Hủy",
-                }).then((result) => {
-                    if (result.isConfirmed) {
-                        childCategories.forEach((childCategory) => {
-                            window.axios
-                                .put(`/admin/categories/${childCategory.id}`, {
-                                    id_parent: value,
-                                })
-                                .then((res) => {
-                                    if (res.data.check === true) {
-                                        toast.success(res.data.message);
-                                        setData(res.data.data);
-                                    }
-                                })
-                                .catch((error) => {
-                                    toast.error(error.response.data.message);
-                                });
-                        });
-                    }
-                });
-            }
-        }
-        const originalValue = editingCells[id + "-" + field];
-        if (originalValue !== value) {
-            window.axios
-                .put("/admin/categories/" + id, {
-                    [field]: value,
-                })
-                .then((res) => {
-                    if (res.data.check === true) {
-                        toast.success(res.data.message);
-                        setData(res.data.data);
-                    }
-                })
-                .catch((error) => {
-                    toast.error(error.response.data.message);
-                });
-        } else {
-            setEditingCells((prev) => {
-                const newEditingCells = { ...prev };
-                delete newEditingCells[id + "-" + field];
-                return newEditingCells;
-            });
-            toast.info("Không có chỉnh sửa.");
-        }
-    };
-
-    const handleDelete = (id) => {
-        Swal.fire({
-            title: "Xóa danh mục?",
-            text: "Bạn chắc chắn xóa danh mục này!",
-            icon: "error",
-            showCancelButton: true,
-            confirmButtonColor: "#3085d6",
-            cancelButtonColor: "#d33",
-            confirmButtonText: "Có, xóa",
-            cancelButtonText: "Hủy",
-        }).then((result) => {
-            if (result.isConfirmed) {
-                window.axios
-                    .delete(`/admin/categories/${id}`)
-                    .then((res) => {
-                        if (res.data.check === true) {
-                            toast.success(res.data.message);
-                            setData((prevData) => prevData.filter((category) => category.id !== id));
-                            setTrash(res.data.trashs);
-                        } else {
-                            toast.warning(res.data.message);
-                        }
-                    })
-                    .catch((error) => {
-                        toast.error(error.response.data.message);
-                    });
-            }
-        });
-    };
-
-    const handleRestore = (id) => {
-        window.axios
-            .post("/admin/categories/" + id + "/restore")
-            .then((res) => {
-                if (res.data.check === true) {
-                    toast.success(res.data.message);
-                    setData(res.data.data);
-                    setTrash(res.data.trashs);
-                } else {
-                    toast.warning(res.data.message);
-                }
-            })
-            .catch((error) => {
-                toast.error(error.response.data.message);
-            });
-    };
-
-    const handleDeletePermanent = (id) => {
-        Swal.fire({
-            title: "Xóa vĩnh viễn mục?",
-            text: "Bạn chắc chắn muốn xóa mục này!",
-            icon: "error",
-            showCancelButton: true,
-            confirmButtonColor: "#3085d6",
-            cancelButtonColor: "#d33",
-            confirmButtonText: "Có, xóa",
-            cancelButtonText: "Hủy",
-        }).then((result) => {
-            if (result.isConfirmed) {
-                window.axios
-                    .delete("/admin/categories/" + id + "/permanent")
-                    .then((res) => {
-                        if (res.data.check === true) {
-                            toast.success(res.data.message);
-                            setData(res.data.data);
-                            setTrash(res.data.trashs);
-                        } else {
-                            toast.warning(res.data.message);
-                        }
-                    })
-                    .catch((error) => {
-                        toast.error(error.response.data.message);
-                    });
-            }
-        });
-    };
+    const { handleSubmit, loading } = useSubmitForm("/admin/categories", setData, setTrash, handleClose);
+    const { handleCellEditStart, handleCellEditStop } = useEditCell("/admin/categories", setData);
+    const { handleDelete, handleRestore, handleDeleteForever } = useDelete("/admin/categories", setData, setTrash);
 
     const handleUpdateProduct = (id, newCategoryId) => {
         const updatedData = {
@@ -380,14 +223,31 @@ function Index({ categories, trashs, crumbs }) {
             width: 160,
             renderCell: (params) => (
                 <>
-                    <Button type="button" variant="outline-success" title="Khôi phục sản phẩm" onClick={() => handleRestore(params.row.id)}>
-                        <i className="bi bi-arrow-clockwise" />
-                    </Button>
-                    <Button className="ms-2" type="button" variant="outline-danger" title="Xóa vĩnh viễn sản phẩm" onClick={() => handleDeletePermanent(params.row.id)}>
-                        <i className="bi bi-trash-fill" />
-                    </Button>
+                    <div className="d-flex gap-2 align-items-center mt-2">
+                        <ButtonsComponent type="button" variant="outline-success" icon="reset" onClick={() => handleRestore(params.row.id)} />
+                        <ButtonsComponent type="button" variant="outline-danger" icon="delete" onClick={() => handleDeleteForever(params.row.id)} />
+                    </div>
                 </>
             ),
+        },
+    ]);
+
+    const tabsData = useMemo(() => [
+        {
+            eventKey: "list",
+            title: "Danh sách",
+            data: data,
+            columns: columns,
+            handleCellEditStop: handleCellEditStop,
+            handleCellEditStart: handleCellEditStart,
+        },
+        {
+            eventKey: "trash",
+            title: "Thùng rác",
+            data: trash,
+            columns: columnsTrash,
+            handleCellEditStop: handleCellEditStop,
+            handleCellEditStart: handleCellEditStart,
         },
     ]);
 
@@ -406,19 +266,21 @@ function Index({ categories, trashs, crumbs }) {
                 <section className="container">
                     <Row>
                         <BreadcrumbComponent props={crumbs}>
-                            <Button type="button" variant="primary" onClick={handleShow}>
-                                <i className="bi bi-plus-circle" />
-                                <span className="ms-2">Thêm danh mục mới</span>
-                            </Button>
+                            <ButtonsComponent type="button" variant="primary" icon="add" title="Thêm mới" onClick={() => handleShow()} />
                         </BreadcrumbComponent>
 
                         {/* Start Modal Thêm danh mục mới */}
-                        <Modal show={show} onHide={handleClose}>
-                            <Form onSubmit={handleSubmit}>
-                                <Modal.Header closeButton>
-                                    <Modal.Title>Thêm danh mục sản phẩm mới</Modal.Title>
-                                </Modal.Header>
-                                <Modal.Body>
+                        <ModalComponent
+                            show={show}
+                            close={handleClose}
+                            submit={(e) => {
+                                e.preventDefault();
+                                handleSubmit({ name, id_parent: idParent || null });
+                            }}
+                            title="Thêm danh mục mới"
+                            loaded={loading}
+                            body={
+                                <>
                                     <Form.Group className="mb-3" controlId="name">
                                         <Form.Label>Tên danh mục sản phẩm</Form.Label>
                                         <Form.Control type="text" placeholder="Nhập tên danh mục sản phẩm" onChange={(e) => setName(e.target.value)} required />
@@ -436,98 +298,73 @@ function Index({ categories, trashs, crumbs }) {
                                                 ))}
                                         </Form.Select>
                                     </Form.Group>
-                                </Modal.Body>
-                                <Modal.Footer>
-                                    <Button variant="secondary" onClick={handleClose}>
-                                        Đóng
-                                    </Button>
-                                    <Button variant="primary" type="submit" disabled={loading}>
-                                        {loading ? <Spinner animation="border" size="sm" /> : "Lưu danh mục"}
-                                    </Button>
-                                </Modal.Footer>
-                            </Form>
-                        </Modal>
+                                </>
+                            }
+                        />
                         {/* End Modal Thêm danh mục mới */}
 
                         {/* Start Products Modal */}
-                        <Modal show={showProductsModal} onHide={handleCloseProducts} size="lg">
-                            <Modal.Header closeButton>
-                                <Modal.Title>Danh Sách Sản Phẩm</Modal.Title>
-                            </Modal.Header>
-                            <Modal.Body>
-                                <Row className="row-cols-4 g-1">
-                                    {selectedProducts.length > 0 ? (
-                                        selectedProducts.map((item, index) => (
-                                            <Col key={index} className="mb-3">
-                                                <Card>
-                                                    {item.gallery && item.gallery.length > 0 && item.gallery.find((image) => image.status === 1) ? (
-                                                        <>
+                        <ModalComponent
+                            show={showProductsModal}
+                            close={handleCloseProducts}
+                            size="xl"
+                            title="Danh sách sản phẩm"
+                            body={
+                                <>
+                                    <Row className="row-cols-4 g-1">
+                                        {selectedProducts.length > 0 ? (
+                                            selectedProducts.map((item, index) => (
+                                                <Col key={index} className="mb-3">
+                                                    <Card>
+                                                        {item.gallery && item.gallery.length > 0 && item.gallery.find((image) => image.status === 1) ? (
+                                                            <>
+                                                                <Card.Img
+                                                                    variant="top"
+                                                                    fluid
+                                                                    className="mb-1 rounded-1"
+                                                                    src={`/storage/gallery/${item.gallery.find((image) => image.status === 1).image}`}
+                                                                    alt={item.gallery.find((image) => image.status === 1).image}
+                                                                />
+                                                            </>
+                                                        ) : (
                                                             <Card.Img
                                                                 variant="top"
                                                                 fluid
                                                                 className="mb-1 rounded-1"
-                                                                src={`/storage/gallery/${item.gallery.find((image) => image.status === 1).image}`}
-                                                                alt={item.gallery.find((image) => image.status === 1).image}
+                                                                src="https://upload.wikimedia.org/wikipedia/commons/a/a3/Image-not-found.png?20210521171500"
+                                                                alt="No image"
                                                             />
-                                                        </>
-                                                    ) : (
-                                                        <Card.Img
-                                                            variant="top"
-                                                            fluid
-                                                            className="mb-1 rounded-1"
-                                                            src="https://upload.wikimedia.org/wikipedia/commons/a/a3/Image-not-found.png?20210521171500"
-                                                            alt="No image"
-                                                        />
-                                                    )}
-                                                    <Card.Body className="d-flex flex-wrap">
-                                                        <p className="my-2 text-break" style={truncateStyle}>
-                                                            {item.name}
-                                                        </p>
-                                                        <select className="form-select" value={item.id_category} onChange={(e) => handleUpdateProduct(item.id, e.target.value)}>
-                                                            {categories.map((category) => (
-                                                                <option key={category.id} value={category.id}>
-                                                                    {category.name}
-                                                                </option>
-                                                            ))}
-                                                        </select>
-                                                    </Card.Body>
-                                                </Card>
-                                            </Col>
-                                        ))
-                                    ) : (
-                                        <>
-                                            <Col xs="12">
-                                                <p className="text-center">Không có sản phẩm nào trong danh mục này.</p>
-                                            </Col>
-                                        </>
-                                    )}
-                                </Row>
-                            </Modal.Body>
-                            <Modal.Footer>
-                                <Button variant="secondary" onClick={handleCloseProducts}>
-                                    Đóng
-                                </Button>
-                            </Modal.Footer>
-                        </Modal>
+                                                        )}
+                                                        <Card.Body className="d-flex flex-wrap">
+                                                            <p className="my-2 text-break" style={truncateStyle}>
+                                                                {item.name}
+                                                            </p>
+                                                            <select className="form-select" value={item.id_category} onChange={(e) => handleUpdateProduct(item.id, e.target.value)}>
+                                                                {categories.map((category) => (
+                                                                    <option key={category.id} value={category.id}>
+                                                                        {category.name}
+                                                                    </option>
+                                                                ))}
+                                                            </select>
+                                                        </Card.Body>
+                                                    </Card>
+                                                </Col>
+                                            ))
+                                        ) : (
+                                            <>
+                                                <Col xs="12">
+                                                    <p className="text-center">Không có sản phẩm nào trong danh mục này.</p>
+                                                </Col>
+                                            </>
+                                        )}
+                                    </Row>
+                                </>
+                            }
+                        />
                         {/* End Products Modal */}
 
-                        <Col xs="12">
-                            <div className="text-start my-2">
-                                <h4>Danh Sách Danh Mục</h4>
-                            </div>
-                        </Col>
-
                         {/* Start DataGrid */}
-                        <Col xs="12">
-                            <Tabs defaultActiveKey="list" id="uncontrolled-tab-example">
-                                <Tab eventKey="list" title={"Danh sách" + " (" + data.length + ")"}>
-                                    <TableDataGrid data={data} columns={columns} handleCellEditStop={handleCellEditStop} handleCellEditStart={handleCellEditStart} />
-                                </Tab>
-                                <Tab eventKey="trash" title={"Thùng rác" + " (" + trash.length + ")"}>
-                                    <TableDataGrid data={trash} columns={columnsTrash} handleCellEditStop={handleCellEditStop} handleCellEditStart={handleCellEditStart} />
-                                </Tab>
-                            </Tabs>
-                        </Col>
+                        <Body title="Danh Sách Danh Mục" data={tabsData} />
                         {/* End DataGrid */}
                     </Row>
                 </section>

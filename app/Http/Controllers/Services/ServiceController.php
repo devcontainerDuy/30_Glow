@@ -136,6 +136,26 @@ class ServiceController extends Controller
         return response()->json(['check' => false, 'message' => 'Xóa thất bại!'], 400);
     }
 
+    public function restore(string $id)
+    {
+        $this->instance = $this->model::withTrashed()->findOrFail($id)->restore();
+        if ($this->instance) {
+            $this->data = $this->model::with('collection')->orderBy('id', 'desc')->get();
+            return response()->json(['check' => true, 'message' => 'Phục hồi thành công!', 'data' => $this->data], 200);
+        }
+        return response()->json(['check' => false, 'message' => 'Phục hồi thất bại!'], 400);
+    }
+
+    public function forceDelete(string $id)
+    {
+        $this->instance = $this->model::withTrashed()->findOrFail($id)->forceDelete();
+        if ($this->instance) {
+            $this->data = $this->model::with('collection')->orderBy('id', 'desc')->get();
+            return response()->json(['check' => true, 'message' => 'Xóa vĩnh viện thành công!', 'data' => $this->data], 200);
+        }
+        return response()->json(['check' => false, 'message' => 'Xóa vĩnh viện thất bại!'], 400);
+    }
+
     /**
      * API Client
      */

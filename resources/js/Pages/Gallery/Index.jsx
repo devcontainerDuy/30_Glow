@@ -37,7 +37,7 @@ function Index({ galleries, products, crumbs, trashs }) {
     };
 
     const { handleSubmit, loading } = useSubmitForm("/admin/galleries", setData, setTrash, handleClose);
-    const { handleCellEditStop } = useEditCell("/admin/galleries", setData);
+    const { handleCellEditStart, handleCellEditStop } = useEditCell("/admin/galleries", setData);
     const { handleDelete, handleRestore, handleDeleteForever } = useDelete("/admin/galleries", setData, setTrash);
 
     const columns = useMemo(() => [
@@ -195,12 +195,16 @@ function Index({ galleries, products, crumbs, trashs }) {
             title: "Danh sách",
             data: data,
             columns: columns,
+            handleCellEditStop: handleCellEditStop,
+            handleCellEditStart: handleCellEditStart,
         },
         {
             eventKey: "trash",
             title: "Thùng rác",
             data: trash,
             columns: columnsTrash,
+            handleCellEditStop: handleCellEditStop,
+            handleCellEditStart: handleCellEditStart,
         },
     ]);
 
@@ -225,7 +229,7 @@ function Index({ galleries, products, crumbs, trashs }) {
                         {/* Start Modal */}
                         <ModalComponent
                             show={showModal}
-                            onHide={handleClose}
+                            close={handleClose}
                             submit={(e) => {
                                 e.preventDefault();
                                 handleSubmit({ images: files.map((x) => x.file), id_parent: productId, status: status });
