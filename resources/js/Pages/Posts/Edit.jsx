@@ -49,11 +49,8 @@ function Edit({ service, collections, crumbs }) {
             .then((res) => {
                 if (res.data.check == true) {
                     toast.success(res.data.message);
-                    setTimeout(() => {
-                        router.visit("/admin/posts/" + data?.id, {
-                            method: "get",
-                        });
-                    }, 1000);
+                    const newData = res.data.data.find((x) => x.id === data.id);
+                    newData && setData(newData);
                 } else {
                     toast.warning(res.data.message);
                 }
@@ -81,9 +78,11 @@ function Edit({ service, collections, crumbs }) {
                     .then((res) => {
                         if (res.data.check) {
                             toast.success(res.data.message);
-                            router.visit("/admin/posts/" + service?.id, {
-                                method: "get",
-                            });
+                            setTimeout(() => {
+                                router.visit("/admin/posts/", {
+                                    method: "get",
+                                });
+                            }, 2000);
                         } else {
                             toast.warning(res.data.message);
                         }
@@ -126,13 +125,9 @@ function Edit({ service, collections, crumbs }) {
                 )
                 .then((res) => {
                     if (res.data.check === true) {
-                        setData({ ...data, image: res.data.data?.image });
                         toast.success(res.data.message);
-                        setTimeout(() => {
-                            router.visit("/admin/posts/" + data?.id, {
-                                method: "get",
-                            });
-                        }, 1000);
+                        const newData = res.data.data.find((x) => x.id === data.id);
+                        newData && setData(newData);
                     } else {
                         toast.warn(res.data.message);
                     }

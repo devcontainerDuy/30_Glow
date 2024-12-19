@@ -1,10 +1,13 @@
 import React, { useState, useEffect, useMemo } from "react";
 import Layout from "@/Layouts/Index";
+import Body from "@/Layouts/Body";
 import { Button, Col, Row } from "react-bootstrap";
 import { Box } from "@mui/material";
 import { DataGrid, GridToolbar } from "@mui/x-data-grid";
 import { Helmet } from "react-helmet";
 import BreadcrumbComponent from "@/Components/BreadcrumbComponent";
+import ButtonsComponent from "@/Components/ButtonsComponent";
+import ModalComponent from "@/Components/ModalComponent";
 import { router } from "@inertiajs/react";
 
 function Index({ bookings, crumbs }) {
@@ -137,6 +140,66 @@ function Index({ bookings, crumbs }) {
         },
     ]);
 
+    const filteredData = useMemo(() => {
+        return {
+            all: data,
+            status_0: data.filter((item) => item.status === 0),
+            status_1: data.filter((item) => item.status === 1),
+            status_2: data.filter((item) => item.status === 2),
+            status_3: data.filter((item) => item.status === 3),
+            status_4: data.filter((item) => item.status === 4),
+            status_5: data.filter((item) => item.status === 5),
+        };
+    }, [data]);
+
+    const tabsData = useMemo(
+        () => [
+            {
+                eventKey: "list",
+                title: "Danh sách",
+                data: filteredData.all,
+                columns: columns,
+            },
+            {
+                eventKey: "status_0",
+                title: "Đang chờ xếp nhân viên",
+                data: filteredData.status_0,
+                columns: columns,
+            },
+            {
+                eventKey: "status_1",
+                title: "Đã xếp nhân viên",
+                data: filteredData.status_1,
+                columns: columns,
+            },
+            {
+                eventKey: "status_2",
+                title: "Đang thực hiện",
+                data: filteredData.status_2,
+                columns: columns,
+            },
+            {
+                eventKey: "status_3",
+                title: "Thành công",
+                data: filteredData.status_3,
+                columns: columns,
+            },
+            {
+                eventKey: "status_4",
+                title: "Đã thanh toán",
+                data: filteredData.status_4,
+                columns: columns,
+            },
+            {
+                eventKey: "status_5",
+                title: "Thất bại",
+                data: filteredData.status_5,
+                columns: columns,
+            },
+        ],
+        [filteredData, columns]
+    );
+
     useEffect(() => {
         const channel = pusher.subscribe("channelBookings");
 
@@ -160,48 +223,10 @@ function Index({ bookings, crumbs }) {
             <Layout>
                 <section className="container">
                     <Row>
-                        <BreadcrumbComponent props={crumbsData}>
-                        </BreadcrumbComponent>
+                        <BreadcrumbComponent props={crumbsData}></BreadcrumbComponent>
 
                         {/* Start DataGrid */}
-                        <Col xs="12">
-                            <Box sx={{ height: "70vh", width: "100%" }}>
-                                <div className="text-start">
-                                    <h4>Danh Sách lịch đặt</h4>
-                                </div>
-                                <DataGrid
-                                    rows={data}
-                                    columns={columns}
-                                    slots={{
-                                        toolbar: GridToolbar,
-                                    }}
-                                    slotProps={{
-                                        toolbar: {
-                                            showQuickFilter: true,
-                                            quickFilterProps: {
-                                                debounceMs: 500,
-                                            },
-                                        },
-                                    }}
-                                    initialState={{
-                                        pagination: {
-                                            paginationModel: {
-                                                pageSize: 20,
-                                            },
-                                        },
-                                    }}
-                                    // onCellEditStop={(params, e) => {
-                                    //     handleCellEditStop(params.row.id, params.field, e.target.value);
-                                    // }}
-                                    // onCellEditStart={(params, e) => {
-                                    //     handleCellEditStart(params.row.id, params.field, e.target.value);
-                                    // }}
-                                    pageSizeOptions={[20, 40, 60, 80, 100]}
-                                    checkboxSelection
-                                    disableRowSelectionOnClick
-                                />
-                            </Box>
-                        </Col>
+                        <Body title="Danh sách lịch đặt" data={tabsData} />
                         {/* End DataGrid */}
                     </Row>
                 </section>
