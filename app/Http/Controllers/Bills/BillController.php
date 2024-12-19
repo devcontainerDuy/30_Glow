@@ -71,88 +71,195 @@ class BillController extends Controller
      * payment_method: 0 - Thanh toán khi nhận hàng, 1 - Thanh toán qua thẻ ngân hàng, 2 - Thanh toán qua ví điện tử
      * status: 0 - Đang chờ xử lý, 1 - Đã xác nhận, 2 - Đã giao đơn vị vận chuyển, 3 - Đang giao hàng, 4 - Đã giao hàng, 5 - Khách hàng từ chối nhận hàng, 6 - Đã hoàn trả
      */
+    // public function store(BillRequest $request)
+    // {
+    //     $this->data = $request->validated();
+    //     DB::beginTransaction();
+    //     try {
+
+    //         if (Auth::check()) {
+    //             $customers = Auth::user()->load('carts.product');
+
+    //             if (
+    //                 $customers->name !== $this->data['name'] || $customers->email !== $this->data['email']
+    //             ) {
+    //                 return response()->json(['check' => false, 'message' => 'Thông tin khách hàng không chính xác!'], 401);
+    //             }
+
+    //             if ($customers->address === null) {
+    //                 $customers->update(['address' => $this->data['address']]);
+    //             }
+
+    //             if ($customers->phone === null) {
+    //                 $customers->update(['phone' => $this->data['phone']]);
+    //             } elseif ($customers->phone !== $this->data['phone']) {
+    //                 return response()->json(['check' => false, 'message' => 'Số điện thoại không khớp!'], 401);
+    //             }
+
+    //             if ($customers->carts->isEmpty()) {
+    //                 return response()->json(['check' => false, 'message' => 'Giỏ hàng trống!'], 401);
+    //             }
+
+    //             $this->data['cart'] = $customers->carts->map(function ($item) {
+    //                 if (!$item->product) {
+    //                     return response()->json(['check' => false, 'message' => 'Sản phẩm không tồn tại!'], 401);
+    //                 }
+    //                 return [
+    //                     'id_product' => $item->id_product,
+    //                     'quantity' => $item->quantity,
+    //                     'unit_price' => $item->product->price * (1 - $item->product->discount / 100),
+    //                 ];
+    //             })->toArray();
+    //         } else {
+    //             $this->instance = Customers::where('email', $this->data['email'])->active()->first();
+
+    //             if ($this->instance->phone === $this->data['phone']) {
+    //                 return response()->json(['check' => false, 'message' => 'Số điện thoại đã có người dùng!'], 401);
+    //             } elseif ($this->instance->email === $this->data['email']) {
+    //                 return response()->json(['check' => false, 'message' => 'Email đã có người dùng!'], 401);
+    //             }
+    //             $password = Str::random(10);
+    //             $customers = Customers::create(['uid' => $this->createCodeCustomer(), 'name' => $this->data['name'], 'email' => $this->data['email'], 'phone' => $this->data['phone'], 'address' => $this->data['address'], 'password' => Hash::make($password)]);
+    //             $customers->carts()->createMany($this->data['cart']);
+    //         }
+
+    //         $uidBill = $this->createCodeOrder();
+    //         $this->instance = $this->model::insertGetId([
+    //             'uid' => $uidBill,
+    //             'customer_id' => $customers->id,
+    //             'name' => $this->data['name'],
+    //             'email' => $this->data['email'],
+    //             'phone' => $this->data['phone'],
+    //             'address' => $this->data['address'],
+    //             'note' => $this->data['note'],
+    //             'name_other' => $this->data['name_other'] ?? null,
+    //             'email_other' => $this->data['email_other'] ?? null,
+    //             'phone_other' => $this->data['phone_other'] ?? null,
+    //             'address_other' => $this->data['address_other'] ?? null,
+    //             'note_other' => $this->data['note_other'] ?? null,
+    //             'payment_method' => $this->data['payment_method'],
+    //             'payment_status' => $this->data['payment_status'] ?? 0,
+    //             'transaction_id' => $this->data['transaction_id'] ?? null,
+    //             'total' => $this->data['total'],
+    //             'status' => 0,
+    //             'created_at' => now(),
+    //             'updated_at' => now(),
+    //         ]);
+
+    //         foreach ($this->data['cart'] as $item) {
+    //             BillsDetail::create(['id_bill' => $this->instance, 'id_product' => $item['id_product'], 'quantity' => $item['quantity'], 'unit_price' => $item['unit_price']]);
+    //         }
+
+    //         $customers->carts()->delete();
+
+    //         DB::commit();
+    //         return response()->json(['check' => true, 'uid' => $uidBill, 'total' => $this->data['total']], 201);
+    //     } catch (\Throwable $e) {
+    //         DB::rollBack();
+    //         Log::error("Error: " . $e->getMessage());
+    //         return response()->json(['check' => false, 'message' => 'Đặt hàng thất bại!'], 401);
+    //     }
+    // }
+
     public function store(BillRequest $request)
     {
-        DB::beginTransaction();
-        try {
-            $this->data = $request->validated();
-            $this->instance = Customers::where('email', $this->data['email'])->active()->first();
+        $data = $request->validated();
 
-            if ($this->instance !== null && !empty($this->instance)) {
-                $customers = $this->instance->load('carts.product');
+        return DB::transaction(function () use ($data) {
+            try {
 
-                if (
-                    $customers->name !== $this->data['name'] || $customers->email !== $this->data['email']
-                ) {
-                    return response()->json(['check' => false, 'message' => 'Thông tin khách hàng không chính xác!'], 401);
-                }
+                if (Auth::check()) {
+                    $customer = Auth::user()->load('carts.product');
 
-                if ($customers->address === null) {
-                    $customers->update(['address' => $this->data['address']]);
-                }
-
-                if ($customers->phone === null) {
-                    $customers->update(['phone' => $this->data['phone']]);
-                } elseif ($customers->phone !== $this->data['phone']) {
-                    return response()->json(['check' => false, 'message' => 'Số điện thoại không khớp!'], 401);
-                }
-
-                if ($customers->carts->isEmpty()) {
-                    return response()->json(['check' => false, 'message' => 'Giỏ hàng trống!'], 401);
-                }
-
-                $this->data['cart'] = $customers->carts->map(function ($item) {
-                    if (!$item->product) {
-                        return response()->json(['check' => false, 'message' => 'Sản phẩm không tồn tại!'], 401);
+                    if ($customer->name !== $data['name'] || $customer->email !== $data['email']) {
+                        return response()->json(['check' => false, 'message' => 'Thông tin khách hàng không chính xác!'], 401);
                     }
-                    return [
-                        'id_product' => $item->id_product,
-                        'quantity' => $item->quantity,
-                        'unit_price' => $item->product->price * (1 - $item->product->discount / 100),
-                    ];
-                })->toArray();
-            } else {
-                $password = Str::random(10);
-                $customers = Customers::create(['uid' => $this->createCodeCustomer(), 'name' => $this->data['name'], 'email' => $this->data['email'], 'phone' => $this->data['phone'], 'address' => $this->data['address'], 'password' => Hash::make($password)]);
-                $customers->carts()->createMany($this->data['cart']);
+
+                    if ($customer->address === null) {
+                        $customer->update(['address' => $data['address']]);
+                    }
+
+                    if ($customer->phone === null) {
+                        $customer->update(['phone' => $data['phone']]);
+                    } elseif ($customer->phone !== $data['phone']) {
+                        return response()->json(['check' => false, 'message' => 'Số điện thoại không khớp!'], 401);
+                    }
+
+                    if ($customer->carts->isEmpty()) {
+                        return response()->json(['check' => false, 'message' => 'Giỏ hàng trống!'], 401);
+                    }
+
+                    $data['cart'] = $customer->carts->map(function ($item) {
+                        if (!$item->product) {
+                            throw new \Exception('Sản phẩm không tồn tại!');
+                        }
+                        return [
+                            'id_product' => $item->id_product,
+                            'quantity' => $item->quantity,
+                            'unit_price' => $item->product->price * (1 - $item->product->discount / 100),
+                        ];
+                    })->toArray();
+                } else {
+                    $existingCustomer = Customers::where('email', $data['email'])->active()->first();
+
+                    if ($existingCustomer && $existingCustomer->phone === $data['phone']) {
+                        return response()->json(['check' => false, 'message' => 'Số điện thoại đã có người dùng!'], 401);
+                    } elseif ($existingCustomer && $existingCustomer->email === $data['email']) {
+                        return response()->json(['check' => false, 'message' => 'Email đã có người dùng!'], 401);
+                    }
+
+                    $password = Str::random(10);
+                    $customer = Customers::create([
+                        'uid' => $this->createCodeCustomer(),
+                        'name' => $data['name'],
+                        'email' => $data['email'],
+                        'phone' => $data['phone'],
+                        'address' => $data['address'],
+                        'password' => Hash::make($password)
+                    ]);
+                    $customer->carts()->createMany($data['cart']);
+                }
+
+                $uidBill = $this->createCodeOrder();
+                $billId = $this->model::insertGetId([
+                    'uid' => $uidBill,
+                    'customer_id' => $customer->id,
+                    'name' => $data['name'],
+                    'email' => $data['email'],
+                    'phone' => $data['phone'],
+                    'address' => $data['address'],
+                    'note' => $data['note'],
+                    'name_other' => $data['name_other'] ?? null,
+                    'email_other' => $data['email_other'] ?? null,
+                    'phone_other' => $data['phone_other'] ?? null,
+                    'address_other' => $data['address_other'] ?? null,
+                    'note_other' => $data['note_other'] ?? null,
+                    'payment_method' => $data['payment_method'],
+                    'payment_status' => $data['payment_status'] ?? 0,
+                    'transaction_id' => $data['transaction_id'] ?? null,
+                    'total' => $data['total'],
+                    'status' => 0,
+                    'created_at' => now(),
+                    'updated_at' => now(),
+                ]);
+
+                foreach ($data['cart'] as $item) {
+                    BillsDetail::create([
+                        'id_bill' => $billId,
+                        'id_product' => $item['id_product'],
+                        'quantity' => $item['quantity'],
+                        'unit_price' => $item['unit_price']
+                    ]);
+                }
+
+                $customer->carts()->delete();
+
+                return response()->json(['check' => true, 'uid' => $uidBill, 'total' => $data['total']], 201);
+            } catch (\Throwable $e) {
+                Log::error("Error: " . $e->getMessage());
+                return response()->json(['check' => false, 'message' => 'Đặt hàng thất bại!'], 401);
             }
-
-            $uidBill = $this->createCodeOrder();
-            $this->instance = $this->model::insertGetId([
-                'uid' => $uidBill,
-                'customer_id' => $customers->id,
-                'name' => $this->data['name'],
-                'email' => $this->data['email'],
-                'phone' => $this->data['phone'],
-                'address' => $this->data['address'],
-                'note' => $this->data['note'],
-                'name_other' => $this->data['name_other'] ?? null,
-                'email_other' => $this->data['email_other'] ?? null,
-                'phone_other' => $this->data['phone_other'] ?? null,
-                'address_other' => $this->data['address_other'] ?? null,
-                'note_other' => $this->data['note_other'] ?? null,
-                'payment_method' => $this->data['payment_method'],
-                'payment_status' => $this->data['payment_status'] ?? 0,
-                'transaction_id' => $this->data['transaction_id'] ?? null,
-                'total' => $this->data['total'],
-                'status' => 0,
-                'created_at' => now(),
-                'updated_at' => now(),
-            ]);
-
-            foreach ($this->data['cart'] as $item) {
-                BillsDetail::create(['id_bill' => $this->instance, 'id_product' => $item['id_product'], 'quantity' => $item['quantity'], 'unit_price' => $item['unit_price']]);
-            }
-
-            $customers->carts()->delete();
-
-            DB::commit();
-            return response()->json(['check' => true, 'uid' => $uidBill, 'total' => $this->data['total']], 201);
-        } catch (\Throwable $e) {
-            DB::rollBack();
-            Log::error("Error: " . $e->getMessage());
-            return response()->json(['check' => false, 'message' => 'Đặt hàng thất bại!'], 401);
-        }
+        });
     }
 
     /**
