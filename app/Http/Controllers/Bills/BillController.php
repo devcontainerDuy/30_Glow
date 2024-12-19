@@ -168,8 +168,8 @@ class BillController extends Controller
         return DB::transaction(function () use ($data) {
             try {
 
-                if (Auth::check()) {
-                    $customer = Auth::user()->load('carts.product');
+                $customer = Customers::where('uid', $data['uid'])->active()->first();
+                if ($customer->load('carts.product')) {
 
                     if ($customer->name !== $data['name'] || $customer->email !== $data['email']) {
                         return response()->json(['check' => false, 'message' => 'Thông tin khách hàng không chính xác!'], 401);
@@ -200,7 +200,10 @@ class BillController extends Controller
                         ];
                     })->toArray();
                 } else {
-                    $existingCustomer = Customers::where('email', $data['email'])->active()->first();
+                    $existingCustomer = Customers::where(function ($query) use ($data) {
+                        $query->where('email', $data['email'])
+                            ->orWhere('phone', $data['phone']);
+                    })->active()->first();
 
                     if ($existingCustomer && $existingCustomer->phone === $data['phone']) {
                         return response()->json(['check' => false, 'message' => 'Số điện thoại đã có người dùng!'], 401);
