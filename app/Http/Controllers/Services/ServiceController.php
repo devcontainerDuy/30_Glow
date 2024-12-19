@@ -7,6 +7,7 @@ use App\Http\Requests\Services\ServiceRequest;
 use App\Models\Services;
 use App\Models\ServicesCollections;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 use Inertia\Inertia;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
@@ -27,8 +28,9 @@ class ServiceController extends Controller
             ['name' => 'Danh sách dịch vụ', 'url' => '/admin/services'],
         ];
         $this->data = $this->model::with('collection')->orderBy('id', 'desc')->get();
+        $trashs = $this->model::orderBy('id', 'desc')->onlyTrashed()->get();
         $this->instance = ServicesCollections::active()->select('id', 'name')->get();
-        return Inertia::render('Services/Index', ['services' => $this->data, 'collections' => $this->instance, 'crumbs' => $this->crumbs]);
+        return Inertia::render('Services/Index', ['services' => $this->data, 'trashs' => $trashs, 'collections' => $this->instance, 'crumbs' => $this->crumbs]);
     }
 
     /**
@@ -128,30 +130,39 @@ class ServiceController extends Controller
      */
     public function destroy(string $id)
     {
-        $this->instance = $this->model::findOrFail($id)->delete();
-        if ($this->instance) {
+        $this->instance = $this->model::findOrFail($id);
+        if ($this->instance->delete()) {
             $this->data = $this->model::with('collection')->orderBy('id', 'desc')->get();
-            return response()->json(['check' => true, 'message' => 'Xóa thành công!', 'data' => $this->data], 200);
+            $trashs = $this->model::orderBy('id', 'desc')->onlyTrashed()->get();
+            return response()->json(['check' => true, 'message' => 'Xóa thành công!', 'data' => $this->data, 'trashs' => $trashs], 200);
         }
         return response()->json(['check' => false, 'message' => 'Xóa thất bại!'], 400);
     }
 
     public function restore(string $id)
     {
-        $this->instance = $this->model::withTrashed()->findOrFail($id)->restore();
-        if ($this->instance) {
+        $this->instance = $this->model::withTrashed()->findOrFail($id);
+        if ($this->instance->restore()) {
             $this->data = $this->model::with('collection')->orderBy('id', 'desc')->get();
-            return response()->json(['check' => true, 'message' => 'Phục hồi thành công!', 'data' => $this->data], 200);
+            $trashs = $this->model::orderBy('id', 'desc')->onlyTrashed()->get();
+            return response()->json(['check' => true, 'message' => 'Phục hồi thành công!', 'data' => $this->data, 'trashs' => $trashs], 200);
         }
         return response()->json(['check' => false, 'message' => 'Phục hồi thất bại!'], 400);
     }
 
     public function forceDelete(string $id)
     {
-        $this->instance = $this->model::withTrashed()->findOrFail($id)->forceDelete();
-        if ($this->instance) {
+        $this->instance = $this->model::withTrashed()->findOrFail($id);
+
+        $imagePath = "public/services/{$this->instance->image}";
+        if (Storage::exists($imagePath)) {
+            Storage::delete($imagePath);
+        }
+
+        if ($this->instance->forceDelete()) {
             $this->data = $this->model::with('collection')->orderBy('id', 'desc')->get();
-            return response()->json(['check' => true, 'message' => 'Xóa vĩnh viện thành công!', 'data' => $this->data], 200);
+            $trashs = $this->model::orderBy('id', 'desc')->onlyTrashed()->get();
+            return response()->json(['check' => true, 'message' => 'Xóa vĩnh viện thành công!', 'data' => $this->data, 'trashs' => $trashs], 200);
         }
         return response()->json(['check' => false, 'message' => 'Xóa vĩnh viện thất bại!'], 400);
     }

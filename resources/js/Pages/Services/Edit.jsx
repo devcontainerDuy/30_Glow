@@ -1,11 +1,16 @@
 import React, { useEffect, useState } from "react";
-import { Box } from "@mui/material";
 import Layout from "@/Layouts/Index";
-import { Button, Card, Col, Form, Image, InputGroup, Modal, Row, Spinner } from "react-bootstrap";
+import Title from "@/Containers/Title";
+import { Button, Card, Col, Container, Form, Image, InputGroup, Modal, Row, Spinner } from "react-bootstrap";
 import Swal from "sweetalert2";
 import CKEditor from "@/Containers/CKEditor";
 import { Dropzone, FileMosaic } from "@dropzone-ui/react";
 import BreadcrumbComponent from "@/Components/BreadcrumbComponent";
+import ButtonsComponent from "@/Components/ButtonsComponent";
+import ModalComponent from "@/Components/ModalComponent";
+import useSubmitForm from "@/Hooks/useSubmitForm";
+import useEditCell from "@/Hooks/useEditCell";
+import useDelete from "@/Hooks/useDelete";
 import { router } from "@inertiajs/react";
 import { toast } from "react-toastify";
 import axios from "axios";
@@ -52,11 +57,8 @@ function Edit({ service, collections, crumbs }) {
             .then((res) => {
                 if (res.data.check == true) {
                     toast.success(res.data.message);
-                    setTimeout(() => {
-                        router.visit("/admin/services/" + data?.id, {
-                            method: "get",
-                        });
-                    }, 1000);
+                    const newData = res.data.data.find((x) => x.id === products.id);
+                    newData && setData(newData);
                 } else {
                     toast.warning(res.data.message);
                 }
@@ -84,7 +86,7 @@ function Edit({ service, collections, crumbs }) {
                     .then((res) => {
                         if (res.data.check) {
                             toast.success(res.data.message);
-                            router.visit("/admin/services/" + service?.id, {
+                            router.visit("/admin/services/", {
                                 method: "get",
                             });
                         } else {
@@ -164,35 +166,28 @@ function Edit({ service, collections, crumbs }) {
                 <section className="container">
                     <Row>
                         <BreadcrumbComponent props={crumbs}>
-                            <Button variant="danger" onClick={() => handleDelete(service?.id)}>
-                                <i className="bi bi-trash-fill" />
-                            </Button>
-                            <Button className="ms-2" variant="secondary" onClick={handleBack}>
-                                <i className="bi bi-box-arrow-right" />
-                                <span className="ms-2">Quay lại</span>
-                            </Button>
-                            <Button className="ms-2" variant="success" type="submit" disabled={loading} onClick={handleSubmit}>
-                                {loading ? (
-                                    <>
-                                        <Spinner size="sm" animation="border" variant="secondary" />
-                                        <span>Đang lưu...</span>
-                                    </>
-                                ) : (
-                                    <>
-                                        <i className="bi bi-floppy-fill" />
-                                        <span className="ms-2">Lưu cập nhật</span>
-                                    </>
-                                )}
-                            </Button>
+                            <div className="d-flex gap-2 ">
+                                <ButtonsComponent
+                                    type="button"
+                                    variant="danger"
+                                    icon="delete"
+                                    onClick={(e) => {
+                                        e.preventDefault();
+                                        handleDelete(data.id);
+                                    }}
+                                />
+                                <ButtonsComponent type="button" variant="secondary" icon="back" title="Quay lại" onClick={handleBack} />
+                                <ButtonsComponent type="submit" variant="success" icon="edit" title="Cập nhật chỉnh sửa" loaded={loading} onClick={handleSubmit} />
+                            </div>
                         </BreadcrumbComponent>
 
                         {/* Start DataGrid */}
-                        <Col xs="12">
-                            <Box sx={{ height: "70vh", width: "100%" }}>
-                                <div className="text-start">
-                                    <h4>Danh sách sản phẩm</h4>
-                                </div>
-                                <Form onSubmit={handleSubmit} encType="multipart/form-data">
+                        <Container>
+                            <Row className="row-cols-1">
+                                <Col>
+                                    <Title props={"Cập nhật sản phẩm"} />
+                                </Col>
+                                <Form encType="multipart/form-data">
                                     <Row>
                                         <Col xs={9} className="d-flex flex-column">
                                             {/* Tên sản phẩm */}
@@ -312,34 +307,36 @@ function Edit({ service, collections, crumbs }) {
                                         </Col>
                                     </Row>
 
-                                    <Modal show={show} onHide={handleClose}>
-                                        <Modal.Header closeButton>
-                                            <Modal.Title>Thay đổi hình ảnh</Modal.Title>
-                                        </Modal.Header>
-                                        <Modal.Body>
-                                            {/* Chọn hiệu dữ liệu */}
-                                            <Dropzone onChange={updateFiles} className="rounded-1" accept="image/*" maxFiles={1} multiple={false} value={files}>
-                                                {files && files.length > 0 ? (
-                                                    files.map((file, index) => <FileMosaic {...file} key={index} preview info onDelete={onDelete} />)
-                                                ) : (
-                                                    <Form.Label>
-                                                        <i className="bi bi-cloud-arrow-up" style={{ fontSize: "5rem" }} />
-                                                    </Form.Label>
-                                                )}
-                                            </Dropzone>
-                                        </Modal.Body>
-                                        <Modal.Footer>
-                                            <Button variant="secondary" onClick={handleClose}>
-                                                Đóng
-                                            </Button>
-                                            <Button variant="primary" onClick={handleSetImage}>
-                                                Chọn ảnh
-                                            </Button>
-                                        </Modal.Footer>
-                                    </Modal>
+                                    <ModalComponent
+                                        show={show}
+                                        close={handleClose}
+                                        title="Thay đổi ảnh"
+                                        body={
+                                            <>
+                                                {/* Chọn hiệu dữ liệu */}
+                                                <Form.Group>
+                                                    <Form.Label>Chọn ảnh thay đổi</Form.Label>
+                                                    <Dropzone onChange={updateFiles} className="rounded-1" accept="image/*" maxFiles={1} multiple={false} value={files}>
+                                                        {files && files.length > 0 ? (
+                                                            files.map((file, index) => <FileMosaic {...file} key={index} preview info onDelete={onDelete} />)
+                                                        ) : (
+                                                            <Form.Label>
+                                                                <i className="bi bi-cloud-arrow-up" style={{ fontSize: "5rem" }} />
+                                                            </Form.Label>
+                                                        )}
+                                                    </Dropzone>
+                                                </Form.Group>
+                                            </>
+                                        }
+                                        footer={
+                                            <>
+                                                <ButtonsComponent type="button" variant="secondary" icon="close" title="Thoát ra" onClick={handleClose} />
+                                            </>
+                                        }
+                                    />
                                 </Form>
-                            </Box>
-                        </Col>
+                            </Row>
+                        </Container>
                         {/* End DataGrid */}
                     </Row>
                 </section>

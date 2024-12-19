@@ -7,7 +7,7 @@ import Title from "@/Containers/Title";
 const Body = ({ title, data }) => {
     return (
         <Container className="p-0">
-            <Row>
+            <Row className="row-cols-1">
                 <Col xs="12">
                     <Title props={title} />
                 </Col>

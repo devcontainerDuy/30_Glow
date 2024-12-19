@@ -8,6 +8,8 @@ use App\Models\Comments;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 class CommentsController extends Controller
 {
@@ -34,11 +36,11 @@ class CommentsController extends Controller
     {
         $this->data = $request->validated();
         $this->data['id_customer'] = Auth::user()->id;
-        $this->instance = $this->model::create($this->data);
-        if ($this->instance) {
+
+        if ($this->model::create($this->data)) {
             return response()->json(['check' => true, 'message' => 'Thành công!'], 200);
         }
-        return response()->json(['check' => false, 'message' => 'Thành công!'], 400);
+        return response()->json(['check' => false, 'message' => 'Thêm thất bại!'], 400);
     }
 
     public function update(Request $request, $id)
@@ -96,13 +98,18 @@ class CommentsController extends Controller
      */
     public function addComment(CommentsRequest $request)
     {
-        $this->data = $request->validated();
-        $this->data['id_customer'] = Auth::user()->id;
-        $this->instance = $this->model::create($this->data);
-        if ($this->instance) {
-            return response()->json(['check' => true, 'message' => 'Thành công!'], 200);
-        }
-        return response()->json(['check' => false, 'message' => 'Thành công!'], 400);
+        $data = $request->validated();
+        $data['id_customer'] = Auth::id();
+
+        return DB::transaction(function () use ($data) {
+            try {
+                $this->model::create($data);
+                return response()->json(['check' => true, 'message' => 'Thành công!'], 200);
+            } catch (\Throwable $e) {
+                Log::error("Lỗi ở phần thêm bình luận: " . $e->getMessage());
+                return response()->json(['check' => false, 'message' => 'Thêm thất bại!'], 400);
+            }
+        });
     }
 
     // public function addComment(CommentsRequest $request)

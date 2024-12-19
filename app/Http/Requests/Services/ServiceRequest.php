@@ -14,9 +14,9 @@ class ServiceRequest extends BaseRequest
     {
         return [
             'name' => ['required', 'string', 'max:255'],
-            'price' => ['required', 'numeric'],
-            'compare_price' => ['required', 'numeric'],
-            'discount' => ['required', 'numeric'],
+            'price' => ['required', 'numeric', 'min:0'],
+            'compare_price' => ['required', 'numeric', 'min:0'],
+            'discount' => ['required', 'numeric', 'min:0'],
             'summary' => ['required', 'string'],
             'id_collection' => ['required', 'exists:services_collections,id'],
             'image' => ['required', 'image', 'max:2048'],
@@ -31,9 +31,9 @@ class ServiceRequest extends BaseRequest
     {
         return [
             'name' => ['nullable', 'string', 'max:255'],
-            'price' => ['nullable', 'numeric'],
-            'compare_price' => ['nullable', 'numeric'],
-            'discount' => ['nullable', 'numeric'],
+            'price' => ['nullable', 'numeric', 'min:0'],
+            'compare_price' => ['nullable', 'numeric', 'min:0'],
+            'discount' => ['nullable', 'numeric', 'min:0'],
             'summary' => ['nullable', 'string'],
             'id_collection' => ['nullable', 'exists:services_collections,id'],
             'image' => ['nullable', 'image', 'max:2048'],
