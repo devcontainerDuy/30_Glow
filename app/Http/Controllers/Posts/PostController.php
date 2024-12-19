@@ -12,6 +12,7 @@ use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
 use Inertia\Inertia;
 use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Log;
 
 class PostController extends Controller
 {
@@ -47,20 +48,29 @@ class PostController extends Controller
      */
     public function store(PostRequest $request)
     {
-        $this->data = $request->validated();
-        $this->data['slug'] = Str::slug($this->data['title']);
+        $data = $request->validated();
+        $data['slug'] = Str::slug($data['title']);
         $file = $request->file('image');
         $imageName = $file->getClientOriginalName();
         $extractTo = storage_path('app/public/posts/');
-        $file->move($extractTo, $imageName);
 
-        $this->data['image'] = $imageName;
-        $this->instance = $this->model::create($this->data);
-        if ($this->instance) {
-            $this->data = $this->model::with('collection')->orderBy('id', 'desc')->get();
-            return response()->json(['check' => true, 'message' => 'Thêm thành công!', 'data' => $this->data], 201);
-        }
-        return response()->json(['check' => false, 'message' => 'Thêm thất bại!'], 400);
+        return DB::transaction(function () use ($data, $file, $imageName, $extractTo) {
+            try {
+                $file->move($extractTo, $imageName);
+                $data['image'] = $imageName;
+                $instance = $this->model::create($data);
+
+                if ($instance) {
+                    $data = $this->model::with('collection')->orderBy('id', 'desc')->get();
+                    return response()->json(['check' => true, 'message' => 'Thêm thành công!', 'data' => $data], 201);
+                }
+
+                return response()->json(['check' => false, 'message' => 'Thêm thất bại!'], 400);
+            } catch (\Throwable $e) {
+                Log::error("Lỗi ở phần thêm bài viết: " . $e->getMessage());
+                return response()->json(['check' => false, 'message' => 'Thêm thất bại!'], 400);
+            }
+        });
     }
 
     /**
