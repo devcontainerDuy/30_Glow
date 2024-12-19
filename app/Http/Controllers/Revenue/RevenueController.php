@@ -25,6 +25,9 @@ class RevenueController extends Controller
     }
     public function index()
     {
+        $this->crumbs = [
+            ['name' => 'Trang chủ', 'url' => '/admin/'],
+        ];
         // Doanh thu sản phẩm tháng hiện tại
         $currentMonthProductRevenue = Bills::whereMonth('created_at', now()->month)
             ->where('payment_status', 1)
@@ -152,6 +155,7 @@ class RevenueController extends Controller
 
         // Truyền tất cả dữ liệu vào trang Vue
         return Inertia::render('Home', [
+            'crumbs' => $this->crumbs,
             'products' => $totalProducts,
             'services' => $totalServices,
             'currentMonthProductRevenue' => $currentMonthProductRevenue,
@@ -390,6 +394,7 @@ class RevenueController extends Controller
     {
         $this->data = ServiceBillsDetails::with(['serviceBill', 'service'])
             ->where('id_service', $id)
+            ->where('status', 1)
             ->get();
 
         if ($this->data->isEmpty()) {
@@ -431,6 +436,7 @@ class RevenueController extends Controller
     {
         $this->data = $this->model::with(['customer'])
             ->where('id_customer', $id)
+            ->where('status', 1)
             ->get();
 
         if ($this->data->isEmpty()) {
@@ -476,6 +482,7 @@ class RevenueController extends Controller
 
         $this->data = $this->model::with(['serviceBillDetails.service'])
             ->whereBetween('created_at', [$startDate, $endDate])
+            ->where('status', 1)
             ->get();
 
         if ($this->data->isEmpty()) {

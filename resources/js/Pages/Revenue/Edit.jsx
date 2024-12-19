@@ -141,7 +141,8 @@ function Edit({ dailyRevenues, crumbs, date }) {
                 width: 180,
                 renderCell: (params) => {
                     const value = params.row.booking ? params.row.booking.time : params.row.payment_method;
-                    return <span>{value}</span>;
+                    const displayValue = value === "0" ? "Thanh toán khi nhận hàng" : value === "1" ? "Chuyển khoản" : value;
+                    return <span>{displayValue}</span>;
                 },
             },
             {
@@ -194,9 +195,6 @@ function Edit({ dailyRevenues, crumbs, date }) {
                         {/* Start DataGrid */}
                         <Col xs="12">
                             <Box sx={{ height: "70vh", width: "100%" }}>
-                                <div className="text-start">
-                                    <h4>Chi tiết doanh thu trong ngày</h4>
-                                </div>
                                 <Form encType="multipart/form-data">
                                     <Row className="row-gap-3">
                                         {/* Thông tin Booking */}
@@ -216,32 +214,37 @@ function Edit({ dailyRevenues, crumbs, date }) {
                                                             </Form.Group>
                                                             <Row className="row-gap-3">
                                                                 {specificData?.payment_method_totals ? (
-                                                                    Object.entries(specificData.payment_method_totals).map(([method, details], index) => (
-                                                                        <React.Fragment key={index}>
-                                                                            <Col md={6}>
-                                                                                <Form.Group className="mb-3" controlId={`payment-${method}`}>
-                                                                                    <Form.Label>Phương thức thanh toán</Form.Label>
-                                                                                    <Form.Control type="text" value={method} readOnly disabled />
-                                                                                </Form.Group>
-                                                                            </Col>
-                                                                            <Col md={6}>
-                                                                                <Form.Group className="mb-3" controlId={`paymentTotal-${method}`}>
-                                                                                    <Form.Label>Tổng tiền</Form.Label>
-                                                                                    <Form.Control
-                                                                                        type="text"
-                                                                                        value={
-                                                                                            details?.total_by_payment_method?.toLocaleString("vi-VN", {
-                                                                                                style: "currency",
-                                                                                                currency: "VND",
-                                                                                            }) || "Không có tổng tiền"
-                                                                                        }
-                                                                                        readOnly
-                                                                                        disabled
-                                                                                    />
-                                                                                </Form.Group>
-                                                                            </Col>
-                                                                        </React.Fragment>
-                                                                    ))
+                                                                    Object.entries(specificData.payment_method_totals).map(([method, details], index) => {
+                                                                        // Đổi tên phương thức thanh toán
+                                                                        const paymentMethodName = method === "0" ? "Thanh toán khi nhận hàng" : method === "1" ? "Chuyển khoản" : method;
+
+                                                                        return (
+                                                                            <React.Fragment key={index}>
+                                                                                <Col md={6}>
+                                                                                    <Form.Group className="mb-3" controlId={`payment-${method}`}>
+                                                                                        <Form.Label>Phương thức thanh toán</Form.Label>
+                                                                                        <Form.Control type="text" value={paymentMethodName} readOnly disabled />
+                                                                                    </Form.Group>
+                                                                                </Col>
+                                                                                <Col md={6}>
+                                                                                    <Form.Group className="mb-3" controlId={`paymentTotal-${method}`}>
+                                                                                        <Form.Label>Tổng tiền</Form.Label>
+                                                                                        <Form.Control
+                                                                                            type="text"
+                                                                                            value={
+                                                                                                details?.total_by_payment_method?.toLocaleString("vi-VN", {
+                                                                                                    style: "currency",
+                                                                                                    currency: "VND",
+                                                                                                }) || "Không có tổng tiền"
+                                                                                            }
+                                                                                            readOnly
+                                                                                            disabled
+                                                                                        />
+                                                                                    </Form.Group>
+                                                                                </Col>
+                                                                            </React.Fragment>
+                                                                        );
+                                                                    })
                                                                 ) : (
                                                                     <p></p>
                                                                 )}
@@ -250,33 +253,37 @@ function Edit({ dailyRevenues, crumbs, date }) {
                                                     </Card>
                                                 </Col>
                                                 <Col xs={12}>
-                                                    <Box sx={{ height: "70vh", width: "100%" }}>
-                                                        <DataGrid
-                                                            rows={product || []} // Dữ liệu sản phẩm
-                                                            columns={columns} // Cấu hình cột
-                                                            slots={{
-                                                                toolbar: GridToolbar,
-                                                            }}
-                                                            slotProps={{
-                                                                toolbar: {
-                                                                    showQuickFilter: true,
-                                                                    quickFilterProps: {
-                                                                        debounceMs: 500,
-                                                                    },
-                                                                },
-                                                            }}
-                                                            initialState={{
-                                                                pagination: {
-                                                                    paginationModel: {
-                                                                        pageSize: 20,
-                                                                    },
-                                                                },
-                                                            }}
-                                                            pageSizeOptions={[20, 40, 60, 80, 100]}
-                                                            checkboxSelection
-                                                            disableRowSelectionOnClick
-                                                        />
-                                                    </Box>
+                                                    <Card>
+                                                        <Card.Body>
+                                                            <Box sx={{ height: "70vh", width: "100%" }}>
+                                                                <DataGrid
+                                                                    rows={product || []} // Dữ liệu sản phẩm
+                                                                    columns={columns} // Cấu hình cột
+                                                                    slots={{
+                                                                        toolbar: GridToolbar,
+                                                                    }}
+                                                                    slotProps={{
+                                                                        toolbar: {
+                                                                            showQuickFilter: true,
+                                                                            quickFilterProps: {
+                                                                                debounceMs: 500,
+                                                                            },
+                                                                        },
+                                                                    }}
+                                                                    initialState={{
+                                                                        pagination: {
+                                                                            paginationModel: {
+                                                                                pageSize: 20,
+                                                                            },
+                                                                        },
+                                                                    }}
+                                                                    pageSizeOptions={[20, 40, 60, 80, 100]}
+                                                                    checkboxSelection
+                                                                    disableRowSelectionOnClick
+                                                                />
+                                                            </Box>
+                                                        </Card.Body>
+                                                    </Card>
                                                 </Col>
                                             </Row>
                                         </Col>

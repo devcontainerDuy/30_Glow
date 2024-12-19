@@ -31,6 +31,7 @@ function Index({ dailyRevenues, crumbs }) {
         const formattedDate = new Date(date).toISOString().split("T")[0];
         router.visit(`/admin/${route}/${formattedDate}/edit`, {
             method: "get",
+            method: "get",
         });
     };
 
@@ -102,14 +103,16 @@ function Index({ dailyRevenues, crumbs }) {
                                                 ? (() => {
                                                       const paymentTotals = {};
 
-                                                      // Tính tổng tiền của mỗi phương thức thanh toán từ tất cả các ngày
                                                       data?.forEach((specificData) => {
                                                           if (specificData.payment_method_totals) {
                                                               Object.entries(specificData.payment_method_totals).forEach(([method, details]) => {
-                                                                  if (paymentTotals[method]) {
-                                                                      paymentTotals[method] += details.total_by_payment_method;
+                                                                  // Đổi tên phương thức thanh toán
+                                                                  const paymentMethodName = method === "0" ? "Tiền mặt" : method === "1" ? "Chuyển khoản" : method;
+
+                                                                  if (paymentTotals[paymentMethodName]) {
+                                                                      paymentTotals[paymentMethodName] += details.total_by_payment_method;
                                                                   } else {
-                                                                      paymentTotals[method] = details.total_by_payment_method;
+                                                                      paymentTotals[paymentMethodName] = details.total_by_payment_method;
                                                                   }
                                                               });
                                                           }
