@@ -206,12 +206,6 @@ class BillController extends Controller
                             ->orWhere('phone', $data['phone']);
                     })->active()->first();
 
-                    if ($existingCustomer && $existingCustomer->phone === $data['phone']) {
-                        return response()->json(['check' => false, 'message' => 'Số điện thoại đã có người dùng!'], 401);
-                    } elseif ($existingCustomer && $existingCustomer->email === $data['email']) {
-                        return response()->json(['check' => false, 'message' => 'Email đã có người dùng!'], 401);
-                    }
-
                     $password = Str::random(10);
                     $customer = Customers::create([
                         'uid' => $this->createCodeCustomer(),
