@@ -168,7 +168,6 @@ class BillController extends Controller
 
         return DB::transaction(function () use ($data) {
             try {
-
                 if ($data['uid'] !== null && !empty($data['cart'])) {
                     $customer = Customers::where('uid', $data['uid'])->active()->first();
                     $customer->load('carts.product');

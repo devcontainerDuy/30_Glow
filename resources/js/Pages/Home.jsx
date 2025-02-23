@@ -52,7 +52,7 @@ function Home({
     const pieData = [
         { name: "Sản phẩm", value: parseFloat(currentMonthProductRevenue) || 0 },
         { name: "Dịch vụ", value: parseFloat(currentMonthServiceRevenue) || 0 },
-    ];  
+    ];
 
     const COLORS = ["#0088FE", "#00C49F"];
 
@@ -189,7 +189,7 @@ function Home({
                                 <Card.Body>
                                     <Row className="align-items-center">
                                         <Col xs={4}>
-                                            <img src={`/storage/gallery/${bestSellingProduct.image}`} alt={bestSellingProduct?.name} className="img-fluid rounded" style={{ maxHeight: "80px" }} />
+                                            <img src={`/storage/gallery/${bestSellingProduct?.image}`} alt={bestSellingProduct?.name} className="img-fluid rounded" style={{ maxHeight: "80px" }} />
                                         </Col>
                                         <Col xs={8}>
                                             <Card.Title className="text-uppercase text-muted mb-1">Sản phẩm bán chạy</Card.Title>

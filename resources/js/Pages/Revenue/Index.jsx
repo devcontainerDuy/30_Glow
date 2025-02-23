@@ -31,7 +31,6 @@ function Index({ dailyRevenues, crumbs }) {
         const formattedDate = new Date(date).toISOString().split("T")[0];
         router.visit(`/admin/${route}/${formattedDate}/edit`, {
             method: "get",
-            method: "get",
         });
     };
 

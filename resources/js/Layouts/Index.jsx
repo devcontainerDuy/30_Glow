@@ -37,7 +37,7 @@ import ContentPasteSearchOutlinedIcon from "@mui/icons-material/ContentPasteSear
 import ConfirmationNumberOutlinedIcon from "@mui/icons-material/ConfirmationNumberOutlined";
 import ArticleOutlinedIcon from "@mui/icons-material/ArticleOutlined";
 import ReceiptOutlinedIcon from "@mui/icons-material/ReceiptOutlined";
-import CommentOutlinedIcon from '@mui/icons-material/CommentOutlined';
+import CommentOutlinedIcon from "@mui/icons-material/CommentOutlined";
 
 function Layout({ children }) {
     const [user, setUser] = useState(null);
@@ -155,7 +155,7 @@ function Layout({ children }) {
             <ToastContainer autoClose={2000} />
             {/* Alert notification */}
 
-            <Container fluid id="app" className="p-0 my-0" style={({ height: "100vh" }, { display: "flex" })}>
+            <Container fluid id="app" className="p-0 my-0" style={({ width: "100vw" }, { height: "100vh" }, { display: "flex" })}>
                 <Sidebar style={{ height: "100vh" }} collapsed={!isExpanded}>
                     <Menu>
                         <MenuItem icon={<MenuOutlinedIcon />} onClick={() => handleToggle()} style={{ textAlign: "center" }}>
