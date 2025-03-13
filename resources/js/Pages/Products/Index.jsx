@@ -310,8 +310,6 @@ function Index({ products, trashs, crumbs, categories, brands }) {
                             <ButtonsComponent type="button" variant="primary" icon="add" title="Thêm mới" onClick={handleShow} />
                         </BreadcrumbComponent>
 
-                        <h1>hehehe</h1>
-
                         {/* Start Modal */}
                         <ModalComponent
                             show={show}
