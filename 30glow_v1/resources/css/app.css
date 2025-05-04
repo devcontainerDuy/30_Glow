@@ -1,0 +1,46 @@
+#cke_notifications_area_editor .cke_notification_warning {
+    display: none !important;
+}
+
+#typing-text {
+    font-family: monospace;
+    white-space: nowrap;
+    overflow: hidden;
+    /* border-right: 0.15em solid orange;
+    animation: typing 3.5s steps(40, end), blink-caret 0.75s step-end infinite; */
+}
+
+@keyframes typing {
+    from {
+        width: 0;
+    }
+
+    to {
+        width: 100%;
+    }
+}
+
+@keyframes blink-caret {
+
+    from,
+    to {
+        border-color: transparent;
+    }
+
+    50% {
+        border-color: orange;
+    }
+}
+
+.marquee-text {
+    background: linear-gradient(to right, #ff8983 17.85%, #7f0e7f 53.28%, #007a65 100%);
+    background-clip: text;
+    color: transparent;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    font-size: 20px;
+    font-weight: bold;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    width: 100%;
+}
