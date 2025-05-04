@@ -17,5 +17,11 @@ Route::group(['prefix' => 'laravel-filemanager', 'middleware' => ['web', 'auth']
     \UniSharp\LaravelFilemanager\Lfm::routes();
 });
 
+// XML Sitemap
+Route::get('/sitemap.xml', function () {
+    $sitemaps = \App\Models\Sitemap::where('status', 1)->get();
+    return response()->view('sitemap.xml', ['items' => $sitemaps])->header('Content-Type', 'application/xml');
+})->name('sitemap');
+
 require __DIR__ . '/settings.php';
 require __DIR__ . '/auth.php';

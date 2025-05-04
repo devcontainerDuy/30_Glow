@@ -2,11 +2,12 @@
 
 namespace App\Enums;
 
-enum ServiceStatus: int
+enum Status: int
 {
     case DRAFT = 0;
-    case PUBLISHED = 1;
-    case ARTICLE = 2;
+    case ARTICLE = 1;
+    case PUBLISHED = 2;
+    case ARCHIVED = 3;
 
     public static function values(): array
     {

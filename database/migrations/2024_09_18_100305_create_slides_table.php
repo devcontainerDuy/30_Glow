@@ -14,11 +14,10 @@ return new class extends Migration
         Schema::create('slides', function (Blueprint $table) {
             $table->id();
             $table->string('name');
-            $table->string('slug');
-            $table->tinyInteger('status')->default(0);
+            $table->string('slug')->unique();
+            $table->tinyInteger('is_active')->default(0)->index();
             $table->string('url')->nullable();
-            $table->string('desktop')->nullable();
-            $table->string('mobile')->nullable();
+            $table->string('image_path')->nullable();
             $table->timestamps();
             $table->softDeletes();
         });

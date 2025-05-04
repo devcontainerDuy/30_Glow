@@ -1,6 +1,8 @@
 <?php
 
-use App\Enums\ServiceStatus;
+use App\Enums\BookingStatus;
+use App\Enums\ServiceBillStatus;
+use App\Enums\Status;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
@@ -31,7 +33,7 @@ return new class extends Migration {
             $table->foreignId('collection_id')->constrained('services_collections')->onDelete('restrict');
             $table->string('image_path')->nullable();
             $table->longText('content');
-            $table->enum('status', ServiceStatus::values())->default(ServiceStatus::DRAFT);
+            $table->enum('status', Status::values())->default(Status::DRAFT);
             $table->boolean('is_highlighted')->default(false);
             $table->timestamps();
             $table->softDeletes();
@@ -41,14 +43,30 @@ return new class extends Migration {
 
         Schema::create('bookings', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('user_id')->nullable()->constrained()->onDelete('set null');
             $table->foreignId('customer_id')->constrained()->onDelete('restrict');
+            $table->foreignId('user_id')->nullable()->constrained()->onDelete('set null'); // Nhân viên được chỉ định
+            $table->foreignId('assigned_user_id')->nullable()->constrained('users')->onDelete('set null'); // Nhân viên được phân công
+            $table->foreignId('service_id')->constrained()->onDelete('restrict');
             $table->dateTime('booking_time');
+            $table->dateTime('estimated_end_time')->nullable(); // Thời gian dự kiến kết thúc
+            $table->dateTime('actual_start_time')->nullable(); // Thời gian bắt đầu thực tế
+            $table->dateTime('actual_end_time')->nullable(); // Thời gian kết thúc thực tế
+            $table->enum('status', BookingStatus::values())->default(BookingStatus::PENDING->value);
             $table->text('note')->nullable();
-            $table->enum('status', ['pending', 'confirmed', 'cancelled', 'completed'])->default('pending');
             $table->timestamps();
 
+            // Index cho các trường query thường xuyên
             $table->index(['booking_time', 'status']);
+            $table->index(['assigned_user_id', 'booking_time']);
+        });
+
+        Schema::create('booking_status_histories', function (Blueprint $table) {
+            $table->id();
+            $table->foreignId('booking_id')->constrained()->onDelete('cascade');
+            $table->enum('status', BookingStatus::values());
+            $table->foreignId('changed_by')->nullable()->constrained('users')->onDelete('set null');
+            $table->text('notes')->nullable();
+            $table->timestamps();
         });
 
         Schema::create('service_bills', function (Blueprint $table) {
@@ -56,14 +74,11 @@ return new class extends Migration {
             $table->uuid('uid')->unique();
             $table->foreignId('customer_id')->constrained()->onDelete('restrict');
             $table->foreignId('booking_id')->constrained()->unique()->onDelete('restrict');
-            $table->foreignId('voucher_id')
-                ->nullable()
-                ->constrained('vouchers')
-                ->onDelete('set null');
+            $table->foreignId('voucher_id')->nullable()->constrained('vouchers')->onDelete('set null');
             $table->decimal('subtotal', 10, 2); // Tổng tiền trước thuế
             $table->decimal('tax_amount', 10, 2)->default(0);
             $table->decimal('total', 10, 2)->storedAs('subtotal + tax_amount'); // Tự động tính
-            $table->enum('status', ['draft', 'pending', 'paid', 'cancelled', 'refunded'])->default('draft');
+            $table->enum('status', ServiceBillStatus::values())->default(ServiceBillStatus::DRAFT->value);
             $table->timestamps();
 
             $table->index(['customer_id', 'status']);
@@ -89,6 +104,7 @@ return new class extends Migration {
     {
         Schema::dropIfExists('service_transactions');
         Schema::dropIfExists('service_bills');
+        Schema::dropIfExists('booking_status_histories');
         Schema::dropIfExists('bookings');
         Schema::dropIfExists('services');
         Schema::dropIfExists('services_collections');
