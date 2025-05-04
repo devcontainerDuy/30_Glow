@@ -13,15 +13,14 @@ return new class extends Migration
     {
         Schema::create('sitemaps', function (Blueprint $table) {
             $table->id();
-            $table->string('url');                     // URL đầy đủ: https://domain.com/page
-            $table->timestamp('lastmod')->nullable(); // Ngày cập nhật gần nhất
-            $table->string('changefreq')->nullable(); // daily, weekly, monthly, yearly...
-            $table->decimal('priority', 2, 1)->nullable(); // 0.1 - 1.0
-            $table->tinyInteger('status')->default(1); // 1 = active, 0 = inactive
+            $table->string('page');
+            $table->tinyInteger('static_page')->default(0);
+            $table->longText('content')->nullable();
+            $table->string('url')->nullable();
+            $table->tinyInteger('status')->default(1);
             $table->timestamps();
             $table->softDeletes();
         });
-
     }
 
     /**
