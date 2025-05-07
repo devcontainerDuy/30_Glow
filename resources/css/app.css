@@ -68,6 +68,7 @@
   color utility to any element that depends on these defaults.
 */
 @layer base {
+
     *,
     ::after,
     ::before,
@@ -156,4 +157,22 @@
     body {
         @apply bg-background text-foreground;
     }
+}
+
+.heart {
+    animation: pulse 5s ease infinite;
+}
+
+@keyframes pulse {
+    0% {
+            scale: 100%;
+        }
+    
+        50% {
+            scale: 150%;
+        }
+    
+        100% {
+            scale: 100%;
+        }
 }

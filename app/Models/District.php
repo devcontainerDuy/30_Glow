@@ -1,29 +1,51 @@
 <?php
 
+/**
+ * Created by Reliese Model.
+ */
+
 namespace App\Models;
 
+use Carbon\Carbon;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
 
+/**
+ * Class District
+ * 
+ * @property int $id
+ * @property string $name
+ * @property string $gso_id
+ * @property int $province_id
+ * @property Carbon|null $created_at
+ * @property Carbon|null $updated_at
+ * 
+ * @property Province $province
+ * @property Collection|Ward[] $wards
+ *
+ * @package App\Models
+ */
 class District extends Model
 {
-    protected function __construct( array $attributes = []) 
-    {
-        parent::__construct($attributes);
-        $this->setTable(config('gso.tables.districts'));
-        $this->fillable([
-            config('gso.columns.name'),
-            config('gso.columns.gso_id'),
-            config('gso.columns.province_id'),
-        ]);
-    }
+	protected $table = 'districts';
 
-    public function province()
-    {
-        return $this->belongsTo(Province::class, 'province_id', 'id');
-    }
+	protected $casts = [
+		'province_id' => 'int'
+	];
 
-    public function ward()
-    {
-        return $this->hasMany(Ward::class, 'ward_id', 'id');
-    }
+	protected $fillable = [
+		'name',
+		'gso_id',
+		'province_id'
+	];
+
+	public function province()
+	{
+		return $this->belongsTo(Province::class);
+	}
+
+	public function wards()
+	{
+		return $this->hasMany(Ward::class);
+	}
 }

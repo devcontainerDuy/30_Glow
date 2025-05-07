@@ -1,23 +1,39 @@
 <?php
 
+/**
+ * Created by Reliese Model.
+ */
+
 namespace App\Models;
 
+use Carbon\Carbon;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
 
+/**
+ * Class Province
+ * 
+ * @property int $id
+ * @property string $name
+ * @property string $gso_id
+ * @property Carbon|null $created_at
+ * @property Carbon|null $updated_at
+ * 
+ * @property Collection|District[] $districts
+ *
+ * @package App\Models
+ */
 class Province extends Model
 {
-    protected function __construct( array $attributes = []) 
-    {
-        parent::__construct($attributes);
-        $this->setTable(config('gso.tables.provinces'));
-        $this->fillable([
-            config('gso.columns.name'),
-            config('gso.columns.gso_id'),
-        ]);
-    }
+	protected $table = 'provinces';
 
-    public function district()
-    {
-        return $this->hasMany(District::class, 'district_id', 'id');
-    }
+	protected $fillable = [
+		'name',
+		'gso_id'
+	];
+
+	public function districts()
+	{
+		return $this->hasMany(District::class);
+	}
 }

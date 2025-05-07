@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
 use App\Models\User;
+use App\Traits\GeneratesUniqueId;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -15,6 +16,7 @@ use Inertia\Response;
 
 class RegisteredUserController extends Controller
 {
+    use GeneratesUniqueId;
     /**
      * Show the registration page.
      */
@@ -37,6 +39,7 @@ class RegisteredUserController extends Controller
         ]);
 
         $user = User::create([
+            'uid' => $this->generateUUIDv4(false),
             'name' => $request->name,
             'email' => $request->email,
             'password' => Hash::make($request->password),
