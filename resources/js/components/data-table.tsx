@@ -63,10 +63,10 @@ export function DataTable<TData, TValue>({
 
     return (
         <div className="w-full">
-            <div className="flex items-center p-4">
+            <div className="flex items-center gap-2 p-4">
                 {searchKey && (
                     <Input
-                        placeholder={`Filter ${searchKey}...`}
+                        placeholder={`Tìm kiếm ${searchKey}...`}
                         value={(table.getColumn(searchKey)?.getFilterValue() as string) ?? ''}
                         onChange={(event) => table.getColumn(searchKey)?.setFilterValue(event.target.value)}
                         className="max-w-sm"
@@ -76,7 +76,7 @@ export function DataTable<TData, TValue>({
                     <DropdownMenu>
                         <DropdownMenuTrigger asChild>
                             <Button variant="outline" className="ml-auto">
-                                Columns <ChevronDown />
+                                Cột hình thức <ChevronDown />
                             </Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end">
@@ -132,7 +132,7 @@ export function DataTable<TData, TValue>({
                             ) : (
                                 <TableRow>
                                     <TableCell colSpan={columns.length} className="h-24 text-center">
-                                        No results.
+                                        Không có kết quả.
                                     </TableCell>
                                 </TableRow>
                             )}
@@ -144,16 +144,16 @@ export function DataTable<TData, TValue>({
                 <div className="flex items-center justify-between space-x-2 p-4">
                     {showRowSelection && (
                         <div className="text-muted-foreground text-sm">
-                            {table.getFilteredSelectedRowModel().rows.length} of {table.getFilteredRowModel().rows.length} row(s) selected.
+                            {table.getFilteredSelectedRowModel().rows.length} trong {table.getFilteredRowModel().rows.length} hàng được chọn.
                         </div>
                     )}
                     {showPagination && (
                         <div className="space-x-2">
                             <Button variant="outline" size="sm" onClick={() => table.previousPage()} disabled={!table.getCanPreviousPage()}>
-                                Previous
+                                Trang trước
                             </Button>
                             <Button variant="outline" size="sm" onClick={() => table.nextPage()} disabled={!table.getCanNextPage()}>
-                                Next
+                                Trang sau
                             </Button>
                         </div>
                     )}

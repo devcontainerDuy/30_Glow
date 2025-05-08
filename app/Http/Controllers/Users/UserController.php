@@ -11,7 +11,6 @@ class UserController extends Controller
 {
     public function __construct()
     {
-        parent::__construct();
         $this->model = User::class;
     }
     
@@ -29,7 +28,7 @@ class UserController extends Controller
      */
     public function create()
     {
-        //
+        return Inertia::render('users/created');
     }
 
     /**
@@ -37,7 +36,7 @@ class UserController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        dd($request->all());
     }
 
     /**

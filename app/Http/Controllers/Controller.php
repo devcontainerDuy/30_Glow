@@ -34,13 +34,11 @@ abstract class Controller
      * Constructor to initialize properties.
      */
     public function __construct(
-        ?string $instance = null,
         ?string $model = null,
         ?string $request = null,
         ?string $service = null,
         ?string $repository = null
     ) {
-        $this->instance = $instance;
         $this->model = $model;
         $this->request = $request;
         $this->service = $service;

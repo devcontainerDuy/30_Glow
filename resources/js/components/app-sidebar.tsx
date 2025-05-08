@@ -9,25 +9,25 @@ import AppLogo from './app-logo';
 
 const mainNavItems: NavItem[] = [
     {
-        title: 'Dashboard',
+        title: 'Bảng điều khiển',
         href: '/dashboard',
         icon: LayoutGrid,
     },
     {
-        title: 'Users',
+        title: 'Tài khoản',
         href: '/#',
         icon: User,
         items: [
             {
-                title: 'Users',
+                title: 'Người dùng',
                 url: '/users',
             },
             {
-                title: 'Roles',
+                title: 'Vai trò',
                 url: '/roles',
             },
             {
-                title: 'Permissions',
+                title: 'Quyền hạn',
                 url: '/permissions',
             },
         ],
