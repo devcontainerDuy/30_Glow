@@ -31,3 +31,13 @@ export interface User {
     deleted_at?: string | null;
     [key: string]: unknown; // This allows for additional properties...
 }
+
+
+export type UserForm = {
+    name: string;
+    email: string;
+    phone: string;
+    address: string;
+    password: string;
+    confirmed: string;
+};

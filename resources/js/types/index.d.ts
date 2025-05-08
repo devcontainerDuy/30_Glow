@@ -1,5 +1,6 @@
 import type { LucideIcon } from 'lucide-react';
 export * from './users';
+export * from './maps';
 
 export interface BreadcrumbItem {
     title: string;
