@@ -4,32 +4,66 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { getDistricts, getProvinces, getWards } from '@/services/getMaps.service';
-import type {  District, Provinces, UserForm, Ward } from '@/types';
+import type { District, Provinces, UserForm, Ward } from '@/types';
 import { useEffect, useMemo, useState } from 'react';
 import { toast } from 'sonner';
 
+type AddressSelectProps = {
+    label: string;
+    id: string;
+    placeholder: string;
+    items?: { id: number; name: string }[] | null;
+    onValueChange: (value: string) => void;
+    disabled?: boolean;
+};
 
+const AddressSelect = ({ label, id, placeholder, items, onValueChange, disabled }: AddressSelectProps) => (
+    <div className="grid grid-cols-4 items-center gap-4">
+        <Label htmlFor={id} className="text-right">
+            {label}
+        </Label>
+        <Select onValueChange={onValueChange} disabled={disabled || !items}>
+            <SelectTrigger className="col-span-3">
+                <SelectValue placeholder={placeholder} />
+            </SelectTrigger>
+            <SelectContent>
+                {items?.map((item) => (
+                    <SelectItem key={item.id} value={item.id.toString()}>
+                        {item.name}
+                    </SelectItem>
+                ))}
+            </SelectContent>
+        </Select>
+    </div>
+);
 
 export function DialogMaps({ data, setData }: { data: UserForm; setData: (key: keyof UserForm, value: string) => void }) {
     const [open, setOpen] = useState(false);
     const [provinces, setProvinces] = useState<Provinces | null>(null);
     const [districts, setDistricts] = useState<District[] | null>(null);
     const [wards, setWards] = useState<Ward[] | null>(null);
-    const [street, setStreet] = useState<string | null>(null);
-    
-    const [selectedProvince, setSelectedProvince] = useState<string | null>(null);
-    const [selectedDistrict, setSelectedDistrict] = useState<string | null>(null);
-    const [selectedWard, setSelectedWard] = useState<string | null>(null);
+    const [street, setStreet] = useState('');
+    const [selected, setSelected] = useState({
+        province: null as string | null,
+        district: null as string | null,
+        ward: null as string | null,
+    });
 
-    const provinceName = useMemo(() => provinces?.data.find((p) => p.id.toString() === selectedProvince)?.name || '', [provinces, selectedProvince]);
-    const districtName = useMemo(() => districts?.find((d) => d.id.toString() === selectedDistrict)?.name || '', [districts, selectedDistrict]);
-    const wardName = useMemo(() => wards?.find((w) => w.id.toString() === selectedWard)?.name || '', [wards, selectedWard]);
+    const { province: selectedProvince, district: selectedDistrict, ward: selectedWard } = selected;
+
+    const addressParts = useMemo(
+        () => ({
+            province: provinces?.data.find((p) => p.id.toString() === selectedProvince)?.name || '',
+            district: districts?.find((d) => d.id.toString() === selectedDistrict)?.name || '',
+            ward: wards?.find((w) => w.id.toString() === selectedWard)?.name || '',
+        }),
+        [provinces, districts, wards, selectedProvince, selectedDistrict, selectedWard],
+    );
 
     useEffect(() => {
         const fetchProvinces = async () => {
             try {
-                const data = await getProvinces();
-                setProvinces(data);
+                setProvinces(await getProvinces());
             } catch (error) {
                 console.error('Lỗi khi lấy danh sách tỉnh/thành phố:', error);
             }
@@ -39,13 +73,9 @@ export function DialogMaps({ data, setData }: { data: UserForm; setData: (key: k
 
     const handleProvinceChange = async (id: string) => {
         try {
-            setSelectedProvince(id);
-            setSelectedDistrict(null);
-            setSelectedWard(null);
+            setSelected({ province: id, district: null, ward: null });
             setWards(null);
-
-            const districtsData = await getDistricts(Number(id));
-            setDistricts(districtsData.data); // districtsData.data should be District[]
+            setDistricts((await getDistricts(Number(id))).data);
         } catch (error) {
             console.error('Lỗi khi lấy danh sách quận/huyện:', error);
         }
@@ -53,11 +83,8 @@ export function DialogMaps({ data, setData }: { data: UserForm; setData: (key: k
 
     const handleDistrictChange = async (id: string) => {
         try {
-            setSelectedDistrict(id);
-            setSelectedWard(null);
-
-            const wardsData = await getWards(Number(id));
-            setWards(wardsData.data); // wardsData.data should be Ward[]
+            setSelected((prev) => ({ ...prev, district: id, ward: null }));
+            setWards((await getWards(Number(id))).data);
         } catch (error) {
             console.error('Lỗi khi lấy danh sách phường/xã:', error);
         }
@@ -68,16 +95,14 @@ export function DialogMaps({ data, setData }: { data: UserForm; setData: (key: k
             toast.error('Vui lòng nhập đầy đủ địa chỉ');
             return;
         }
-
-        const fullAddress = `${street}, ${wardName}, ${districtName}, ${provinceName}`;
-        setData('address', fullAddress);
+        setData('address', `${street}, ${addressParts.ward}, ${addressParts.district}, ${addressParts.province}`);
         setOpen(false);
     };
 
     return (
         <Dialog open={open} onOpenChange={setOpen}>
             <DialogTrigger asChild>
-                <Input id="address" placeholder="Nhập địa chỉ" value={data.address} readOnly />
+                <Input className="text-left" id="address" placeholder="Nhập địa chỉ" value={data.address} readOnly />
             </DialogTrigger>
             <DialogContent className="sm:max-w-[425px]">
                 <DialogHeader>
@@ -108,7 +133,7 @@ export function DialogMaps({ data, setData }: { data: UserForm; setData: (key: k
                         id="ward"
                         placeholder="Chọn phường/xã"
                         items={wards}
-                        onValueChange={setSelectedWard}
+                        onValueChange={(id) => setSelected((prev) => ({ ...prev, ward: id }))}
                         disabled={!selectedDistrict}
                     />
 
@@ -120,7 +145,7 @@ export function DialogMaps({ data, setData }: { data: UserForm; setData: (key: k
                             id="street"
                             placeholder="Nhập địa chỉ cụ thể"
                             className="col-span-3"
-                            value={street as string}
+                            value={street}
                             onChange={(e) => setStreet(e.target.value)}
                         />
                     </div>
@@ -133,41 +158,5 @@ export function DialogMaps({ data, setData }: { data: UserForm; setData: (key: k
                 </DialogFooter>
             </DialogContent>
         </Dialog>
-    );
-}
-
-export function AddressSelect({
-    label,
-    id,
-    placeholder,
-    items,
-    onValueChange,
-    disabled = false,
-}: {
-    label: string;
-    id: string;
-    placeholder: string;
-    items?: { id: number; name: string }[] | null;
-    onValueChange: (value: string) => void;
-    disabled?: boolean;
-}) {
-    return (
-        <div className="grid grid-cols-4 items-center gap-4">
-            <Label htmlFor={id} className="text-right">
-                {label}
-            </Label>
-            <Select onValueChange={onValueChange} disabled={disabled}>
-                <SelectTrigger className="col-span-3">
-                    <SelectValue id={id} placeholder={placeholder} />
-                </SelectTrigger>
-                <SelectContent>
-                    {items?.map((item) => (
-                        <SelectItem key={item.id} value={item.id.toString()}>
-                            {item.name}
-                        </SelectItem>
-                    ))}
-                </SelectContent>
-            </Select>
-        </div>
     );
 }
