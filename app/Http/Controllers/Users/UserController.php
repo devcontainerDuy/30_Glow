@@ -3,8 +3,8 @@
 namespace App\Http\Controllers\Users;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\User\UserRequest;
 use App\Models\User;
-use Illuminate\Http\Request;
 use Inertia\Inertia;
 
 class UserController extends Controller
@@ -12,6 +12,7 @@ class UserController extends Controller
     public function __construct()
     {
         $this->model = User::class;
+        $this->request = UserRequest::class;
     }
     
     /**
@@ -34,9 +35,9 @@ class UserController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request)
+    public function store()
     {
-        dd($request->all());
+        dd(request()->all());
     }
 
     /**
@@ -58,7 +59,7 @@ class UserController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, string $id)
+    public function update( string $id)
     {
         //
     }

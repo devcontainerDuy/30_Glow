@@ -32,6 +32,12 @@ const AddressSelect = ({ label, id, placeholder, items, onValueChange, disabled 
                         {item.name}
                     </SelectItem>
                 ))}
+
+                {!items?.length && (
+                    <SelectItem value="0" disabled>
+                        Không có dữ liệu
+                    </SelectItem>
+                )}
             </SelectContent>
         </Select>
     </div>
