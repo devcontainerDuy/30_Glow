@@ -23,26 +23,26 @@ interface EloquentRepositoryInterface
      * Create a new record in the repository.
      *
      * @param array $data
-     * @return mixed
+     * @return array
      */
-    public function created(array $data): array;
+    public function create(array $data): array;
 
     /**
      * Update an existing record in the repository.
      *
      * @param int $id
      * @param array $data
-     * @return mixed
+     * @return array
      */
-    public function updated(int $id, array $data): array|bool;
+    public function update(int $id, array $data): array|bool;
 
     /**
      * Delete a record from the repository.
      *
      * @param int $id
-     * @return mixed
+     * @return array
      */
-    public function deleted(int $id): bool;
+    public function delete(int $id): bool;
 
     /**
      * Get a paginated list of records from the repository.

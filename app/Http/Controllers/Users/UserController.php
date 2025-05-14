@@ -4,14 +4,12 @@ namespace App\Http\Controllers\Users;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\User\UserRequest;
-use App\Models\User;
 use Inertia\Inertia;
 
 class UserController extends Controller
 {
     public function __construct()
     {
-        $this->model = User::class;
         $this->request = UserRequest::class;
     }
     
@@ -20,7 +18,6 @@ class UserController extends Controller
      */
     public function index()
     {
-        $this->instance = $this->model::with('roles')->get();
         return Inertia::render('users/index');
     }
 

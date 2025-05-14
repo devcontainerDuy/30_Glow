@@ -11,11 +11,6 @@ abstract class Controller
     protected ?string $instance;
 
     /**
-     * The name of the model to be used for the controller.
-     */
-    protected ?string $model;
-
-    /**
      * The name of the form request to be used for the controller.
      */
     protected ?string $request;
@@ -26,22 +21,13 @@ abstract class Controller
     protected ?string $service;
 
     /**
-     * The name of the repository to be used for the controller.
-     */
-    protected ?string $repository;
-
-    /**
      * Constructor to initialize properties.
      */
     public function __construct(
-        ?string $model = null,
         ?string $request = null,
         ?string $service = null,
-        ?string $repository = null
     ) {
-        $this->model = $model;
         $this->request = $request;
         $this->service = $service;
-        $this->repository = $repository;
     }
 }

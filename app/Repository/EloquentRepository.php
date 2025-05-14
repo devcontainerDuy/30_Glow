@@ -46,13 +46,45 @@ abstract class EloquentRepository implements EloquentRepositoryInterface
     public function setModel(): void
     {
         //other -> new Model
-        $this->model = app()->make($this->getModel());
+        $model = app()->make($this->getModel());
+        $this->model = $model->newQuery();
+    }
+
+    /**
+     * Get the model instance.
+     *
+     * @return \Illuminate\Database\Eloquent\Model
+     */
+    public function beginTransaction(): void
+    {
+        $this->model->getConnection()->beginTransaction();
+    }
+
+    /**
+     * Commit the transaction.
+     *
+     * @return void
+     */
+    public function commit(): void
+    {
+        $this->model->getConnection()->commit();
+    }
+
+    /**
+     * Rollback the transaction.
+     *
+     * @return void
+     */
+    public function rollBack(): void
+    {
+        $this->model->getConnection()->rollBack();
     }
 
     /**
      * Get all records from the repository.
      *
-     * @return mixed
+     * @return array
+     * @throws \Exception
      */
     public function getAll(): array
     {
@@ -63,7 +95,8 @@ abstract class EloquentRepository implements EloquentRepositoryInterface
      * Find a record by its ID.
      *
      * @param int $id
-     * @return mixed
+     * @return array
+     * @throws \Exception
      */
     public function find(int $id): ?array
     {
@@ -77,7 +110,7 @@ abstract class EloquentRepository implements EloquentRepositoryInterface
      * @param array $data
      * @return mixed
      */
-    public function created(array $data): array
+    public function create(array $data): array
     {
         return $this->model->create($data)->toArray();
     }
@@ -89,7 +122,7 @@ abstract class EloquentRepository implements EloquentRepositoryInterface
      * @param array $data
      * @return mixed
      */
-    public function updated(int $id, array $data): bool
+    public function update(int $id, array $data): bool
     {
         $this->instance = $this->model->find($id);
         return $this->instance ? $this->instance->update($data) : false;
@@ -99,9 +132,9 @@ abstract class EloquentRepository implements EloquentRepositoryInterface
      * Delete a record from the repository.
      *
      * @param int $id
-     * @return mixed
+     * @return array
      */
-    public function deleted(int $id): bool
+    public function delete(int $id): bool
     {
         $this->instance = $this->model->find($id);
         return $this->instance ? $this->instance->delete() : false;
