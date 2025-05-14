@@ -50,13 +50,9 @@ class SlidesController extends Controller
         $this->data['slug'] = Str::slug($this->data['name']);
 
         $desktopImages = $request->file('desktop');
-        $mobileImages = $request->file('mobile');
-        if (count($desktopImages) !== count($mobileImages)) {
-            return response()->json(['check' => false, 'message' => 'Hãy thêm số lượng ảnh bằng nhau!'], 400);
-        }
         // Lưu từng cặp slide
         for ($i = 0; $i < count($desktopImages); $i++) {
-            $this->saveSlide($this->data, $desktopImages[$i], $mobileImages[$i]);
+            $this->saveSlide($this->data, $desktopImages[$i]);
         }
 
         if ($this->instance) {
@@ -66,15 +62,13 @@ class SlidesController extends Controller
         return response()->json(['check' => false, 'message' => 'Thêm vai trò thất bại!'], 400);
     }
 
-    private function saveSlide($data, $desktopImage, $mobileImage)
+    private function saveSlide($data, $desktopImage)
     {
         $desktopFilename = time() . '_' . $desktopImage->getClientOriginalName();
-        $mobileFilename = time() . '_' . $mobileImage->getClientOriginalName();
 
-        Storage::putFileAs('/public/slides/desktop', $desktopImage, $desktopFilename);
-        Storage::putFileAs('/public/slides/mobile', $mobileImage, $mobileFilename);
+        Storage::putFileAs('/public/slides', $desktopImage, $desktopFilename);
 
-        $this->instance = $this->model::create(['name' => $data['name'], 'slug' => $data['slug'], 'status' => $data['status'], 'desktop' => $desktopFilename, 'mobile' => $mobileFilename,]);
+        $this->instance = $this->model::create(['name' => $data['name'], 'slug' => $data['slug'], 'status' => $data['status'], 'desktop' => $desktopFilename]);
     }
 
     /**
@@ -147,14 +141,10 @@ class SlidesController extends Controller
 
         if ($this->instance) {
             // Xóa file liên quan nếu tồn tại
-            $desktopPath = '/public/slides/desktop/' . $this->instance->desktop;
-            $mobilePath = '/public/slides/mobile/' . $this->instance->mobile;
+            $desktopPath = '/public/slides/' . $this->instance->desktop;
 
             if (Storage::exists($desktopPath)) {
                 Storage::delete($desktopPath);
-            }
-            if (Storage::exists($mobilePath)) {
-                Storage::delete($mobilePath);
             }
 
             $this->instance->forceDelete();
@@ -173,10 +163,9 @@ class SlidesController extends Controller
      */
     public function apiIndex()
     {
-        $this->data = $this->model::active()->select('id', 'name', 'slug', 'status', 'url', 'desktop', 'mobile')->get();
+        $this->data = $this->model::active()->select('id', 'name', 'slug', 'status', 'url', 'desktop')->get();
         $this->data->transform(function ($item) {
-            $item->desktop = asset('storage/slides/desktop/' . $item->desktop);
-            $item->mobile = asset('storage/slides/mobile/' . $item->mobile);
+            $item->desktop = asset('storage/slides/' . $item->desktop);
             return $item;
         });
         return response()->json(['check' => true, 'data' => $this->data], 200);
@@ -184,10 +173,9 @@ class SlidesController extends Controller
 
     public function apiShow($slug)
     {
-        $this->data = $this->model::active()->select('id', 'name', 'slug', 'status', 'url', 'desktop', 'mobile')->where('slug', $slug)->firstOrFail();
+        $this->data = $this->model::active()->select('id', 'name', 'slug', 'status', 'url', 'desktop')->where('slug', $slug)->firstOrFail();
 
-        $this->data->desktop = asset('/storage/slides/desktop/' . $this->data->desktop);
-        $this->data->mobile = asset('/storage/slides/mobile/' . $this->data->mobile);
+        $this->data->desktop = asset('/storage/slides/' . $this->data->desktop);
 
         if (!$this->data) {
             return response()->json(['check' => false, 'message' => 'Không tìm thấy slide'], 404);

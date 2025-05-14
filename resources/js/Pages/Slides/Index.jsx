@@ -19,14 +19,12 @@ function Index({ slides, crumbs, trashs }) {
     const [show, setshow] = useState(false);
     const [name, setName] = useState("");
     const [desktop, setDesktop] = useState([]);
-    const [mobile, setMobile] = useState([]);
     const [status, setStatus] = useState(0);
 
     const handleClose = () => {
         setshow(false);
         setName("");
         setDesktop([]);
-        setMobile([]);
         setStatus(0);
     };
 
@@ -35,16 +33,12 @@ function Index({ slides, crumbs, trashs }) {
     const updateFiles = (files, type) => {
         if (type === "desktop") {
             setDesktop(files);
-        } else if (type === "mobile") {
-            setMobile(files);
         }
     };
 
     const onDelete = (file, type) => {
         if (type === "desktop") {
             setDesktop(desktop.filter((f) => f !== file));
-        } else if (type === "mobile") {
-            setMobile(mobile.filter((f) => f !== file));
         }
     };
 
@@ -109,23 +103,10 @@ function Index({ slides, crumbs, trashs }) {
         },
         {
             field: "desktop",
-            headerName: "Hình ảnh Desktop",
+            headerName: "Hình ảnh ",
             width: 160,
             renderCell: (params) => {
-                const imageUrl = params.value ? "/storage/slides/desktop/" + params.value : "";
-                return (
-                    <>
-                        <Image fluid className="rounded-1 h-100 p-0 m-0" src={imageUrl} alt={params.value || "No Image"} />
-                    </>
-                );
-            },
-        },
-        {
-            field: "mobile",
-            headerName: "Hình ảnh Mobile",
-            width: 160,
-            renderCell: (params) => {
-                const imageUrl = params.value ? "/storage/slides/mobile/" + params.value : "";
+                const imageUrl = params.value ? "/storage/slides/" + params.value : "";
                 return (
                     <>
                         <Image fluid className="rounded-1 h-100 p-0 m-0" src={imageUrl} alt={params.value || "No Image"} />
@@ -194,20 +175,7 @@ function Index({ slides, crumbs, trashs }) {
             headerName: "Hình ảnh Desktop",
             width: 160,
             renderCell: (params) => {
-                const imageUrl = params.value ? "/storage/slides/desktop/" + params.value : "";
-                return (
-                    <>
-                        <Image fluid className="rounded-1 h-100 p-0 m-0" src={imageUrl} alt={params.value || "No Image"} />
-                    </>
-                );
-            },
-        },
-        {
-            field: "mobile",
-            headerName: "Hình ảnh Mobile",
-            width: 160,
-            renderCell: (params) => {
-                const imageUrl = params.value ? "/storage/slides/mobile/" + params.value : "";
+                const imageUrl = params.value ? "/storage/slides/" + params.value : "";
                 return (
                     <>
                         <Image fluid className="rounded-1 h-100 p-0 m-0" src={imageUrl} alt={params.value || "No Image"} />
@@ -283,7 +251,7 @@ function Index({ slides, crumbs, trashs }) {
                             close={handleClose}
                             submit={(e) => {
                                 e.preventDefault();
-                                handleSubmit({ name: name, desktop: desktop.map((f) => f.file), mobile: mobile.map((f) => f.file), status: status });
+                                handleSubmit({ name: name, desktop: desktop.map((f) => f.file), status: status });
                             }}
                             size="md"
                             title="Thêm mới"
@@ -310,40 +278,20 @@ function Index({ slides, crumbs, trashs }) {
                                                 </Form.Group>
                                             </Col>
                                         </Row>
-                                        <Row className="row-cols-1 row-cols-md-2">
-                                            <Col>
-                                                <Form.Group className="mb-3" controlId="formBasic">
-                                                    <Form.Label>Hình ảnh Desktop</Form.Label>
-                                                    <Dropzone
-                                                        onChange={(files) => updateFiles(files, "desktop")}
-                                                        className="mb-3"
-                                                        accept="chỉ nhận file (.jpeg, .png, .jpg, .gif)"
-                                                        maxFiles={1}
-                                                        value={desktop}
-                                                    >
-                                                        {desktop &&
-                                                            desktop.length > 0 &&
-                                                            desktop.map((file, index) => <FileMosaic {...file} key={index} preview info onDelete={() => onDelete(file, "desktop")} />)}
-                                                    </Dropzone>
-                                                </Form.Group>
-                                            </Col>
-                                            <Col>
-                                                <Form.Group className="mb-3" controlId="formBasic">
-                                                    <Form.Label>Hình ảnh Mobile</Form.Label>
-                                                    <Dropzone
-                                                        onChange={(files) => updateFiles(files, "mobile")}
-                                                        className="mb-3"
-                                                        accept="chỉ nhận file (.jpeg, .png, .jpg, .gif)"
-                                                        maxFiles={1}
-                                                        value={mobile}
-                                                    >
-                                                        {mobile &&
-                                                            mobile.length > 0 &&
-                                                            mobile.map((file, index) => <FileMosaic {...file} key={index} preview info onDelete={() => onDelete(file, "mobile")} />)}
-                                                    </Dropzone>
-                                                </Form.Group>
-                                            </Col>
-                                        </Row>
+                                        <Form.Group className="mb-3" controlId="formBasic">
+                                            <Form.Label>Hình ảnh Desktop</Form.Label>
+                                            <Dropzone
+                                                onChange={(files) => updateFiles(files, "desktop")}
+                                                className="mb-3"
+                                                accept="chỉ nhận file (.jpeg, .png, .jpg, .gif)"
+                                                maxFiles={1}
+                                                value={desktop}
+                                            >
+                                                {desktop &&
+                                                    desktop.length > 0 &&
+                                                    desktop.map((file, index) => <FileMosaic {...file} key={index} preview info onDelete={() => onDelete(file, "desktop")} />)}
+                                            </Dropzone>
+                                        </Form.Group>
                                     </Form>
                                 </>
                             }

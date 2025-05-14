@@ -8,7 +8,6 @@ use App\Models\Brands;
 use App\Models\Categories;
 use App\Models\Gallery;
 use App\Models\Products;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
@@ -220,7 +219,9 @@ class ProductController extends Controller
                     'name' => $item->brand->name,
                     'slug' => $item->brand->slug,
                 ] : null,
-                'gallery' => asset('storage/gallery/' . $item->gallery->firstWhere('status', 1)->image) ?? null,
+                'gallery' => $item->gallery ?
+                    asset('storage/gallery/' . ($item->gallery->firstWhere('status', 1)->image ?? null)) :
+                    null,
             ];
         });
 
@@ -304,7 +305,9 @@ class ProductController extends Controller
                         'name' => $related->brand->name,
                         'slug' => $related->brand->slug,
                     ] : null,
-                    'gallery' => asset('storage/gallery/' . $related->gallery->firstWhere('status', 1)->image) ?? null,
+                    'gallery' => $related->gallery ?
+                        asset('storage/gallery/' . ($related->gallery->firstWhere('status', 1)->image ?? null)) :
+                        null,
                 ];
             }),
             'comments' => $this->data->comment->filter(function ($comment) {
@@ -348,7 +351,9 @@ class ProductController extends Controller
                         'name' => $item->brand->name,
                         'slug' => $item->brand->slug,
                     ] : null,
-                    'gallery' => asset('storage/gallery/' . $item->gallery->firstWhere('status', 1)->image) ?? null,
+                    'gallery' => $item->gallery ?
+                        asset('storage/gallery/' . ($item->gallery->firstWhere('status', 1)->image ?? null)) :
+                        null,
                 ];
             });
 

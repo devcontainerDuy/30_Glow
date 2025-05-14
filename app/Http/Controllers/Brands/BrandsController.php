@@ -177,14 +177,17 @@ class BrandsController extends Controller
                     'slug' => $item->brand->slug,
                     'status' => $item->brand->status,
                 ] : null,
-                'gallery' => $item->gallery->map(function ($galleryItem) {
-                    return [
-                        'id' => $galleryItem->id,
-                        'image' => asset('storage/gallery/' . $galleryItem->image),
-                        'id_parent' => $galleryItem->id_parent,
-                        'status' => $galleryItem->status,
-                    ];
-                }),
+                'gallery' => $item->gallery ?
+                    asset('storage/gallery/' . ($item->gallery->firstWhere('status', 1)->image ?? null)) :
+                    null,
+                // 'gallery' => $item->gallery->map(function ($galleryItem) {
+                //     return [
+                //         'id' => $galleryItem->id,
+                //         'image' => asset('storage/gallery/' . $galleryItem->image),
+                //         'id_parent' => $galleryItem->id_parent,
+                //         'status' => $galleryItem->status,
+                //     ];
+                // }),
             ];
         });
 

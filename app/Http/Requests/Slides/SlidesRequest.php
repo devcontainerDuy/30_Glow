@@ -17,8 +17,6 @@ class SlidesRequest extends BaseRequest
             'status' => 'required|integer|in:0,1',
             'desktop' => 'nullable|array',
             'desktop.*' => 'image|mimes:jpeg,png,jpg,gif|max:2048',
-            'mobile' => 'nullable|array',
-            'mobile.*' => 'image|mimes:jpeg,png,jpg,gif|max:2048',
         ];
     }
 
@@ -32,8 +30,6 @@ class SlidesRequest extends BaseRequest
             'status' => 'nullable|integer|in:0,1', // Tương tự như trên
             'desktop' => 'nullable|array',
             'desktop.*' => 'image|mimes:jpeg,png,jpg,gif|max:2048',
-            'mobile' => 'nullable|array',
-            'mobile.*' => 'image|mimes:jpeg,png,jpg,gif|max:2048',
         ];
     }
 }

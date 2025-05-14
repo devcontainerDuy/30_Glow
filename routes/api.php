@@ -23,8 +23,8 @@ Route::middleware('api')->group(function () {
         Route::post('register', 'register');
         Route::post('login', 'login');
         Route::post('logout', 'logout')->middleware('auth:sanctum');
-        Route::get('auth/google', 'redirectToAuth');
-        Route::get('auth/google/callback', 'handleAuthCallback');
+        Route::get('auth/google', 'redirectToAuth')->middleware('web');
+        Route::get('auth/google/callback', 'handleAuthCallback')->middleware('web');
     });
 
     // Reset password

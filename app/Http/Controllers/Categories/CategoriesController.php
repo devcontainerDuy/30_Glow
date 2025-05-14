@@ -159,7 +159,9 @@ class CategoriesController extends Controller
                     'name' => $item->brand->name,
                     'slug' => $item->brand->slug,
                 ] : null,
-                'gallery' => asset('storage/gallery/' . $item->gallery->firstWhere('status', 1)->image) ?? null,
+                'gallery' => $item->gallery ?
+                    asset('storage/gallery/' . ($item->gallery->firstWhere('status', 1)->image ?? null)) :
+                    null,
             ];
         });
 

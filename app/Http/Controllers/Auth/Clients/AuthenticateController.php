@@ -9,7 +9,6 @@ use App\Mail\createUser;
 use App\Models\Customers;
 use App\Traits\GeneratesUniqueId;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
@@ -82,7 +81,7 @@ class AuthenticateController extends Controller
     {
         return response()->json([
             'check' => true,
-            'url' => Socialite::driver('google')->stateless()->redirect()->getTargetUrl(),
+            'url' => Socialite::driver('google')->redirect()->getTargetUrl(),
         ]);
     }
 
@@ -129,7 +128,7 @@ class AuthenticateController extends Controller
                 ]));
         } catch (\Throwable $e) {
             Log::error("Đăng nhập Google thất bại: " . $e->getMessage() . " at " . $e->getFile() . ":" . $e->getLine());
-            return response()->json(['check' => false, 'message' => 'Đăng nhập Google thất bại!'], 500, ['Content-Type' => 'application/json']);
+            return response()->json(['check' => false, 'message' => $e->getMessage()], 500, ['Content-Type' => 'application/json']);
         }
     }
 }
