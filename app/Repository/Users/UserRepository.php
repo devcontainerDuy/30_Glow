@@ -2,7 +2,15 @@
 
 namespace App\Repository\Users;
 
-class UserRepository implements UserRepositoryInterface
+use App\Repository\EloquentRepository;
+
+class UserRepository extends EloquentRepository implements UserRepositoryInterface
 {
-    //
+    /**
+     * UserRepository constructor.
+     */
+    public function getModel(): string
+    {
+        return \App\Models\User::class;
+    }
 }
