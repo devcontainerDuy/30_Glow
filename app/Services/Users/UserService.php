@@ -3,10 +3,11 @@
 namespace App\Services\Users;
 
 use App\Repository\Users\UserRepositoryInterface;
-use App\Services\BaseService;
 
-class UserService extends BaseService implements UserServiceInterface
+class UserService implements UserServiceInterface
 {
+    protected UserRepositoryInterface $repository;
+
     public function __construct(UserRepositoryInterface $repository)
     {
         $this->repository = $repository;
@@ -14,7 +15,7 @@ class UserService extends BaseService implements UserServiceInterface
 
     public function read(): array
     {
-        return $this->repository->getAll();
+        return $this->repository->getAllUsers();
     }
 
     public function created(array $data): array
@@ -29,7 +30,7 @@ class UserService extends BaseService implements UserServiceInterface
 
     public function deleted(int $id): bool
     {
-        return $this->repository->delete($id);
+        return $this->repository->delete($id) ? true : false;
     }
 
 }

@@ -24,7 +24,7 @@ abstract class EloquentRepository implements EloquentRepositoryInterface
      *
      * @var object
      */
-    protected ?Model $instance = null;
+    protected ?object $instance = null;
 
     /**
      * get model
@@ -88,7 +88,7 @@ abstract class EloquentRepository implements EloquentRepositoryInterface
      */
     public function getAll(): array
     {
-        return $this->model->all()->toArray();
+        return $this->model->get()->toArray();
     }
 
     /**
@@ -100,8 +100,8 @@ abstract class EloquentRepository implements EloquentRepositoryInterface
      */
     public function find(int $id): ?array
     {
-        $record = $this->model->find($id);
-        return $record ? $record->toArray() : null;
+        $this->instance = $this->model->find($id);
+        return $this->instance ? $this->instance->toArray() : null;
     }
 
     /**
@@ -110,9 +110,10 @@ abstract class EloquentRepository implements EloquentRepositoryInterface
      * @param array $data
      * @return mixed
      */
-    public function create(array $data): array
+    public function create(array $data): array|bool
     {
-        return $this->model->create($data)->toArray();
+        $this->instance = $this->model->create($data);
+        return $this->instance ? $this->instance->toArray() : false;
     }
 
     /**

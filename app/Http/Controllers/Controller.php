@@ -2,32 +2,26 @@
 
 namespace App\Http\Controllers;
 
-abstract class Controller
+use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
+use Illuminate\Foundation\Validation\ValidatesRequests;
+use Illuminate\Routing\Controller as BaseController;
+
+abstract class Controller extends BaseController
 {
+    use AuthorizesRequests, ValidatesRequests;
     /**
      * The name of the model to be used for the controller.
      * @var string
      */
-    protected ?string $instance;
-
-    /**
-     * The name of the form request to be used for the controller.
-     */
-    protected ?string $request;
+    protected $instance;
 
     /**
      * The name of the service to be used for the controller.
      */
-    protected ?string $service;
+    protected $service;
 
     /**
-     * Constructor to initialize properties.
+     * The name of the repository to be used for the controller.
      */
-    public function __construct(
-        ?string $request = null,
-        ?string $service = null,
-    ) {
-        $this->request = $request;
-        $this->service = $service;
-    }
+    protected $repository;
 }

@@ -25,7 +25,7 @@ interface EloquentRepositoryInterface
      * @param array $data
      * @return array
      */
-    public function create(array $data): array;
+    public function create(array $data): array|bool;
 
     /**
      * Update an existing record in the repository.

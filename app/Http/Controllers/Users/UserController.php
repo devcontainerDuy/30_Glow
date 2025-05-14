@@ -4,13 +4,14 @@ namespace App\Http\Controllers\Users;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\User\UserRequest;
+use App\Services\Users\UserServiceInterface;
 use Inertia\Inertia;
 
 class UserController extends Controller
 {
-    public function __construct()
+    public function __construct(UserServiceInterface $service)
     {
-        $this->request = UserRequest::class;
+        $this->service = $service;
     }
     
     /**
@@ -18,7 +19,9 @@ class UserController extends Controller
      */
     public function index()
     {
-        return Inertia::render('users/index');
+        return Inertia::render('users/index', [
+            'data' => $this->service->read(),
+        ]);
     }
 
     /**
@@ -32,9 +35,9 @@ class UserController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store()
+    public function store(UserRequest $request)
     {
-        dd(request()->all());
+        dd($request->all());
     }
 
     /**
@@ -56,7 +59,7 @@ class UserController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update( string $id)
+    public function update( string $id, UserRequest $request)
     {
         //
     }
