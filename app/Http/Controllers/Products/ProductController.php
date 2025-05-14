@@ -238,7 +238,6 @@ class ProductController extends Controller
                 'price' => $item->price,
                 'discount' => $item->discount,
                 'in_stock' => $item->in_stock,
-                // 'content' => $item->content,
                 'status' => $item->status,
                 'category' => $item->category ? [
                     'name' => $item->category->name,
@@ -248,7 +247,9 @@ class ProductController extends Controller
                     'name' => $item->brand->name,
                     'slug' => $item->brand->slug,
                 ] : null,
-                'gallery' => asset('storage/gallery/' . $item->gallery->firstWhere('status', 1)->image) ?? null,
+                'gallery' => $item->gallery ?
+                    asset('storage/gallery/' . ($item->gallery->firstWhere('status', 1)->image ?? null)) :
+                    null,
             ];
         });
 
