@@ -168,13 +168,25 @@ class BillController extends Controller
 
         return DB::transaction(function () use ($data) {
             try {
-                if ($data['uid'] !== null && !empty($data['cart'])) {
+                // Tìm customer theo uid (nếu có) hoặc theo email/phone
+                $customer = null;
+                if (!empty($data['uid'])) {
                     $customer = Customers::where('uid', $data['uid'])->active()->first();
+                } else {
+                    $customer = Customers::where(function ($query) use ($data) {
+                        $query->where('email', $data['email'])
+                            ->orWhere('phone', $data['phone']);
+                    })->active()->first();
+                }
+
+                // Nếu đã có customer
+                if ($customer) {
                     $customer->load('carts.product');
+                    // Kiểm tra thông tin khách hàng
                     if ($customer->name !== $data['name'] || $customer->email !== $data['email']) {
                         return response()->json(['check' => false, 'message' => 'Thông tin khách hàng không chính xác!'], 401);
                     }
-
+                    // Cập nhật địa chỉ, số điện thoại nếu thiếu
                     if ($customer->address === null) {
                         $customer->update(['address' => $data['address']]);
                     }
@@ -184,12 +196,12 @@ class BillController extends Controller
                     } elseif ($customer->phone !== $data['phone']) {
                         return response()->json(['check' => false, 'message' => 'Số điện thoại không khớp!'], 401);
                     }
-
+                    // Kiểm tra giỏ hàng
                     if ($customer->carts->isEmpty()) {
                         return response()->json(['check' => false, 'message' => 'Giỏ hàng trống!'], 401);
                     }
-
-                    $data['cart'] = $customer->carts->map(function ($item) {
+                    // Chuẩn hóa lại cart
+                    $cartItems = $customer->carts->map(function ($item) {
                         if (!$item->product) {
                             throw new \Exception('Sản phẩm không tồn tại!');
                         }
@@ -200,6 +212,7 @@ class BillController extends Controller
                         ];
                     })->toArray();
                 } else {
+                    // Nếu chưa có customer, kiểm tra trùng email/phone
                     $existingCustomer = Customers::where(function ($query) use ($data) {
                         $query->where('email', $data['email'])
                             ->orWhere('phone', $data['phone']);
@@ -220,9 +233,12 @@ class BillController extends Controller
                         'address' => $data['address'],
                         'password' => Hash::make($password)
                     ]);
+                    // Tạo cart cho customer mới
                     $customer->carts()->createMany($data['cart']);
+                    $cartItems = $data['cart'];
                 }
 
+                // Tạo hóa đơn
                 $uidBill = $this->createCodeOrder();
                 $billId = $this->model::insertGetId([
                     'uid' => $uidBill,
@@ -246,14 +262,14 @@ class BillController extends Controller
                     'updated_at' => now(),
                 ]);
 
-                foreach ($data['cart'] as $item) {
+                // Lưu chi tiết hóa đơn và cập nhật tồn kho
+                foreach ($cartItems as $item) {
                     BillsDetail::create([
                         'id_bill' => $billId,
                         'id_product' => $item['id_product'],
                         'quantity' => $item['quantity'],
                         'unit_price' => $item['unit_price']
                     ]);
-
                     $product = Products::find($item['id_product']);
                     if ($product) {
                         if ($item['quantity'] > $product->in_stock) {
@@ -265,6 +281,7 @@ class BillController extends Controller
                     }
                 }
 
+                // Xóa giỏ hàng sau khi đặt hàng
                 $customer->carts()->delete();
 
                 return response()->json(['check' => true, 'uid' => $uidBill, 'total' => $data['total']], 201);
