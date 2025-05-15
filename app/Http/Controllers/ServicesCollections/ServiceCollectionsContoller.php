@@ -138,17 +138,21 @@ class ServiceCollectionsContoller extends Controller
 
     public function apiShow($slug)
     {
-        $this->data = $this->model::with('services')->active()->select('id', 'name', 'slug', 'status', 'highlighted')->whereHas(
-            'services',
-            function ($query) {
-                $query->where('status', 1);
-            }
-        )->where('slug', $slug)->firstOrFail();
-
+        $this->data = $this->model::with(['services' => function ($query) {
+            $query->where('status', 1);
+        }])
+        ->active()
+        ->select('id', 'name', 'slug', 'status', 'highlighted')
+        ->whereHas('services', function ($query) {
+            $query->where('status', 1);
+        })
+        ->where('slug', $slug)
+        ->firstOrFail();
+    
         if (!$this->data) {
             return response()->json(['check' => false, 'message' => 'Không tìm thấy dịch vụ!'], 404);
         }
-
+    
         $this->data->services->transform(function ($item) {
             return [
                 'id' => $item->id,
@@ -157,7 +161,7 @@ class ServiceCollectionsContoller extends Controller
                 'price' => $item->price,
                 'compare_price' => $item->compare_price,
                 'discount' => $item->discount,
-                'image' => asset('storage/services/' . $item->image ?? '1747288084_Untitled.png'),
+                'image' => asset('storage/services/' . ($item->image ?? '1747288084_Untitled.png')),
                 'summary' => $item->summary,
                 'content' => $item->content,
                 'status' => $item->status,
@@ -169,7 +173,7 @@ class ServiceCollectionsContoller extends Controller
                 ] : null,
             ];
         });
-
+    
         return response()->json(['check' => true, 'data' => $this->data], 200);
     }
 }
