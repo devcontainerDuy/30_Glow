@@ -25,6 +25,7 @@ class PostController extends Controller
      */
     public function index()
     {
+        $this->authorize('read', Posts::class);
         $this->crumbs = [
             ['name' => 'Bài viết', 'url' => '/admin/posts'],
             ['name' => 'Danh sách bài viết', 'url' => '/admin/posts'],
@@ -48,6 +49,7 @@ class PostController extends Controller
      */
     public function store(PostRequest $request)
     {
+        $this->authorize('create', Posts::class);
         $data = $request->validated();
         $data['slug'] = Str::slug($data['title']);
         $file = $request->file('image');
@@ -86,6 +88,7 @@ class PostController extends Controller
      */
     public function edit(string $id)
     {
+        $this->authorize('show', Posts::class);
         $this->crumbs = [
             ['name' => 'Bài viết', 'url' => '/admin/posts'],
             ['name' => 'Danh sách bài viết', 'url' => '/admin/posts'],
@@ -101,6 +104,7 @@ class PostController extends Controller
      */
     public function update(PostRequest $request, string $id)
     {
+        $this->authorize('update', Posts::class);
         $this->data = $request->validated();
         if (isset($this->data['name'])) $this->data['slug'] = Str::slug($this->data['title']);
 
@@ -141,6 +145,7 @@ class PostController extends Controller
      */
     public function destroy(string $id)
     {
+        $this->authorize('delete', Posts::class);
         DB::beginTransaction();
         try {
             $this->instance = $this->model::findOrFail($id);

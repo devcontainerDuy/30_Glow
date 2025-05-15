@@ -16,6 +16,7 @@ class BrandsController extends Controller
     }
     public function index()
     {
+        $this->authorize('read', Brands::class);
         $this->crumbs = [
             ['name' => 'Sản phẩm', 'url' => '/admin/products'],
             ['name' => 'Danh sách thương hiệu', 'url' => '/admin/brands'],
@@ -38,6 +39,7 @@ class BrandsController extends Controller
      */
     public function store(BrandsRequest $request)
     {
+        $this->authorize('create', Brands::class);
         $this->data = $request->validated();
         $this->data['slug'] = str::slug($this->data['name']);
         $this->instance = $this->model::create($this->data);
@@ -69,6 +71,7 @@ class BrandsController extends Controller
      */
     public function update(BrandsRequest $request, string $id)
     {
+        $this->authorize('update', Brands::class);
         $this->data = $request->validated();
         if (isset($this->data['name'])) $this->data['slug'] = Str::slug($this->data['name']);
         $this->instance = $this->model::findOrFail($id)->update($this->data);
@@ -98,6 +101,7 @@ class BrandsController extends Controller
 
     public function destroy($id)
     {
+        $this->authorize('delete', Brands::class);
         $this->instance = $this->model::findOrFail($id)->load('products');
 
         if ($this->instance->products()->count() > 0) {

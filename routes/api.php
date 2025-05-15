@@ -15,7 +15,9 @@ use Illuminate\Support\Facades\Auth;
 |
 */
 
-Route::middleware(['auth:sanctum', 'web', 'role:Super Admin'])->get('/user/info', [App\Http\Controllers\Users\UserController::class, 'show']);
+Route::middleware(['auth:sanctum', 'web', 'role:Super Admin|Manager'])->group(function () {
+    Route::get('/user/info', [App\Http\Controllers\Users\UserController::class, 'show']);
+});
 
 Route::middleware('api')->group(function () {
     // Auth client

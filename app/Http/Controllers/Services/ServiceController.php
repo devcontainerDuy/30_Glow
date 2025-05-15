@@ -23,6 +23,7 @@ class ServiceController extends Controller
      */
     public function index()
     {
+        $this->authorize('read', Services::class);
         $this->crumbs = [
             ['name' => 'Dịch vụ', 'url' => '/admin/services'],
             ['name' => 'Danh sách dịch vụ', 'url' => '/admin/services'],
@@ -46,6 +47,7 @@ class ServiceController extends Controller
      */
     public function store(ServiceRequest $request)
     {
+        $this->authorize('create', Services::class);
         $this->data = $request->validated();
         $this->data['slug'] = Str::slug($this->data['name']);
         $file = $request->file('image');
@@ -75,6 +77,7 @@ class ServiceController extends Controller
      */
     public function edit(string $id)
     {
+        $this->authorize('show', Services::class);
         $this->crumbs = [
             ['name' => 'Dịch vụ', 'url' => '/admin/services'],
             ['name' => 'Danh sách dịch vụ', 'url' => '/admin/services'],
@@ -90,6 +93,7 @@ class ServiceController extends Controller
      */
     public function update(ServiceRequest $request, string $id)
     {
+        $this->authorize('update', Services::class);
         $this->data = $request->validated();
         if (isset($this->data['name'])) $this->data['slug'] = Str::slug($this->data['name']);
 
@@ -130,6 +134,7 @@ class ServiceController extends Controller
      */
     public function destroy(string $id)
     {
+        $this->authorize('delete', Services::class);
         $this->instance = $this->model::findOrFail($id);
         if ($this->instance->delete()) {
             $this->data = $this->model::with('collection')->orderBy('id', 'desc')->get();

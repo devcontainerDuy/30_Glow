@@ -22,6 +22,7 @@ class PostCollectionsController extends Controller
      */
     public function index()
     {
+        $this->authorize('read', PostCollections::class);
         $this->crumbs = [
             ['name' => 'Bài Viết', 'url' => '/admin/posts'],
             ['name' => 'Chuyên Đề Bài Viết', 'url' => '/admin/posts/collections'],
@@ -44,6 +45,7 @@ class PostCollectionsController extends Controller
      */
     public function store(PostCollectionsRequest $request)
     {
+        $this->authorize('create', PostCollections::class);
         $this->data = $request->validated();
         $this->data['slug'] = Str::slug($this->data['name']);
         $this->instance = $this->model::create($this->data);
@@ -76,6 +78,7 @@ class PostCollectionsController extends Controller
      */
     public function update(PostCollectionsRequest $request, string $id)
     {
+        $this->authorize('update', PostCollections::class);
         $this->data = $request->validated();
         if (isset($this->data['name'])) $this->data['slug'] = Str::slug($this->data['name']);
         $this->instance = $this->model::findOrFail($id)->update($this->data);
@@ -92,6 +95,7 @@ class PostCollectionsController extends Controller
      */
     public function destroy(string $id)
     {
+        $this->authorize('delete', PostCollections::class);
         DB::beginTransaction();
         try {
             $this->instance = $this->model::findOrFail($id);

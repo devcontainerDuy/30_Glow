@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import { Link, router } from "@inertiajs/react";
 import ModalComponent from "@/Components/ModalComponent";
 import ButtonsComponent from "@/Components/ButtonsComponent";
@@ -136,6 +136,14 @@ function Layout({ children }) {
         });
     };
 
+    const hasPermission = useCallback(
+        (permissionName) => {
+            if (!user) return false;
+            return user.roles[0].permissions.some((p) => p.name === permissionName);
+        },
+        [user]
+    );
+
     useEffect(() => {
         window.axios
             .get("/api/user/info")
@@ -145,7 +153,7 @@ function Layout({ children }) {
                 }
             })
             .catch((error) => {
-                toast.error(error.response.data.message || "Có lỗi xảy ra, vui lòng thử lại sau.");
+                toast.error(error.response.data?.message || "Có lỗi xảy ra, vui lòng thử lại sau.");
             });
     }, []);
 
@@ -179,36 +187,58 @@ function Layout({ children }) {
                                 Quyền tài khoản
                             </MenuItem>
                         </SubMenu>
-                        <SubMenu icon={<StorefrontIcon />} label="Quản lý Sản phẩm">
-                            <MenuItem icon={<Inventory2OutlinedIcon />} component={<Link href="/admin/products" />}>
-                                Ds sản phẩm
-                            </MenuItem>
-                            <MenuItem icon={<CategoryOutlinedIcon />} component={<Link href="/admin/categories" />}>
-                                Danh mục
-                            </MenuItem>
-                            <MenuItem icon={<BrandingWatermarkOutlinedIcon />} component={<Link href="/admin/brands" />}>
-                                Thương hiệu
-                            </MenuItem>
-                        </SubMenu>
-                        <SubMenu icon={<ContentCutOutlinedIcon />} label="Quản lý dịch vụ">
-                            <MenuItem icon={<ContentPasteOutlinedIcon />} component={<Link href="/admin/services" />}>
-                                Ds dịch vụ
-                            </MenuItem>
-                            <MenuItem icon={<ClassOutlinedIcon />} component={<Link href="/admin/services/collections" />}>
-                                Phân loại dịch vụ
-                            </MenuItem>
-                            <MenuItem icon={<CalendarMonthOutlinedIcon />} component={<Link href="/admin/bookings" />}>
-                                Ds lịch đặt
-                            </MenuItem>
-                        </SubMenu>
-                        <SubMenu icon={<ListAltOutlinedIcon />} label="Quản lý bài viết">
-                            <MenuItem icon={<ArticleOutlinedIcon />} component={<Link href="/admin/posts" />}>
-                                Ds bài viết
-                            </MenuItem>
-                            <MenuItem icon={<ListOutlinedIcon />} component={<Link href="/admin/posts/collections" />}>
-                                Chuyên mục bài viết
-                            </MenuItem>
-                        </SubMenu>
+                        {(hasPermission("real_product") || hasPermission("read_category") || hasPermission("read_brand")) && (
+                            <SubMenu icon={<StorefrontIcon />} label="Quản lý Sản phẩm">
+                                {hasPermission("read_product") && (
+                                    <MenuItem icon={<Inventory2OutlinedIcon />} component={<Link href="/admin/products" />}>
+                                        Ds sản phẩm
+                                    </MenuItem>
+                                )}
+                                {hasPermission("read_category") && (
+                                    <MenuItem icon={<CategoryOutlinedIcon />} component={<Link href="/admin/categories" />}>
+                                        Danh mục
+                                    </MenuItem>
+                                )}
+                                {hasPermission("read_brand") && (
+                                    <MenuItem icon={<BrandingWatermarkOutlinedIcon />} component={<Link href="/admin/brands" />}>
+                                        Thương hiệu
+                                    </MenuItem>
+                                )}
+                            </SubMenu>
+                        )}
+                        {(hasPermission("real_service") || hasPermission("real_service_collection") || hasPermission("real_booking")) && (
+                            <SubMenu icon={<ContentCutOutlinedIcon />} label="Quản lý dịch vụ">
+                                {hasPermission("real_service") && (
+                                    <MenuItem icon={<ContentPasteOutlinedIcon />} component={<Link href="/admin/services" />}>
+                                        Ds dịch vụ
+                                    </MenuItem>
+                                )}
+                                {hasPermission("real_service_collection") && (
+                                    <MenuItem icon={<ClassOutlinedIcon />} component={<Link href="/admin/services/collections" />}>
+                                        Phân loại dịch vụ
+                                    </MenuItem>
+                                )}
+                                {hasPermission("real_booking") && (
+                                    <MenuItem icon={<CalendarMonthOutlinedIcon />} component={<Link href="/admin/bookings" />}>
+                                        Ds lịch đặt
+                                    </MenuItem>
+                                )}
+                            </SubMenu>
+                        )}
+                        {(hasPermission("real_post") || hasPermission("real_post_collection")) && (
+                            <SubMenu icon={<ListAltOutlinedIcon />} label="Quản lý bài viết">
+                                {hasPermission("real_post") && (
+                                    <MenuItem icon={<ArticleOutlinedIcon />} component={<Link href="/admin/posts" />}>
+                                        Ds bài viết
+                                    </MenuItem>
+                                )}
+                                {hasPermission("real_post_collection") && (
+                                    <MenuItem icon={<ListOutlinedIcon />} component={<Link href="/admin/posts/collections" />}>
+                                        Chuyên mục bài viết
+                                    </MenuItem>
+                                )}
+                            </SubMenu>
+                        )}
                         <SubMenu icon={<ReceiptLongOutlinedIcon />} label="Quản lý hóa đơn">
                             <MenuItem icon={<ReceiptOutlinedIcon />} component={<Link href="/admin/bills" />}>
                                 Hóa đơn sản phẩm

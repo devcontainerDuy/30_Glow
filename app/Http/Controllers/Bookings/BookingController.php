@@ -209,6 +209,7 @@ class BookingController extends Controller
      */
     public function edit(string $id)
     {
+        $this->authorize('show', Bookings::class);
         $this->crumbs = [
             ['name' => 'Dịch vụ', 'url' => '/admin/services'],
             ['name' => 'Danh sách dịch vụ đặt lịch', 'url' => '/admin/bookings'],

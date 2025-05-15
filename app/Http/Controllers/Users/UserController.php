@@ -83,7 +83,7 @@ class UserController extends Controller
     public function show()
     {
         try {
-            $this->data = $this->model::with('roles')->where('id', Auth::user()->id)->first();
+            $this->data = $this->model::with('roles', 'roles.permissions')->where('id', Auth::user()->id)->first();
             return response()->json(['check' => true, 'data' => $this->data], 200);
         } catch (\Throwable $e) {
             Log::error($e->getMessage());

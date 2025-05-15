@@ -26,6 +26,7 @@ class ProductController extends Controller
      */
     public function index()
     {
+        $this->authorize('read', Products::class);
         $this->crumbs = [
             ['name' => 'Sản phẩm', 'url' => '/admin/products'],
             ['name' => 'Danh sách sản phẩm', 'url' => '/admin/products'],
@@ -51,6 +52,7 @@ class ProductController extends Controller
      */
     public function store(ProductRequest $request)
     {
+        $this->authorize('create', Products::class);
         DB::beginTransaction();
         try {
             $this->data = $request->validated();
@@ -101,6 +103,7 @@ class ProductController extends Controller
      */
     public function edit(string $id)
     {
+        $this->authorize('update', Products::class);
         $this->crumbs = [
             ['name' => 'Sản phẩm', 'url' => '/admin/products'],
             ['name' => 'Danh sách sản phẩm', 'url' => '/admin/products'],
@@ -143,6 +146,7 @@ class ProductController extends Controller
 
     public function destroy(string $id)
     {
+        $this->authorize('delete', Products::class);
         $this->instance = $this->model::with('gallery')->findOrFail($id);
         $this->instance->update(['status' => 0, 'highlighted' => 0]);
 

@@ -35,7 +35,7 @@ class PermissionController extends Controller
      */
     public function create()
     {
-        //
+        // 
     }
 
     /**

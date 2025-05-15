@@ -20,6 +20,7 @@ class CategoriesController extends Controller
 
     public function index()
     {
+        $this->authorize('read', Categories::class);
         $this->crumbs = [
             ['name' => 'Sản phẩm', 'url' => '/admin/products'],
             ['name' => 'Danh sách danh mục', 'url' => '/admin/categories'],
@@ -31,6 +32,7 @@ class CategoriesController extends Controller
 
     public function store(CategoriesRequest $request)
     {
+        $this->authorize('create', Categories::class);
         $this->data = $request->validated();
         $this->data['slug'] = Str::slug($this->data['name']);
         $this->instance = $this->model::create($this->data);
@@ -43,6 +45,7 @@ class CategoriesController extends Controller
 
     public function edit(string $id)
     {
+        $this->authorize('show', Categories::class);
         $this->crumbs = [
             ['name' => 'Sản phẩm', 'url' => '/admin/products'],
             ['name' => 'Danh sách danh mục', 'url' => '/admin/categories'],
@@ -54,6 +57,7 @@ class CategoriesController extends Controller
 
     public function update(CategoriesRequest $request, $id)
     {
+        $this->authorize('update', Categories::class);
         $this->data = $request->validated();
         if (isset($this->data['name'])) $this->data['slug'] = Str::slug($this->data['name']);
 
@@ -70,6 +74,7 @@ class CategoriesController extends Controller
 
     public function destroy($id)
     {
+        $this->authorize('delete', Categories::class);
         $this->instance = $this->model::findOrFail($id)->load('products', 'children');
 
         if ($this->instance->products()->count() > 0) {
