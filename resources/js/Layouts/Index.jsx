@@ -173,21 +173,29 @@ function Layout({ children }) {
                         <MenuItem icon={<HomeOutlinedIcon />} component={<Link href="/admin" method="get" as="a" />}>
                             Thống kê
                         </MenuItem>
-                        <SubMenu icon={<PeopleOutlinedIcon />} label="Quản lý tài khoản">
-                            <MenuItem icon={<BadgeOutlinedIcon />} component={<Link href="/admin/users" />}>
-                                Ds quản trị
-                            </MenuItem>
-                            <MenuItem icon={<PermContactCalendarOutlinedIcon />} component={<Link href="/admin/customers" />}>
-                                Ds khách hàng
-                            </MenuItem>
-                            <MenuItem icon={<ManageAccountsOutlinedIcon />} component={<Link href="/admin/roles" />}>
-                                Vai trò tài khoản
-                            </MenuItem>
-                            <MenuItem icon={<VerifiedUserOutlinedIcon />} component={<Link href="/admin/permissions" />}>
-                                Quyền tài khoản
-                            </MenuItem>
-                        </SubMenu>
-                        {(hasPermission("real_product") || hasPermission("read_category") || hasPermission("read_brand")) && (
+                        {(hasPermission("read_user") || hasPermission("read_role") || hasPermission("read_permission")) && (
+                            <SubMenu icon={<PeopleOutlinedIcon />} label="Quản lý người dùng">
+                                {hasPermission("read_user") && (
+                                    <MenuItem icon={<BadgeOutlinedIcon />} component={<Link href="/admin/users" />}>
+                                        Ds người dùng
+                                    </MenuItem>
+                                )}
+                                <MenuItem icon={<PermContactCalendarOutlinedIcon />} component={<Link href="/admin/customers" />}>
+                                    Ds khách hàng
+                                </MenuItem>
+                                {hasPermission("read_role") && (
+                                    <MenuItem icon={<ManageAccountsOutlinedIcon />} component={<Link href="/admin/roles" />}>
+                                        Ds vai trò
+                                    </MenuItem>
+                                )}
+                                {hasPermission("read_permission") && (
+                                    <MenuItem icon={<VerifiedUserOutlinedIcon />} component={<Link href="/admin/permissions" />}>
+                                        Ds quyền hạn
+                                    </MenuItem>
+                                )}
+                            </SubMenu>
+                        )}
+                        {(hasPermission("read_product") || hasPermission("read_category") || hasPermission("read_brand")) && (
                             <SubMenu icon={<StorefrontIcon />} label="Quản lý Sản phẩm">
                                 {hasPermission("read_product") && (
                                     <MenuItem icon={<Inventory2OutlinedIcon />} component={<Link href="/admin/products" />}>
@@ -206,33 +214,33 @@ function Layout({ children }) {
                                 )}
                             </SubMenu>
                         )}
-                        {(hasPermission("real_service") || hasPermission("real_service_collection") || hasPermission("real_booking")) && (
+                        {(hasPermission("read_service") || hasPermission("read_service_collection") || hasPermission("read_booking")) && (
                             <SubMenu icon={<ContentCutOutlinedIcon />} label="Quản lý dịch vụ">
-                                {hasPermission("real_service") && (
+                                {hasPermission("read_service") && (
                                     <MenuItem icon={<ContentPasteOutlinedIcon />} component={<Link href="/admin/services" />}>
                                         Ds dịch vụ
                                     </MenuItem>
                                 )}
-                                {hasPermission("real_service_collection") && (
+                                {hasPermission("read_service_collection") && (
                                     <MenuItem icon={<ClassOutlinedIcon />} component={<Link href="/admin/services/collections" />}>
                                         Phân loại dịch vụ
                                     </MenuItem>
                                 )}
-                                {hasPermission("real_booking") && (
+                                {hasPermission("read_booking") && (
                                     <MenuItem icon={<CalendarMonthOutlinedIcon />} component={<Link href="/admin/bookings" />}>
                                         Ds lịch đặt
                                     </MenuItem>
                                 )}
                             </SubMenu>
                         )}
-                        {(hasPermission("real_post") || hasPermission("real_post_collection")) && (
+                        {(hasPermission("read_post") || hasPermission("read_post_collection")) && (
                             <SubMenu icon={<ListAltOutlinedIcon />} label="Quản lý bài viết">
-                                {hasPermission("real_post") && (
+                                {hasPermission("read_post") && (
                                     <MenuItem icon={<ArticleOutlinedIcon />} component={<Link href="/admin/posts" />}>
                                         Ds bài viết
                                     </MenuItem>
                                 )}
-                                {hasPermission("real_post_collection") && (
+                                {hasPermission("read_post_collection") && (
                                     <MenuItem icon={<ListOutlinedIcon />} component={<Link href="/admin/posts/collections" />}>
                                         Chuyên mục bài viết
                                     </MenuItem>

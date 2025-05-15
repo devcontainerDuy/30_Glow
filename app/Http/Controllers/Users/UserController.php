@@ -31,6 +31,7 @@ class UserController extends Controller
      */
     public function index()
     {
+        $this->authorize('read', User::class);
         $this->crumbs = [
             ['name' => 'Tài khoản', 'url' => '/admin/users'],
             ['name' => 'Danh sách tài khoản', 'url' => '/admin/users'],
@@ -55,6 +56,7 @@ class UserController extends Controller
      */
     public function store(UserRequest $request)
     {
+        $this->authorize('create', User::class);
         $this->data = $request->validated();
 
         $password = Str::random(10);
@@ -82,6 +84,7 @@ class UserController extends Controller
      */
     public function show()
     {
+        $this->authorize('show', User::class);
         try {
             $this->data = $this->model::with('roles', 'roles.permissions')->where('id', Auth::user()->id)->first();
             return response()->json(['check' => true, 'data' => $this->data], 200);
@@ -106,6 +109,7 @@ class UserController extends Controller
      */
     public function update(UserRequest $request, string $id)
     {
+        $this->authorize('update', User::class);
         $this->data = $request->validated();
         isset($this->data['roles']) ? $this->instance = $this->model::findOrFail($id)->syncRoles(['name' => $this->data['roles']]) : $this->instance = $this->model::findOrFail($id)->update($this->data);
 
@@ -121,6 +125,7 @@ class UserController extends Controller
      */
     public function destroy(string $id)
     {
+        $this->authorize('delete', User::class);
         DB::beginTransaction();
         try {
             $this->instance = $this->model::findOrFail($id);

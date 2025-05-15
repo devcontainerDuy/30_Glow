@@ -15,7 +15,7 @@ use Illuminate\Support\Facades\Auth;
 |
 */
 
-Route::middleware(['auth:sanctum', 'web', 'role:Super Admin|Manager'])->group(function () {
+Route::middleware(['auth:sanctum', 'web', 'can:isActiveRoles'])->group(function () {
     Route::get('/user/info', [App\Http\Controllers\Users\UserController::class, 'show']);
 });
 

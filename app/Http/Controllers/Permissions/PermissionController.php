@@ -19,6 +19,7 @@ class PermissionController extends Controller
      */
     public function index()
     {
+        $this->authorize('read', Permission::class);
         $this->crumbs = [
             ['name' => 'Tài khoản', 'url' => '/admin/users'],
             ['name' => 'Danh sách quyền', 'url' => '/admin/permissions'],
@@ -43,7 +44,7 @@ class PermissionController extends Controller
      */
     public function store(PermissionRequests $request)
     {
-
+        $this->authorize('create', Permission::class);
         $this->data = $request->validated();
         $this->instance = $this->model::create(['name' => $this->data['name']]);
         if ($this->instance) {
@@ -74,6 +75,7 @@ class PermissionController extends Controller
      */
     public function update(PermissionRequests $request, string $id)
     {
+        $this->authorize('update', Permission::class);
         $this->data = $request->validated();
         $this->instance = $this->model::findOrFail($id)->update($this->data);
         if ($this->instance) {
@@ -88,6 +90,7 @@ class PermissionController extends Controller
      */
     public function destroy(string $id)
     {
+        $this->authorize('delete', Permission::class);
         $this->instance = $this->model::findOrFail($id)->delete();
         if ($this->instance) {
             $this->data = $this->model::with('roles')->get();

@@ -33,7 +33,7 @@ Route::fallback(function () {
     return redirect()->route('notfound');
 });
 
-Route::middleware(['auth', 'auth.session', 'web', 'authen:Super Admin,Manager'])->prefix('admin')->as('admin.')->group(function () {
+Route::middleware(['auth', 'auth.session', 'web', 'can:isActiveRoles'])->prefix('admin')->as('admin.')->group(function () {
     Route::get('/', [App\Http\Controllers\Revenue\RevenueController::class, 'index'])->name('home');
     Route::get('/dailyProductRevenues', [App\Http\Controllers\Revenue\RevenueController::class, 'billProDuctsList'])->name('dailyProductRevenues');
     Route::get('/dailyProductRevenues/{id}/edit', [App\Http\Controllers\Revenue\RevenueController::class, 'billProDuctsDetail'])->name('dailyProductRevenues-detail');

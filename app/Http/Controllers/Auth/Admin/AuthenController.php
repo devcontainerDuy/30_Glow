@@ -27,12 +27,27 @@ class AuthenController extends Controller
 
     public function handleLogin(AuthenRequest $request)
     {
-        $this->data = $request->validated();
-        if (Auth::attempt(['email' => $this->data['email'], 'password' => $this->data['password'], 'status' => 1], $this->data['remember_token'])) {
-            Session::regenerateToken();
-            return response()->json(['check' => true, 'message' => 'Đăng nhập thành công!'], 200);
+        try {
+            $this->data = $request->validated();
+            if (Auth::attempt([
+                'email' => $this->data['email'],
+                'password' => $this->data['password'],
+                'status' => 1
+            ], $this->data['remember_token'])) {
+                Session::regenerateToken();
+                $user = Auth::user();
+                if ($user && $user->can('isActiveRoles')) {
+                    return response()->json(['check' => true, 'message' => 'Đăng nhập thành công!'], 200);
+                } else {
+                    Auth::logout();
+                    return response()->json(['check' => false, 'message' => 'Tài khoản không có quyền truy cập!'], 403);
+                }
+            }
+            return response()->json(['check' => false, 'message' => 'Đăng nhập thất bại!'], 400);
+        } catch (\Exception $e) {
+            Log::error('Login error: ' . $e->getMessage());
+            return response()->json(['check' => false, 'message' => 'Có lỗi xảy ra, vui lòng thử lại!'], 500);
         }
-        return response()->json(['check' => false, 'message' => 'Đăng nhập thất bại!'], 400);
     }
 
     public function handleLogout()
@@ -40,7 +55,7 @@ class AuthenController extends Controller
         Auth::logout();
         Session::invalidate();
         Session::regenerateToken();
-        return response()->json(['check' => true, 'message' => 'Đăng xuất thành công!'], 200);
+        return response()->json(['check' => true, 'message' => 'Đăng xuất thành công!'], 200);
     }
     public function loginManager(AuthenRequest $request)
     {

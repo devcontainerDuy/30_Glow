@@ -20,6 +20,7 @@ class RoleController extends Controller
      */
     public function index()
     {
+        $this->authorize('read', Role::class);
         $this->crumbs = [
             ['name' => 'Tài khoản', 'url' => '/admin/users'],
             ['name' => 'Danh sách vai trò', 'url' => '/admin/roles'],
@@ -47,6 +48,7 @@ class RoleController extends Controller
      */
     public function store(RoleRequest $request)
     {
+        $this->authorize('create', Role::class);
         $this->data = $request->validated();
         $this->instance = $this->model::create(['name' => $this->data['name']]);
 
@@ -62,6 +64,7 @@ class RoleController extends Controller
      */
     public function show(string $id)
     {
+        // $this->authorize('show', Role::class);
         $this->instance = $this->model::findOrFail($id);
         if ($this->instance) {
             $this->instance->load('permissions');
@@ -82,6 +85,7 @@ class RoleController extends Controller
      */
     public function update(RoleRequest $request, string $id)
     {
+        $this->authorize('update', Role::class);
         $this->data = $request->validated();
         $this->instance = $this->model::findOrFail($id)->update($this->data);
         if ($this->instance) {
@@ -105,6 +109,7 @@ class RoleController extends Controller
      */
     public function destroy(string $id)
     {
+        $this->authorize('delete', Role::class);
         $this->instance = $this->model::findOrFail($id);
         $this->instance = $this->instance->delete();
         if ($this->instance) {
