@@ -157,7 +157,7 @@ class ServiceCollectionsContoller extends Controller
                 'price' => $item->price,
                 'compare_price' => $item->compare_price,
                 'discount' => $item->discount,
-                'image' => asset('storage/services/' . $item->image),
+                'image' => asset('storage/services/' . $item->image ?? '1747288084_Untitled.png'),
                 'summary' => $item->summary,
                 'content' => $item->content,
                 'status' => $item->status,
