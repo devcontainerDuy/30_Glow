@@ -157,7 +157,7 @@ class PostCollectionsController extends Controller
                     'title' => $item->title,
                     'slug' => $item->slug,
                     'summary' => $item->summary,
-                    'image' => asset('storage/posts/' . $item->image),
+                    'image' => asset('storage/posts/' . $item->image ?? '1747288084_Untitled.png'),
                     'collection' => $item->collection ? [
                         'name' => $item->collection->name,
                         'slug' => $item->collection->slug,

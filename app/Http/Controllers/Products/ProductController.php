@@ -224,7 +224,7 @@ class ProductController extends Controller
                     'slug' => $item->brand->slug,
                 ] : null,
                 'gallery' => $item->gallery ?
-                    asset('storage/gallery/' . ($item->gallery->firstWhere('status', 1)->image ?? null)) :
+                    asset('storage/gallery/' . ($item->gallery->firstWhere('status', 1)->image ?? '1747288084_Untitled.png')) :
                     null,
             ];
         });
@@ -253,7 +253,7 @@ class ProductController extends Controller
                     'slug' => $item->brand->slug,
                 ] : null,
                 'gallery' => $item->gallery ?
-                    asset('storage/gallery/' . ($item->gallery->firstWhere('status', 1)->image ?? null)) :
+                    asset('storage/gallery/' . ($item->gallery->firstWhere('status', 1)->image ?? '1747288084_Untitled.png')) :
                     null,
             ];
         });
@@ -288,7 +288,7 @@ class ProductController extends Controller
             'gallery' => $this->data->gallery->map(function ($gallery) {
                 return [
                     'id' => $gallery->id,
-                    'image' => asset('storage/gallery/' . $gallery->image),
+                    'image' => asset('storage/gallery/' . $gallery->image ?? '1747288084_Untitled.png'),
                     'id_parent' => $gallery->id_parent,
                     'status' => $gallery->status,
                 ];
@@ -310,7 +310,7 @@ class ProductController extends Controller
                         'slug' => $related->brand->slug,
                     ] : null,
                     'gallery' => $related->gallery ?
-                        asset('storage/gallery/' . ($related->gallery->firstWhere('status', 1)->image ?? null)) :
+                        asset('storage/gallery/' . ($related->gallery->firstWhere('status', 1)->image ?? '1747288084_Untitled.png')) :
                         null,
                 ];
             }),
@@ -356,7 +356,7 @@ class ProductController extends Controller
                         'slug' => $item->brand->slug,
                     ] : null,
                     'gallery' => $item->gallery ?
-                        asset('storage/gallery/' . ($item->gallery->firstWhere('status', 1)->image ?? null)) :
+                        asset('storage/gallery/' . ($item->gallery->firstWhere('status', 1)->image ?? '1747288084_Untitled.png')) :
                         null,
                 ];
             });

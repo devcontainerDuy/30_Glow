@@ -153,7 +153,7 @@ class BrandsController extends Controller
 
     public function apiShow($slug)
     {
-        $this->data = $this->model::with("products")->active()->select('id', 'name', 'slug', 'status')->whereHas('products.gallery')->where('slug', $slug)->firstOrFail();
+        $this->data = $this->model::with("products")->active()->select('id', 'name', 'slug', 'status')->where('slug', $slug)->firstOrFail();
 
         if (!$this->data) {
             return response()->json(['check' => false, 'message' => 'Không tìm thấy thương hiệu'], 404);
@@ -182,7 +182,7 @@ class BrandsController extends Controller
                     'status' => $item->brand->status,
                 ] : null,
                 'gallery' => $item->gallery ?
-                    asset('storage/gallery/' . ($item->gallery->firstWhere('status', 1)->image ?? null)) :
+                    asset('storage/gallery/' . ($item->gallery->firstWhere('status', 1)->image ?? '1747288084_Untitled.png')) :
                     null,
                 // 'gallery' => $item->gallery->map(function ($galleryItem) {
                 //     return [

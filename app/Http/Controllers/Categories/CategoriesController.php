@@ -4,10 +4,8 @@ namespace App\Http\Controllers\Categories;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Categories\CategoriesRequest;
-use App\Models\Brands;
 use App\Models\Categories;
 use App\Models\Products;
-use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Illuminate\Support\Str;
 
@@ -165,7 +163,7 @@ class CategoriesController extends Controller
                     'slug' => $item->brand->slug,
                 ] : null,
                 'gallery' => $item->gallery ?
-                    asset('storage/gallery/' . ($item->gallery->firstWhere('status', 1)->image ?? null)) :
+                    asset('storage/gallery/' . ($item->gallery->firstWhere('status', 1)->image ?? '')) :
                     null,
             ];
         });
@@ -196,7 +194,7 @@ class CategoriesController extends Controller
                 'gallery' => $item->gallery->map(function ($galleryItem) {
                     return [
                         'id' => $galleryItem->id,
-                        'image' => asset("storage/gallery/{$galleryItem->image}"),
+                        'image' => asset("storage/gallery/" . $galleryItem->image ?? '1747288084_Untitled.png'),
                         'id_parent' => $galleryItem->id_parent,
                         'status' => $galleryItem->status,
                     ];
