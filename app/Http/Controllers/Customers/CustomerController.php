@@ -29,6 +29,7 @@ class CustomerController extends Controller
      */
     public function index()
     {
+        $this->authorize('read', Customers::class);
         $this->crumbs = [
             ['name' => 'Tài khoản', 'url' => '/admin/users'],
             ['name' => 'Danh sách khách hàng', 'url' => '/admin/customers'],
@@ -51,6 +52,7 @@ class CustomerController extends Controller
      */
     public function store(CustomerRequest $request)
     {
+        $this->authorize('create', Customers::class);
         $this->data = $request->validated();
 
         $password = Str::random(10);
@@ -74,6 +76,7 @@ class CustomerController extends Controller
 
     public function resetPassword($id)
     {
+        $this->authorize('update', Customers::class);
         $this->instance = Str::random(10);
         $this->data = $this->model::findOrFail($id);
 
@@ -152,6 +155,7 @@ class CustomerController extends Controller
      */
     public function update(CustomerRequest $request, string $id)
     {
+        $this->authorize('update', Customers::class);
         $this->data = $request->validated();
         // $this->instance = $this->model::findOrFail($id)->update($this->data); gộp 1 dòng kh chạy đc mà tách ra thì đc :)))))))) 
         // à tại dòng ở trên là trả về true fail nên bị bắt lỗi kiểu dữ liệu nha
@@ -171,6 +175,7 @@ class CustomerController extends Controller
      */
     public function destroy(string $id)
     {
+        $this->authorize('delete', Customers::class);
         $this->instance = $this->model::findOrFail($id);
         $this->instance->update(['status' => 0]);
         if ($this->instance->delete()) {

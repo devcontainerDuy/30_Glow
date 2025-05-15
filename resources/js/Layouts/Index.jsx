@@ -173,16 +173,18 @@ function Layout({ children }) {
                         <MenuItem icon={<HomeOutlinedIcon />} component={<Link href="/admin" method="get" as="a" />}>
                             Thống kê
                         </MenuItem>
-                        {(hasPermission("read_user") || hasPermission("read_role") || hasPermission("read_permission")) && (
+                        {(hasPermission("read_user") || hasPermission("read_customer") || hasPermission("read_role") || hasPermission("read_permission")) && (
                             <SubMenu icon={<PeopleOutlinedIcon />} label="Quản lý người dùng">
                                 {hasPermission("read_user") && (
                                     <MenuItem icon={<BadgeOutlinedIcon />} component={<Link href="/admin/users" />}>
                                         Ds người dùng
                                     </MenuItem>
                                 )}
-                                <MenuItem icon={<PermContactCalendarOutlinedIcon />} component={<Link href="/admin/customers" />}>
-                                    Ds khách hàng
-                                </MenuItem>
+                                {hasPermission("read_customer") && (
+                                    <MenuItem icon={<PermContactCalendarOutlinedIcon />} component={<Link href="/admin/customers" />}>
+                                        Ds khách hàng
+                                    </MenuItem>
+                                )}
                                 {hasPermission("read_role") && (
                                     <MenuItem icon={<ManageAccountsOutlinedIcon />} component={<Link href="/admin/roles" />}>
                                         Ds vai trò
@@ -316,48 +318,42 @@ function Layout({ children }) {
                         close={handleClose}
                         title={"Thông tin cá nhân"}
                         body={
-                            <>
-                                <ListGroup variant="flush">
-                                    <ListGroup.Item>
-                                        <strong>UID:</strong> {user?.uid}
-                                    </ListGroup.Item>
-                                    <ListGroup.Item>
-                                        <strong>Tên:</strong> {user?.name}
-                                    </ListGroup.Item>
-                                    <ListGroup.Item>
-                                        <strong>Email:</strong> {user?.email}
-                                    </ListGroup.Item>
-                                    <ListGroup.Item>
-                                        <strong>Điện thoại:</strong> {user?.phone || "Chưa cập nhật"}
-                                    </ListGroup.Item>
-                                    <ListGroup.Item>
-                                        <strong>Địa chỉ:</strong> {user?.address || "Chưa cập nhật"}
-                                    </ListGroup.Item>
-                                    <ListGroup.Item>
-                                        <strong>Trạng thái:</strong> {user?.status === 1 ? <Badge bg="success">Hoạt động</Badge> : <Badge bg="secondary">Tạm ngừng</Badge>}
-                                    </ListGroup.Item>
-                                    <ListGroup.Item>
-                                        <strong>Ngày tạo:</strong> {new Date(user?.created_at).toLocaleString()}
-                                    </ListGroup.Item>
-                                    <ListGroup.Item>
-                                        <strong>Ngày cập nhật:</strong> {new Date(user?.updated_at).toLocaleString()}
-                                    </ListGroup.Item>
-                                    <ListGroup.Item>
-                                        <strong>Vai trò:</strong>{" "}
-                                        {user?.roles.map((role) => (
-                                            <Badge bg="info" className="me-1" key={role.id}>
-                                                {role.name}
-                                            </Badge>
-                                        ))}
-                                    </ListGroup.Item>
-                                </ListGroup>
-                            </>
+                            <ListGroup variant="flush">
+                                <ListGroup.Item>
+                                    <strong>UID:</strong> {user?.uid}
+                                </ListGroup.Item>
+                                <ListGroup.Item>
+                                    <strong>Tên:</strong> {user?.name}
+                                </ListGroup.Item>
+                                <ListGroup.Item>
+                                    <strong>Email:</strong> {user?.email}
+                                </ListGroup.Item>
+                                <ListGroup.Item>
+                                    <strong>Điện thoại:</strong> {user?.phone || "Chưa cập nhật"}
+                                </ListGroup.Item>
+                                <ListGroup.Item>
+                                    <strong>Địa chỉ:</strong> {user?.address || "Chưa cập nhật"}
+                                </ListGroup.Item>
+                                <ListGroup.Item>
+                                    <strong>Trạng thái:</strong> {user?.status === 1 ? <Badge bg="success">Hoạt động</Badge> : <Badge bg="secondary">Tạm ngừng</Badge>}
+                                </ListGroup.Item>
+                                <ListGroup.Item>
+                                    <strong>Ngày tạo:</strong> {new Date(user?.created_at).toLocaleString()}
+                                </ListGroup.Item>
+                                <ListGroup.Item>
+                                    <strong>Ngày cập nhật:</strong> {new Date(user?.updated_at).toLocaleString()}
+                                </ListGroup.Item>
+                                <ListGroup.Item>
+                                    <strong>Vai trò:</strong>{" "}
+                                    {user?.roles.map((role) => (
+                                        <Badge bg="info" className="me-1" key={role.id}>
+                                            {role.name}
+                                        </Badge>
+                                    ))}
+                                </ListGroup.Item>
+                            </ListGroup>
                         }
-                        footer={
-                            <>
-                                <ButtonsComponent type="button" variant="secondary" icon="close" title="Thoát ra" onClick={handleClose} />
-                            </>
-                        }
+                        footer={<ButtonsComponent type="button" variant="secondary" icon="close" title="Thoát ra" onClick={handleClose} />}
                     />
 
                     {/* Nội dung chính */}
