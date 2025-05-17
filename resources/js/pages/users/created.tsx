@@ -1,14 +1,13 @@
 import Heading from '@/components/heading';
 import InputError from '@/components/input-error';
 import { Button } from '@/components/ui/button';
-
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import AppLayout from '@/layouts/app-layout';
 import { DialogMaps } from '@/layouts/users/dialog-maps';
 import { generatePassword } from '@/lib/generatesPassword';
-import type { BreadcrumbItem, UserForm} from '@/types';
-import { Head, useForm } from '@inertiajs/react';
+import type { BreadcrumbItem, UserForm } from '@/types';
+import { Head, Link, useForm } from '@inertiajs/react';
 import { ArrowLeft, Eye, EyeOff, LoaderCircle } from 'lucide-react';
 import { type FormEventHandler, useState } from 'react';
 import { toast } from 'sonner';
@@ -35,7 +34,7 @@ const Created = () => {
         phone: '',
         address: '',
         password: '',
-        confirmed: '',
+        password_confirmation: '',
     });
     const [hidden, setHidden] = useState<boolean>(true);
 
@@ -44,7 +43,8 @@ const Created = () => {
         console.log(data);
 
         post(route('users.store'), {
-            onFinish: () => reset('name', 'email', 'phone', 'address', 'password', 'confirmed'),
+            onSuccess: () => toast.success('Tạo người dùng thành công!'),
+            onFinish: () => reset('name', 'email', 'phone', 'address', 'password', 'password_confirmation'),
             preserveState: true,
         });
     };
@@ -55,12 +55,13 @@ const Created = () => {
             <div className="flex h-full flex-1 flex-col gap-4 rounded-xl px-4 py-6">
                 <div className="flex items-center justify-between">
                     <Heading title="Tạo mới" description="Tạo người dùng mới" />
-                    <div className="flex items-center gap-2">
-                        <Button variant={'link'} onClick={() => window.history.back()}>
+
+                    <Link href={route('users.index')} className="flex items-center gap-2">
+                        <Button variant={'link'}>
                             <ArrowLeft className="h-4 w-4" />
                             <span>Quay lại trang trước</span>
                         </Button>
-                    </div>
+                    </Link>
                 </div>
 
                 <div className="relative flex items-center justify-center">
@@ -149,7 +150,7 @@ const Created = () => {
                             </div>
 
                             <div className="grid gap-2">
-                                <Label htmlFor="confirmed">
+                                <Label htmlFor="password_confirmation">
                                     Xác nhận mật khẩu <span className="text-red-500">(*)</span>
                                 </Label>
 
@@ -164,18 +165,18 @@ const Created = () => {
                                         {!hidden ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                                     </Button>
                                     <Input
-                                        id="confirmed"
+                                        id="password_confirmation"
                                         type={hidden ? 'password' : 'text'}
                                         className="block ps-13"
                                         required
                                         tabIndex={0}
                                         autoComplete="current-password"
-                                        value={data?.confirmed}
-                                        onChange={(e) => setData('confirmed', e.target.value)}
+                                        value={data?.password_confirmation}
+                                        onChange={(e) => setData('password_confirmation', e.target.value)}
                                         placeholder="Xác nhận mật khẩu"
                                     />
                                 </div>
-                                {errors?.confirmed && <InputError message={errors.confirmed} />}
+                                {errors?.password_confirmation && <InputError message={errors.password_confirmation} />}
 
                                 <div className="text-end">
                                     <Button
@@ -186,13 +187,13 @@ const Created = () => {
                                         onClick={() => {
                                             const p = generatePassword(8);
                                             setData('password', p);
-                                            setData('confirmed', p);
+                                            setData('password_confirmation', p);
                                             toast.success('Đã tự động tạo mật khẩu cho người dùng!', {
                                                 action: {
                                                     label: 'Hoàn tác',
                                                     onClick() {
                                                         setData('password', '');
-                                                        setData('confirmed', '');
+                                                        setData('password_confirmation', '');
                                                         toast.error('Đã hoàn tác tạo mật khẩu!', {
                                                             action: {
                                                                 label: 'Ẩn',

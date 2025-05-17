@@ -13,6 +13,7 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { useInitials } from '@/hooks/use-initials';
 import AppLayout from '@/layouts/app-layout';
+import { formatDate } from '@/lib/format';
 import type { BreadcrumbItem, User } from '@/types';
 import { Head, Link } from '@inertiajs/react';
 import type { ColumnDef } from '@tanstack/react-table';
@@ -45,9 +46,9 @@ const NameCell = ({ name }: { name: string }) => {
     );
 };
 
-const Index = ({ ...data }) => {
-    const { users, roles } = data.data;
-    console.log('users', roles);
+const Index = ({ data } : { data: User[] }) => {
+    // const { users, roles } = user;
+    console.log('roles', data ?? 'No roles data available');
 
     const columns: ColumnDef<User>[] = [
         {
@@ -135,7 +136,7 @@ const Index = ({ ...data }) => {
                     </Button>
                 );
             },
-            cell: ({ row }) => <div>{row.getValue('created_at')}</div>,
+            cell: ({ row }) => <div>{formatDate(row.getValue('created_at'))}</div>,
         },
         {
             accessorKey: 'actions',
@@ -153,10 +154,12 @@ const Index = ({ ...data }) => {
                         <DropdownMenuItem className="cursor-pointer" onClick={() => navigator.clipboard.writeText(row.original.uid)}>
                             Sao chép UID
                         </DropdownMenuItem>
+
                         <DropdownMenuSeparator />
-                        <DropdownMenuItem className="cursor-pointer" onClick={() => console.log('Edit user', row.original.id)}>
-                            Sửa
-                        </DropdownMenuItem>
+
+                        <Link href={`users/${row.original.id}/edit`}>
+                            <DropdownMenuItem className="cursor-pointer">Sửa</DropdownMenuItem>
+                        </Link>
                         <DropdownMenuItem className="cursor-pointer" onClick={() => console.log('Delete user', row.original.id)}>
                             Xóa
                         </DropdownMenuItem>
@@ -188,7 +191,7 @@ const Index = ({ ...data }) => {
                     </div>
                 </div>
                 <div className="border-sidebar-border/70 dark:border-sidebar-border relative overflow-hidden rounded-xl border">
-                    <DataTable columns={columns} data={users?.data} searchKey="email" onRowClick={(row) => console.log('Row clicked:', row)} />
+                    <DataTable columns={columns} data={data} searchKey="email" onRowClick={(row) => console.log('Row clicked:', row)} />
                 </div>
             </div>
         </AppLayout>

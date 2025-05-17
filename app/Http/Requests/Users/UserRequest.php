@@ -27,6 +27,7 @@ class UserRequest extends BaseRequest
             'phone'=> 'nullable|string|min:10|max:11',
             'address' => 'nullable|string|max:255',
             'password' => 'required|string|min:8|confirmed',
+            'password_confirmation' => 'required|string|same:password',
         ];
     }
 }

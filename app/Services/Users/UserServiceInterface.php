@@ -4,7 +4,7 @@ namespace App\Services\Users;
 
 interface UserServiceInterface
 {
-    public function read(): array;
+    public function read();
     public function created(array $data): array;
     public function updated(int $id, array $data): array|bool;
     public function deleted(int $id): bool;

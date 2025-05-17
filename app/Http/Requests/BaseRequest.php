@@ -36,8 +36,10 @@ abstract class BaseRequest extends FormRequest
 
         $isMethod = $this->method();
 
-        array_key_exists($isMethod, $methodMap) ?
-            $this->validate = $this->$methodMap[$isMethod]() :
+        if (array_key_exists($isMethod, $methodMap)) {
+            $methodName = $methodMap[$isMethod];
+            $this->validate = $this->$methodName();
+        } else
             $this->validate = $this->methodGet();
 
         return $this->validate;
@@ -103,11 +105,11 @@ abstract class BaseRequest extends FormRequest
         return [];
     }
 
-    protected function failedValidation(Validator $validator)
-    {
-        throw new HttpResponseException(response()->json([
-            'check' => false,
-            'message' => $validator->errors()->first(),
-        ], 200));
-    }
+    // protected function failedValidation(Validator $validator)
+    // {
+    //     throw new HttpResponseException(response()->json([
+    //         'status' => false,
+    //         'message' => $validator->errors()->first(),
+    //     ], 200));
+    // }
 }

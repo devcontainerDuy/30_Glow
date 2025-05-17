@@ -3,25 +3,25 @@
 namespace App\Http\Controllers\Users;
 
 use App\Http\Controllers\Controller;
-use App\Http\Requests\User\UserRequest;
+use App\Http\Requests\Users\UserRequest;
+use App\Repository\Users\UserRepositoryInterface;
 use App\Services\Users\UserServiceInterface;
 use Inertia\Inertia;
 
 class UserController extends Controller
 {
-    public function __construct(UserServiceInterface $service)
+    public function __construct(UserServiceInterface $service, UserRepositoryInterface $repository)
     {
         $this->service = $service;
+        $this->repository = $repository;
     }
-    
+
     /**
      * Display a listing of the resource.
      */
     public function index()
     {
-        return Inertia::render('users/index', [
-            'data' => $this->service->read(),
-        ]);
+        return Inertia::render('users/index', $this->service->read());
     }
 
     /**
@@ -37,7 +37,8 @@ class UserController extends Controller
      */
     public function store(UserRequest $request)
     {
-        dd($request->all());
+        $this->service->created($request->validated());
+        return redirect()->route('users.create');
     }
 
     /**
@@ -53,13 +54,13 @@ class UserController extends Controller
      */
     public function edit(string $id)
     {
-        //
+        return Inertia::render('users/edited', $this->repository->find($id));
     }
 
     /**
      * Update the specified resource in storage.
      */
-    public function update( string $id, UserRequest $request)
+    public function update(string $id, UserRequest $request)
     {
         //
     }

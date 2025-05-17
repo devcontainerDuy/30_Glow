@@ -39,5 +39,5 @@ export type UserForm = {
     phone: string;
     address: string;
     password: string;
-    confirmed: string;
+    password_confirmation: string;
 };
