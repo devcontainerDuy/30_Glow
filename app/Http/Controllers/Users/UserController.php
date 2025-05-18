@@ -4,16 +4,19 @@ namespace App\Http\Controllers\Users;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Users\UserRequest;
+use App\Repository\Roles\RoleRepositoryInterface;
 use App\Repository\Users\UserRepositoryInterface;
 use App\Services\Users\UserServiceInterface;
 use Inertia\Inertia;
 
 class UserController extends Controller
 {
-    public function __construct(UserServiceInterface $service, UserRepositoryInterface $repository)
+    private $rolesRepository;
+    public function __construct(UserServiceInterface $service, UserRepositoryInterface $repository, RoleRepositoryInterface $rolesRepository)
     {
         $this->service = $service;
         $this->repository = $repository;
+        $this->rolesRepository = $rolesRepository;
     }
 
     /**
@@ -21,7 +24,10 @@ class UserController extends Controller
      */
     public function index()
     {
-        return Inertia::render('users/index', $this->service->read());
+        return Inertia::render('users/index', [
+            'data' => $this->service->read(),
+            'roles' => $this->rolesRepository->getAll(),
+        ]);
     }
 
     /**
@@ -29,7 +35,9 @@ class UserController extends Controller
      */
     public function create()
     {
-        return Inertia::render('users/created');
+        return Inertia::render('users/created', [
+            'roles' => $this->rolesRepository->getAll(),
+        ]);
     }
 
     /**
@@ -56,6 +64,7 @@ class UserController extends Controller
     {
         return Inertia::render('users/edited', [
             'user' => $this->repository->with('roles')->firstBy(['uid' => $id]),
+            'roles' => $this->rolesRepository->getAll(),
         ]);
     }
 

@@ -3,7 +3,7 @@
 namespace App\Repository\Users;
 
 use App\Repository\EloquentRepository;
-use Illuminate\Pagination\CursorPaginator;
+use Illuminate\Support\Collection;
 
 class UserRepository extends EloquentRepository implements UserRepositoryInterface
 {
@@ -15,8 +15,8 @@ class UserRepository extends EloquentRepository implements UserRepositoryInterfa
         return \App\Models\User::class;
     }
 
-    public function getAllUsers(): CursorPaginator
+    public function getAllUsers(): Collection
     {
-        return $this->model->with('roles')->cursorPaginate(20);
+        return $this->model->with('roles')->get();
     }
 }

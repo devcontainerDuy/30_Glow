@@ -18,11 +18,13 @@ class DatabaseSeeder extends Seeder
     {
         // User::factory(10)->create();
 
-        User::factory()->create([
-            'uid' => $this->generateUUIDv4(),
-            'name' => 'Admin',
-            'email' => 'admin@gmail.com',
-            'password'=> Hash::make('123456'),
-        ]);
+        for ($i = 0; $i < 10; $i++) {
+            User::create([
+                'uid' => $this->generateUUIDv4(),
+                'name' => fake()->name(),
+                'email' => fake()->unique()->email(),
+                'password' => Hash::make('123456'),
+            ]);
+        }
     }
 }

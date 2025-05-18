@@ -19,7 +19,7 @@ class UserService implements UserServiceInterface
         $this->roleRepository = $roleRepository;
     }
 
-    public function read(): CursorPaginator
+    public function read(): mixed
     {
         return $this->repository->getAllUsers();
     }
