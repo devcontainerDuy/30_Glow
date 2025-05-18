@@ -30,7 +30,7 @@ const breadcrumbs: BreadcrumbItem[] = [
     },
 ];
 
-const NameCell = ({ name }: { name: string }) => {
+const NameCell: React.FC<{ name: string }> = ({ name }) => {
     const getInitials = useInitials();
 
     return (
@@ -46,10 +46,7 @@ const NameCell = ({ name }: { name: string }) => {
     );
 };
 
-const Index = ({ data } : { data: User[] }) => {
-    // const { users, roles } = user;
-    console.log('roles', data ?? 'No roles data available');
-
+const Index: React.FC<{ data: User[] }> = ({ data }) => {
     const columns: ColumnDef<User>[] = [
         {
             id: 'select',
@@ -157,7 +154,7 @@ const Index = ({ data } : { data: User[] }) => {
 
                         <DropdownMenuSeparator />
 
-                        <Link href={`users/${row.original.id}/edit`}>
+                        <Link href={`users/${row.original.uid}/edit`}>
                             <DropdownMenuItem className="cursor-pointer">Sửa</DropdownMenuItem>
                         </Link>
                         <DropdownMenuItem className="cursor-pointer" onClick={() => console.log('Delete user', row.original.id)}>

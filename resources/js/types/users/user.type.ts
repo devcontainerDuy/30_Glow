@@ -32,7 +32,6 @@ export interface User {
     [key: string]: unknown; // This allows for additional properties...
 }
 
-
 export type UserForm = {
     name: string;
     email: string;
@@ -40,4 +39,21 @@ export type UserForm = {
     address: string;
     password: string;
     password_confirmation: string;
+};
+
+export type UserUpdateForm = {
+    id: number;
+    uid: string;
+    name: string;
+    email: string;
+    phone: string;
+    address: string;
+    password_attributes: string;
+    password: string;
+    password_confirmation: string;
+    created_at: string;
+    updated_at: string;
+    role: Array<string>;
+    status: string;
+    avatar: string;
 };

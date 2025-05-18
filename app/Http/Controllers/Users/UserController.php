@@ -54,7 +54,9 @@ class UserController extends Controller
      */
     public function edit(string $id)
     {
-        return Inertia::render('users/edited', $this->repository->find($id));
+        return Inertia::render('users/edited', [
+            'user' => $this->repository->with('roles')->firstBy(['uid' => $id]),
+        ]);
     }
 
     /**
@@ -62,7 +64,9 @@ class UserController extends Controller
      */
     public function update(string $id, UserRequest $request)
     {
-        //
+        $user = $this->repository->findBy(['id' => $id]);
+        $this->service->updated($id, $request->validated());
+        return redirect()->route('users.edit', ['user' => $user[0]->uid]);
     }
 
     /**
@@ -70,6 +74,7 @@ class UserController extends Controller
      */
     public function destroy(string $id)
     {
-        //
+        $this->service->deleted($id);
+        return redirect()->route('users.index');
     }
 }

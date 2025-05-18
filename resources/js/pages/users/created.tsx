@@ -27,7 +27,7 @@ const breadcrumbs: BreadcrumbItem[] = [
     },
 ];
 
-const Created = () => {
+const Created : React.FC = () => {
     const { data, setData, post, processing, errors, reset } = useForm<Required<UserForm>>({
         name: '',
         email: '',
