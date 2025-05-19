@@ -11,8 +11,10 @@ import {
     DropdownMenuSeparator,
     DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
+import { useDelete } from '@/hooks/use-delete';
 import { useInitials } from '@/hooks/use-initials';
 import AppLayout from '@/layouts/app-layout';
+import AlertDialogDelete from '@/layouts/users/alert-dialog-delete';
 import { formatDate } from '@/lib/format';
 import type { BreadcrumbItem, User } from '@/types';
 import { Head, Link } from '@inertiajs/react';
@@ -47,6 +49,9 @@ const NameCell: React.FC<{ name: string }> = ({ name }) => {
 };
 
 const Index: React.FC<{ data: User[] }> = ({ data }) => {
+    console.log('Data:', data);
+    const { open, confirmDelete, handleDelete, handleCancel } = useDelete();
+
     const columns: ColumnDef<User>[] = [
         {
             id: 'select',
@@ -157,7 +162,7 @@ const Index: React.FC<{ data: User[] }> = ({ data }) => {
                         <Link href={`users/${row.original.uid}/edit`}>
                             <DropdownMenuItem className="cursor-pointer">Sửa</DropdownMenuItem>
                         </Link>
-                        <DropdownMenuItem className="cursor-pointer" onClick={() => console.log('Delete user', row.original.id)}>
+                        <DropdownMenuItem className="cursor-pointer" onClick={() => confirmDelete(route('users.destroy', row.original.id))}>
                             Xóa
                         </DropdownMenuItem>
                     </DropdownMenuContent>
@@ -169,6 +174,8 @@ const Index: React.FC<{ data: User[] }> = ({ data }) => {
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title="Danh sách người dùng" />
+            <AlertDialogDelete open={open} handleCancel={handleCancel} handleDelete={handleDelete} />
+
             <div className="flex h-full flex-1 flex-col gap-4 rounded-xl px-4 py-6">
                 <div className="flex items-center justify-between">
                     <Heading title="Người dùng" description="Quản lý danh sách người dùng" />

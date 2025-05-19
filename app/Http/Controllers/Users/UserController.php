@@ -25,8 +25,7 @@ class UserController extends Controller
     public function index()
     {
         return Inertia::render('users/index', [
-            'data' => $this->service->read(),
-            'roles' => $this->rolesRepository->getAll(),
+            'data' => $this->service->read()
         ]);
     }
 

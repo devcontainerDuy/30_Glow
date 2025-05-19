@@ -35,9 +35,9 @@ class UserService implements UserServiceInterface
         return $this->repository->update($id, $data);
     }
 
-    public function deleted(int $id): bool
+    public function deleted(int $id)
     {
-        return $this->repository->delete($id) ? true : false;
+        return $this->repository->delete($id);
     }
 
 }
