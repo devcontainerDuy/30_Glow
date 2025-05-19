@@ -31,7 +31,7 @@ export default function Login({ status, canResetPassword }: LoginProps) {
 
     const submit: FormEventHandler = (e) => {
         e.preventDefault();
-        post(route('login'), {
+        post(route('login'), {  
             onFinish: () => reset('password'),
         });
     };
