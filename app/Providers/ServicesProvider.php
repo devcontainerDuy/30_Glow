@@ -15,6 +15,11 @@ class ServicesProvider extends ServiceProvider
             \App\Services\Users\UserServiceInterface::class,
             \App\Services\Users\UserService::class
         );
+
+        $this->app->bind(
+            \App\Services\Roles\RoleServiceInterface::class,
+            \App\Services\Roles\RoleService::class
+        );
     }
 
     /**

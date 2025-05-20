@@ -14,9 +14,4 @@ class UserRepository extends EloquentRepository implements UserRepositoryInterfa
     {
         return \App\Models\User::class;
     }
-
-    public function getAllUsers(): Collection
-    {
-        return $this->model->with('roles')->get();
-    }
 }

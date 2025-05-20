@@ -41,6 +41,14 @@ abstract class EloquentRepository implements EloquentRepositoryInterface
     }
 
     /**
+     * EloquentRepository destructor.
+     */
+    public function __destruct()
+    {
+        $this->setModel();
+    }
+
+    /**
      * Set model
      */
     public function setModel(): void
@@ -51,44 +59,18 @@ abstract class EloquentRepository implements EloquentRepositoryInterface
     }
 
     /**
-     * Get the model instance.
-     *
-     * @return \Illuminate\Database\Eloquent\Model
-     */
-    public function beginTransaction(): void
-    {
-        $this->model->getConnection()->beginTransaction();
-    }
-
-    /**
-     * Commit the transaction.
-     *
-     * @return void
-     */
-    public function commit(): void
-    {
-        $this->model->getConnection()->commit();
-    }
-
-    /**
-     * Rollback the transaction.
-     *
-     * @return void
-     */
-    public function rollBack(): void
-    {
-        $this->model->getConnection()->rollBack();
-    }
-
-    /**
      * Get all records from the repository.
      *
-     * @return array
+     * @return array|Collection
      * @throws \Exception
      */
-    public function getAll(): array
+    public function getAll(): Collection
     {
-        return $this->model->get()->toArray();
+        if (!empty($this->select)) {
+            $this->model->select($this->select);
+        }
+
+        return $this->model->get();
     }
 
     /**
@@ -98,10 +80,9 @@ abstract class EloquentRepository implements EloquentRepositoryInterface
      * @return array
      * @throws \Exception
      */
-    public function find(int $id): ?array
+    public function find(int $id): ?Model
     {
-        $this->instance = $this->model->find($id);
-        return $this->instance ? $this->instance->toArray() : null;
+        return $this->model->find($id) ?: null;
     }
 
     /**
@@ -113,7 +94,7 @@ abstract class EloquentRepository implements EloquentRepositoryInterface
     public function create(array $data): array|bool
     {
         $this->instance = $this->model->create($data);
-        return $this->instance ? $this->instance->toArray() : false;
+        return $this->instance ? true : false;
     }
 
     /**
@@ -168,6 +149,12 @@ abstract class EloquentRepository implements EloquentRepositoryInterface
     public function with($relations): self
     {
         $this->model = $this->model->with($relations);
+        return $this;
+    }
+
+    public function select(array $columns): self
+    {
+        $this->select = $columns;
         return $this;
     }
 

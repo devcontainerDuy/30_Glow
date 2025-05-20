@@ -1,25 +1,16 @@
-import { DataTable } from '@/components/data-table';
 import Heading from '@/components/heading';
-import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
-import { Checkbox } from '@/components/ui/checkbox';
-import {
-    DropdownMenu,
-    DropdownMenuContent,
-    DropdownMenuItem,
-    DropdownMenuLabel,
-    DropdownMenuSeparator,
-    DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
-import { useDelete } from '@/hooks/use-delete';
-import { useInitials } from '@/hooks/use-initials';
 import AppLayout from '@/layouts/app-layout';
 import AlertDialogDelete from '@/components/alert-dialog-delete';
-import { formatDate } from '@/lib/format';
-import type { BreadcrumbItem, User } from '@/types';
+import type { BreadcrumbItem, Role } from '@/types';
 import { Head, Link } from '@inertiajs/react';
-import type { ColumnDef } from '@tanstack/react-table';
 import { ArrowUpDown, MoreHorizontal, Plus, Trash2 } from 'lucide-react';
+import { useDelete } from '@/hooks/use-delete';
+import { DataTable } from '@/components/data-table';
+import type { ColumnDef } from '@tanstack/react-table';
+import { Checkbox } from '@/components/ui/checkbox';
+import { formatDate } from '@/lib/format';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -27,32 +18,16 @@ const breadcrumbs: BreadcrumbItem[] = [
         href: '/users',
     },
     {
-        title: 'Người dùng',
-        href: '/users',
+        title: 'Vai trò',
+        href: '/roles',
     },
 ];
 
-const NameCell: React.FC<{ name: string }> = ({ name }) => {
-    const getInitials = useInitials();
-
-    return (
-        <div className="flex items-center gap-2 capitalize">
-            <Avatar className="flex h-8 w-8 overflow-hidden rounded-full">
-                {/* <AvatarImage src={row.original.avatar} alt={row.original.name} /> */}
-                <AvatarFallback className="rounded-lg bg-neutral-200 text-black dark:bg-neutral-700 dark:text-white">
-                    {getInitials(name)}
-                </AvatarFallback>
-            </Avatar>
-            <span className="truncate font-semibold">{name}</span>
-        </div>
-    );
-};
-
-const Index: React.FC<{ data: User[] }> = ({ data }) => {
-    console.log('Data:', data);
+const Index: React.FC<{ data: Role[] }> = ({ data }) => {
     const { open, confirmDelete, handleDelete, handleCancel } = useDelete();
+    console.log('Data:', data);
 
-    const columns: ColumnDef<User>[] = [
+    const columns: ColumnDef<Role>[] = [
         {
             id: 'select',
             header: ({ table }) => (
@@ -73,60 +48,24 @@ const Index: React.FC<{ data: User[] }> = ({ data }) => {
             header: ({ column }) => {
                 return (
                     <Button variant="ghost" onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}>
-                        Name
+                        <span className="text-sm font-medium">Tên vai trò</span>
                         <ArrowUpDown className="ml-2 h-4 w-4" />
                     </Button>
                 );
             },
-            cell: ({ row }) => <NameCell name={row.getValue('name')} />,
+            cell: ({ row }) => row.getValue('name'),
         },
         {
-            accessorKey: 'email',
+            accessorKey: 'guard_name',
             header: ({ column }) => {
                 return (
                     <Button variant="ghost" onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}>
-                        Email
+                        <span className="text-sm font-medium">Guard Name</span>
                         <ArrowUpDown className="ml-2 h-4 w-4" />
                     </Button>
                 );
             },
-            cell: ({ row }) => <div className="lowercase">{row.getValue('email')}</div>,
-        },
-        {
-            accessorKey: 'phone',
-            header: ({ column }) => {
-                return (
-                    <Button variant="ghost" onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}>
-                        Phone
-                        <ArrowUpDown className="ml-2 h-4 w-4" />
-                    </Button>
-                );
-            },
-            cell: ({ row }) => <div>{row.getValue('phone') || 'N/A'}</div>,
-        },
-        {
-            accessorKey: 'address',
-            header: ({ column }) => {
-                return (
-                    <Button variant="ghost" onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}>
-                        Address
-                        <ArrowUpDown className="ml-2 h-4 w-4" />
-                    </Button>
-                );
-            },
-            cell: ({ row }) => <div>{row.getValue('address') || 'N/A'}</div>,
-        },
-        {
-            accessorKey: 'status',
-            header: ({ column }) => {
-                return (
-                    <Button variant="ghost" onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}>
-                        Status
-                        <ArrowUpDown className="ml-2 h-4 w-4" />
-                    </Button>
-                );
-            },
-            cell: ({ row }) => <div>{row.getValue('status')}</div>,
+            cell: ({ row }) => <span className="text-sm font-medium">{row.getValue('guard_name')}</span>,
         },
         {
             accessorKey: 'created_at',
@@ -153,16 +92,10 @@ const Index: React.FC<{ data: User[] }> = ({ data }) => {
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end">
                         <DropdownMenuLabel>Hành động</DropdownMenuLabel>
-                        <DropdownMenuItem className="cursor-pointer" onClick={() => navigator.clipboard.writeText(row.original.uid)}>
-                            Sao chép UID
-                        </DropdownMenuItem>
-
-                        <DropdownMenuSeparator />
-
-                        <Link href={route('users.edit', row.original.uid)}>
+                        <Link href={route('roles.edit', row.original.id)}>
                             <DropdownMenuItem className="cursor-pointer">Sửa</DropdownMenuItem>
                         </Link>
-                        <DropdownMenuItem className="cursor-pointer" onClick={() => confirmDelete(route('users.destroy', row.original.id))}>
+                        <DropdownMenuItem className="cursor-pointer" onClick={() => confirmDelete(route('roles.destroy', row.original.id))}>
                             Xóa
                         </DropdownMenuItem>
                     </DropdownMenuContent>
@@ -173,20 +106,20 @@ const Index: React.FC<{ data: User[] }> = ({ data }) => {
 
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
-            <Head title="Danh sách người dùng" />
+            <Head title="Vai trò" />
             <AlertDialogDelete open={open} handleCancel={handleCancel} handleDelete={handleDelete} />
 
             <div className="flex h-full flex-1 flex-col gap-4 rounded-xl px-4 py-6">
                 <div className="flex items-center justify-between">
-                    <Heading title="Người dùng" description="Quản lý danh sách người dùng" />
+                    <Heading title="Vai trò" description="Quản lý danh sách vai trò" />
                     <div className="flex items-center gap-2">
-                        <Link href="/users/trash">
+                        <Link href="/roles/trash">
                             <Button variant={'destructive'}>
                                 <Trash2 className="h-4 w-4" />
                                 <span>Thùng rác</span>
                             </Button>
                         </Link>
-                        <Link href="/users/create">
+                        <Link href="/roles/create">
                             <Button>
                                 <Plus className="h-4 w-4" />
                                 <span>Tạo mới</span>
@@ -195,7 +128,7 @@ const Index: React.FC<{ data: User[] }> = ({ data }) => {
                     </div>
                 </div>
                 <div className="border-sidebar-border/70 dark:border-sidebar-border relative overflow-hidden rounded-xl border">
-                    <DataTable columns={columns} data={data} searchKey="email" onRowClick={(row) => console.log('Row clicked:', row)} />
+                    <DataTable columns={columns} data={data} searchKey="name"/>
                 </div>
             </div>
         </AppLayout>

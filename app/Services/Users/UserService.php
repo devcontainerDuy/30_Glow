@@ -4,13 +4,14 @@ namespace App\Services\Users;
 
 use App\Repository\Roles\RoleRepositoryInterface;
 use App\Repository\Users\UserRepositoryInterface;
+use App\Services\BaseService;
 use App\Traits\GeneratesUniqueId;
-use Illuminate\Pagination\CursorPaginator;
+use Illuminate\Support\Facades\DB;
 
-class UserService implements UserServiceInterface
+class UserService extends BaseService implements UserServiceInterface
 {
     use GeneratesUniqueId;
-    protected UserRepositoryInterface $repository;
+    // protected UserRepositoryInterface $repository;
     protected RoleRepositoryInterface $roleRepository;
 
     public function __construct(UserRepositoryInterface $repository, RoleRepositoryInterface $roleRepository)
@@ -21,13 +22,21 @@ class UserService implements UserServiceInterface
 
     public function read(): mixed
     {
-        return $this->repository->getAllUsers();
+        return $this->repository->with('roles')->getAll();
     }
 
     public function created(array $data): array
     {
-        $data['uid'] = $this->generateUUIDv4(false);
-        return $this->repository->create($data);
+        DB::beginTransaction();
+        try {
+            $data['uid'] = $this->generateUUIDv4(false);
+            $this->instance = $this->repository->create($data);
+            DB::commit();
+            return $this->instance;
+        } catch (\Exception $e) {
+            DB::rollBack();
+            throw $e;
+        }
     }
 
     public function updated(int $id, array $data): array|bool

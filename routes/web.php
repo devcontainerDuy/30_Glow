@@ -13,6 +13,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     })->name('dashboard');
 
     Route::resource('users', App\Http\Controllers\Users\UserController::class);
+    Route::resource('roles', App\Http\Controllers\Roles\RoleController::class);
 });
 
 Route::group(['prefix' => 'laravel-filemanager', 'middleware' => ['web', 'auth']], function () {

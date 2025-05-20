@@ -6,16 +6,15 @@ abstract class BaseService
 {
     /**
      * The name of the model to be used for the controller.
-     * @var string
      */
-    protected ?string $instance;
+    protected $instance;
 
     /**
      * The name of the repository to be used for the controller.
      */
-    protected mixed $repository = null;
+    protected $repository;
 
-    public function __construct(mixed $repository)
+    public function __construct($repository)
     {
         $this->repository = $repository;
     }

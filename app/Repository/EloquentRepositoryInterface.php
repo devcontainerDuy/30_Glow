@@ -2,22 +2,25 @@
 
 namespace App\Repository;
 
+use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Database\Eloquent\Model;
+
 interface EloquentRepositoryInterface
 {
     /**
      * Get all records from the repository.
      *
-     * @return mixed
+     * @return Collection
      */
-    public function getAll(): array;
+    public function getAll() : Collection;
 
     /**
      * Find a record by its ID.
      *
      * @param int $id
-     * @return mixed
+     * @return Model|null
      */
-    public function find(int $id): ?array;
+    public function find(int $id);
 
     /**
      * Create a new record in the repository.
@@ -91,6 +94,14 @@ interface EloquentRepositoryInterface
      * @return $this
      */
     public function with($relations): self;
+
+    /**
+     * Set the columns to be selected.
+     *
+     * @param array $columns
+     * @return $this
+     */
+    public function select(array $columns): self;
 
     /**
      * Order the records by a specific column.

@@ -1,0 +1,41 @@
+<?php
+
+namespace App\Http\Requests\Roles;
+
+use App\Http\Requests\BaseRequest;
+
+class RoleRequest extends BaseRequest
+{
+    /**
+     * Determine if the user is authorized to make this request.
+     */
+    public function authorize(): bool
+    {
+        return true;
+    }
+
+    /**
+     * Get the validation rules that apply to the request.
+     *
+     * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array<mixed>|string>
+     */
+    public function methodPost(): array
+    {
+        return [
+            'name' => 'required|string|max:255',
+            'guard_name' => 'required|string|max:255',
+            'permissions' => 'nullable|array',
+            'permissions.*' => 'string|distinct',
+        ];
+    }
+
+    public function methodPut(): array
+    {
+        return [
+            'name' => 'nullable|string|max:255',
+            'guard_name' => 'nullable|string|max:255',
+            'permissions' => 'nullable|array',
+            'permissions.*' => 'string|distinct',
+        ];
+    }
+}
