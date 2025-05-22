@@ -2,13 +2,15 @@
 
 namespace App\Http\Controllers\Users;
 
-use App\Http\Controllers\Controller;
-use App\Http\Requests\Users\UserRequest;
-use App\Repository\Roles\RoleRepositoryInterface;
-use App\Repository\Users\UserRepositoryInterface;
-use App\Services\Users\UserServiceInterface;
 use Inertia\Inertia;
 use Illuminate\Support\Facades\DB;
+use App\Http\Controllers\Controller;
+use Illuminate\Support\Facades\Cache;
+use App\Http\Requests\Users\UserRequest;
+use App\Http\Resources\Users\UserResource;
+use App\Services\Users\UserServiceInterface;
+use App\Repository\Roles\RoleRepositoryInterface;
+use App\Repository\Users\UserRepositoryInterface;
 
 class UserController extends Controller
 {
@@ -26,8 +28,8 @@ class UserController extends Controller
     public function index()
     {
         return Inertia::render('users/index', [
-            'data' => $this->service->read(),
-            'roles' => $this->rolesRepository->select(['id', 'name'])->getAll(),
+            'data' => Cache::remember('users.list', 60, fn() => UserResource::collection($this->service->read())->resolve()),
+            'roles' => Cache::remember('roles.list', 60, fn() => $this->rolesRepository->select(['id', 'name'])->getAll()),
         ]);
     }
 
@@ -37,7 +39,7 @@ class UserController extends Controller
     public function create()
     {
         return Inertia::render('users/created', [
-            'roles' => $this->rolesRepository->select(['id', 'name'])->getAll(),
+            'roles' => Cache::remember('roles.list', 60, fn() => $this->rolesRepository->select(['id', 'name'])->getAll()),
         ]);
     }
 

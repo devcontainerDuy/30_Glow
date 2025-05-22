@@ -8,7 +8,7 @@ import AppLayout from '@/layouts/app-layout';
 import ChangePassword from '@/layouts/users/change-password';
 import { DialogMaps } from '@/layouts/users/dialog-maps';
 import { getChangedFields } from '@/lib/getChangedFields';
-import type { BreadcrumbItem, User, UserUpdateForm } from '@/types';
+import type { BreadcrumbItem, RoleProps, User, UserUpdateForm } from '@/types';
 import { Head, Link } from '@inertiajs/react';
 import axios from 'axios';
 import { ArrowLeft, LoaderCircle } from 'lucide-react';
@@ -30,7 +30,7 @@ const breadcrumbs: BreadcrumbItem[] = [
     },
 ];
 
-const Edited: React.FC<{ user: User; role: { id: number; name: string }[] }> = ({ user, role }) => {
+const Edited: React.FC<{ user: User; role: RoleProps[] }> = ({ user, role }) => {
     const [values, setValues] = useState<Required<UserUpdateForm>>({
         id: Number(user.id),
         uid: user.uid || '',
@@ -43,7 +43,7 @@ const Edited: React.FC<{ user: User; role: { id: number; name: string }[] }> = (
         password_confirmation: '',
         created_at: user.created_at || '',
         updated_at: user.updated_at || '',
-        roles: Array.isArray(user.roles) ? user.roles.map((role) => role.name) : [],
+        roles: Array.isArray(user.roles) ? user.roles.map((role: RoleProps) => role.name) : [],
         status: user.status || '',
         avatar: user.avatar || '',
     });
@@ -148,7 +148,7 @@ const Edited: React.FC<{ user: User; role: { id: number; name: string }[] }> = (
                                             </SelectTrigger>
 
                                             <SelectContent>
-                                                {role.map((role) => (
+                                                {role?.map((role: RoleProps) => (
                                                     <SelectItem key={role.id} value={role.name}>
                                                         {role.name}
                                                     </SelectItem>

@@ -6,7 +6,7 @@ export interface Role {
     updated_at: string;
 }
 
-export type RoleProps = {
+export interface RoleProps {
     id: number;
     name: string;
 }

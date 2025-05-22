@@ -8,16 +8,16 @@ import {
     AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
 
-const AlertDialogDelete: React.FC<{ open: boolean; handleCancel: () => void; handleDelete: () => void }> = ({ open, handleCancel, handleDelete }) => {
+const AlertDialogDelete: React.FC<{ open: boolean; cancel: () => void; handle: () => void }> = ({ open, cancel, handle }) => {
     return (
-        <AlertDialog open={open} onOpenChange={handleCancel}>
+        <AlertDialog open={open} onOpenChange={cancel}>
             <AlertDialogContent>
                 <AlertDialogHeader>
                     <AlertDialogTitle>Bạn chắc chắn muốn xóa?</AlertDialogTitle>
                 </AlertDialogHeader>
                 <AlertDialogFooter>
-                    <AlertDialogCancel onClick={handleCancel}>Hủy</AlertDialogCancel>
-                    <AlertDialogAction onClick={handleDelete}>Đồng ý</AlertDialogAction>
+                    <AlertDialogCancel onClick={cancel}>Hủy</AlertDialogCancel>
+                    <AlertDialogAction onClick={handle}>Đồng ý</AlertDialogAction>
                 </AlertDialogFooter>
             </AlertDialogContent>
         </AlertDialog>

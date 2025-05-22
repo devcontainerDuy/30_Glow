@@ -10,7 +10,7 @@ interface AppLayoutProps {
 
 export default ({ children, breadcrumbs, ...props }: AppLayoutProps) => (
     <AppLayoutTemplate breadcrumbs={breadcrumbs} {...props}>
-        <Toaster />
+        <Toaster closeButton position="top-right" duration={2000} richColors visibleToasts={5} containerAriaLabel="Notifications" />
         {children}
     </AppLayoutTemplate>
 );

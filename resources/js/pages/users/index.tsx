@@ -12,14 +12,16 @@ import {
     DropdownMenuSeparator,
     DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
+import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useDelete } from '@/hooks/use-delete';
 import { useInitials } from '@/hooks/use-initials';
 import AppLayout from '@/layouts/app-layout';
 import { formatDate } from '@/lib/format';
-import type { BreadcrumbItem, User } from '@/types';
+import type { BreadcrumbItem, RoleProps, User } from '@/types';
 import { Head, Link } from '@inertiajs/react';
 import type { ColumnDef } from '@tanstack/react-table';
 import { ArrowUpDown, MoreHorizontal, Plus, Trash2 } from 'lucide-react';
+import { useMemo } from 'react';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -48,12 +50,9 @@ const NameCell: React.FC<{ name: string }> = ({ name }) => {
     );
 };
 
-const Index: React.FC<{ data: User[]; roles: { id: number; name: string }[] }> = ({ data, roles }) => {
-    console.log('Data:', data);
-    console.log('Roles:', roles);
+const Index: React.FC<{ data: User[]; roles: RoleProps[] }> = ({ data, roles }) => {
     const { open, confirmDelete, handleDelete, handleCancel } = useDelete();
-
-    const columns: ColumnDef<User>[] = [
+    const columns = useMemo<ColumnDef<User>[]>(() => [
         {
             id: 'select',
             header: ({ table }) => (
@@ -130,6 +129,43 @@ const Index: React.FC<{ data: User[]; roles: { id: number; name: string }[] }> =
             cell: ({ row }) => <div>{row.getValue('status')}</div>,
         },
         {
+            accessorKey: 'roles',
+            header: ({ column }) => {
+                return (
+                    <Button variant="ghost" onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}>
+                        Role
+                        <ArrowUpDown className="ml-2 h-4 w-4" />
+                    </Button>
+                );
+            },
+            cell: ({ row }) => {
+                const roleItem = row.getValue('roles') as { name: string }[];
+                return (
+                    <Select defaultValue={roleItem[0]?.name} onValueChange={(e) => console.log('Selected role:', e)}>
+                        <SelectTrigger>
+                            <SelectValue placeholder="Chọn vai trò" />
+                        </SelectTrigger>
+                        <SelectContent>
+                            <SelectGroup>
+                                <SelectLabel>Danh sách vai trò</SelectLabel>
+                                {roles && roles.map((role) => (
+                                    <SelectItem key={role.name} value={role.name}>
+                                        {role.name}
+                                    </SelectItem>
+                                ))}
+
+                                {roles.length === 0 && (
+                                    <SelectItem value="N/A" disabled>
+                                        Không có vai trò nào
+                                    </SelectItem>
+                                )}
+                            </SelectGroup>
+                        </SelectContent>
+                    </Select>
+                );
+            },
+        },
+        {
             accessorKey: 'created_at',
             header: ({ column }) => {
                 return (
@@ -170,12 +206,12 @@ const Index: React.FC<{ data: User[]; roles: { id: number; name: string }[] }> =
                 </DropdownMenu>
             ),
         },
-    ];
+    ], [confirmDelete, roles]);
 
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title="Danh sách người dùng" />
-            <AlertDialogDelete open={open} handleCancel={handleCancel} handleDelete={handleDelete} />
+            <AlertDialogDelete open={open} cancel={handleCancel} handle={handleDelete} />
 
             <div className="flex h-full flex-1 flex-col gap-4 rounded-xl px-4 py-6">
                 <div className="flex items-center justify-between">

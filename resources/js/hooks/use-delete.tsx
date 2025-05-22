@@ -1,17 +1,17 @@
 import { router } from '@inertiajs/react';
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
 import { toast } from 'sonner';
 
 export function useDelete() {
     const [open, setOpen] = useState(false);
     const [deleteUrl, setDeleteUrl] = useState<string>('');
 
-    const confirmDelete = (url: string) => {
+    const confirmDelete = useCallback((url: string) => {
         setDeleteUrl(url);
         setOpen(true);
-    };
+    }, []);
 
-    const handleDelete = () => {
+    const handleDelete = useCallback(() => {
         if (deleteUrl) {
             router.delete(deleteUrl, {
                 onFinish: () => setOpen(false),
@@ -20,9 +20,9 @@ export function useDelete() {
         } else {
             toast.error('Không có URL để xóa!');
         }
-    };
+    }, [deleteUrl]);
 
-    const handleCancel = () => setOpen(false);
+    const handleCancel = useCallback(() => setOpen(false), []);
 
     return {
         open,
