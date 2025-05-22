@@ -105,11 +105,11 @@ abstract class BaseRequest extends FormRequest
         return [];
     }
 
-    // protected function failedValidation(Validator $validator)
-    // {
-    //     throw new HttpResponseException(response()->json([
-    //         'status' => false,
-    //         'message' => $validator->errors()->first(),
-    //     ], 200));
-    // }
+    protected function failedValidation(Validator $validator)
+    {
+        throw new HttpResponseException(response()->json([
+            'status' => false,
+            'error' => $validator->errors(),
+        ], 422));
+    }
 }

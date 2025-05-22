@@ -7,7 +7,8 @@ import AppLayout from '@/layouts/app-layout';
 import { DialogMaps } from '@/layouts/users/dialog-maps';
 import { generatePassword } from '@/lib/generatesPassword';
 import type { BreadcrumbItem, UserForm } from '@/types';
-import { Head, Link, useForm } from '@inertiajs/react';
+import { Head, Link } from '@inertiajs/react';
+import axios from 'axios';
 import { ArrowLeft, Eye, EyeOff, LoaderCircle } from 'lucide-react';
 import { type FormEventHandler, useState } from 'react';
 import { toast } from 'sonner';
@@ -27,8 +28,10 @@ const breadcrumbs: BreadcrumbItem[] = [
     },
 ];
 
-const Created : React.FC = () => {
-    const { data, setData, post, processing, errors, reset } = useForm<Required<UserForm>>({
+const Created: React.FC<{ roles: { id: number; name: string }[] }> = ({ roles }) => {
+    console.log('Roles:', roles);
+    
+    const [values, setValues] = useState<Required<UserForm>>({
         name: '',
         email: '',
         phone: '',
@@ -36,17 +39,39 @@ const Created : React.FC = () => {
         password: '',
         password_confirmation: '',
     });
+    const [errors, setErrors] = useState<{ [key: string]: string }>({});
     const [hidden, setHidden] = useState<boolean>(true);
+    const [processing, setProcessing] = useState<boolean>(false);    
 
     const submit: FormEventHandler = (e) => {
         e.preventDefault();
-        console.log(data);
+        setProcessing(true);
+        axios
+            .post(route('users.store'), values)
+            .then((response) => {
+                toast.success(response.data.message);
+                reset();
+            })
+            .catch((error) => {
+                if (error.response.status === 422) {
+                    setErrors(error.response.data.error);
+                } else toast.error(error.response.data.message);
+            })
+            .finally(() => setProcessing(false));
+    };
 
-        post(route('users.store'), {
-            onSuccess: () => toast.success('Tạo người dùng thành công!'),
-            onFinish: () => reset('name', 'email', 'phone', 'address', 'password', 'password_confirmation'),
-            preserveState: true,
+    const reset = () => {
+        setValues({
+            name: '',
+            email: '',
+            phone: '',
+            address: '',
+            password: '',
+            password_confirmation: '',
         });
+        setHidden(true);
+        setProcessing(false);
+        setErrors({});
     };
 
     return (
@@ -80,8 +105,8 @@ const Created : React.FC = () => {
                                         id="name"
                                         placeholder="Nhập họ và tên"
                                         required
-                                        value={data?.name}
-                                        onChange={(e) => setData('name', e.target.value)}
+                                        value={values?.name}
+                                        onChange={(e) => setValues({ ...values, name: e.target.value })}
                                     />
                                     {errors?.name && <InputError message={errors.name} />}
                                 </div>
@@ -90,8 +115,8 @@ const Created : React.FC = () => {
                                     <Input
                                         id="phone"
                                         placeholder="Nhập số điện thoại"
-                                        value={data?.phone}
-                                        onChange={(e) => setData('phone', e.target.value)}
+                                        value={values?.phone}
+                                        onChange={(e) => setValues({ ...values, phone: e.target.value })}
                                     />
                                     {errors?.phone && <InputError message={errors.phone} />}
                                 </div>
@@ -106,15 +131,15 @@ const Created : React.FC = () => {
                                     id="email"
                                     placeholder="Nhập email"
                                     required
-                                    value={data?.email}
-                                    onChange={(e) => setData('email', e.target.value)}
+                                    value={values?.email}
+                                    onChange={(e) => setValues({ ...values, email: e.target.value })}
                                 />
                                 {errors?.email && <InputError message={errors.email} />}
                             </div>
 
                             <div className="grid gap-2">
                                 <Label htmlFor="address">Địa chỉ</Label>
-                                <DialogMaps data={data} setData={setData} />
+                                <DialogMaps data={values} setData={setValues} />
 
                                 {errors?.address && <InputError message={errors.address} />}
                             </div>
@@ -141,8 +166,8 @@ const Created : React.FC = () => {
                                         required
                                         tabIndex={0}
                                         autoComplete="current-password"
-                                        value={data?.password}
-                                        onChange={(e) => setData('password', e.target.value)}
+                                        value={values?.password}
+                                        onChange={(e) => setValues({ ...values, password: e.target.value })}
                                         placeholder="Nhập mật khẩu"
                                     />
                                 </div>
@@ -171,8 +196,8 @@ const Created : React.FC = () => {
                                         required
                                         tabIndex={0}
                                         autoComplete="current-password"
-                                        value={data?.password_confirmation}
-                                        onChange={(e) => setData('password_confirmation', e.target.value)}
+                                        value={values?.password_confirmation}
+                                        onChange={(e) => setValues({ ...values, password_confirmation: e.target.value })}
                                         placeholder="Xác nhận mật khẩu"
                                     />
                                 </div>
@@ -186,14 +211,12 @@ const Created : React.FC = () => {
                                         tabIndex={0}
                                         onClick={() => {
                                             const p = generatePassword(8);
-                                            setData('password', p);
-                                            setData('password_confirmation', p);
+                                            setValues({ ...values, password: p, password_confirmation: p });
                                             toast.success('Đã tự động tạo mật khẩu cho người dùng!', {
                                                 action: {
                                                     label: 'Hoàn tác',
                                                     onClick() {
-                                                        setData('password', '');
-                                                        setData('password_confirmation', '');
+                                                        setValues({ ...values, password: '', password_confirmation: '' });
                                                         toast.error('Đã hoàn tác tạo mật khẩu!', {
                                                             action: {
                                                                 label: 'Ẩn',

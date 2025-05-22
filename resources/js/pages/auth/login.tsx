@@ -1,4 +1,4 @@
-import { Head, useForm } from '@inertiajs/react';
+import { Head, router, usePage } from '@inertiajs/react';
 import { Eye, EyeOff, LoaderCircle } from 'lucide-react';
 import { useState, type FormEventHandler } from 'react';
 
@@ -22,17 +22,26 @@ interface LoginProps {
 }
 
 export default function Login({ status, canResetPassword }: LoginProps) {
-    const { data, setData, post, processing, errors, reset } = useForm<Required<LoginForm>>({
+    const { errors } = usePage().props;
+    const [values, setValues] = useState<Required<LoginForm>>({
         email: '',
         password: '',
         remember: false,
     });
     const [hidden, setHidden] = useState<boolean>(true);
+    const [processing, setProcessing] = useState<boolean>(false);
 
     const submit: FormEventHandler = (e) => {
         e.preventDefault();
-        post(route('login'), {  
-            onFinish: () => reset('password'),
+        setProcessing(true);
+        router.post(route('login'), values, {
+            onFinish: () => {
+                setProcessing(false);
+            },
+            onSuccess: () => {
+                setValues({ ...values, password: '' });
+                setHidden(true);
+            },
         });
     };
 
@@ -51,8 +60,8 @@ export default function Login({ status, canResetPassword }: LoginProps) {
                             autoFocus
                             tabIndex={0}
                             autoComplete="email"
-                            value={data.email}
-                            onChange={(e) => setData('email', e.target.value)}
+                            value={values.email}
+                            onChange={(e) => setValues({ ...values, email: e.target.value })}
                             placeholder="email@example.com"
                         />
                         <InputError message={errors.email} />
@@ -68,18 +77,24 @@ export default function Login({ status, canResetPassword }: LoginProps) {
                             )}
                         </div>
                         <div className="relative flex">
-                            <Button type='button' variant={'outline'} className=" absolute inset-y-0 start-0 rounded-e-none" tabIndex={0} onClick={() => setHidden(!hidden)}>
+                            <Button
+                                type="button"
+                                variant={'outline'}
+                                className="absolute inset-y-0 start-0 rounded-e-none"
+                                tabIndex={0}
+                                onClick={() => setHidden(!hidden)}
+                            >
                                 {!hidden ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                             </Button>
                             <Input
                                 id="password"
-                                type={hidden ? "password" : "text"}
+                                type={hidden ? 'password' : 'text'}
                                 className="block ps-13"
                                 required
                                 tabIndex={0}
                                 autoComplete="current-password"
-                                value={data.password}
-                                onChange={(e) => setData('password', e.target.value)}
+                                value={values.password}
+                                onChange={(e) => setValues({ ...values, password: e.target.value })}
                                 placeholder="Password"
                             />
                         </div>
@@ -90,8 +105,8 @@ export default function Login({ status, canResetPassword }: LoginProps) {
                         <Checkbox
                             id="remember"
                             name="remember"
-                            checked={data.remember}
-                            onClick={() => setData('remember', !data.remember)}
+                            checked={values.remember}
+                            onClick={() => setValues({ ...values, remember: !values.remember })}
                             tabIndex={0}
                         />
                         <Label htmlFor="remember">Remember me</Label>

@@ -8,6 +8,7 @@ use App\Repository\Roles\RoleRepositoryInterface;
 use App\Repository\Users\UserRepositoryInterface;
 use App\Services\Users\UserServiceInterface;
 use Inertia\Inertia;
+use Illuminate\Support\Facades\DB;
 
 class UserController extends Controller
 {
@@ -25,7 +26,8 @@ class UserController extends Controller
     public function index()
     {
         return Inertia::render('users/index', [
-            'data' => $this->service->read()
+            'data' => $this->service->read(),
+            'roles' => $this->rolesRepository->select(['id', 'name'])->getAll(),
         ]);
     }
 
@@ -35,7 +37,7 @@ class UserController extends Controller
     public function create()
     {
         return Inertia::render('users/created', [
-            'roles' => $this->rolesRepository->getAll(),
+            'roles' => $this->rolesRepository->select(['id', 'name'])->getAll(),
         ]);
     }
 
@@ -44,8 +46,22 @@ class UserController extends Controller
      */
     public function store(UserRequest $request)
     {
-        $this->service->created($request->validated());
-        return redirect()->route('users.create');
+        DB::beginTransaction();
+        try {
+            DB::commit();
+            $this->service->created($request->validated());
+            return response()->json([
+                'status' => true,
+                'message' => 'User created successfully',
+            ], 201);
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return response()->json([
+                'status' => false,
+                'message' => 'Failed to create user',
+                'error' => $e->getMessage(),
+            ], 500);
+        }
     }
 
     /**

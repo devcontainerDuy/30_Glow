@@ -6,7 +6,7 @@ use App\Repository\Roles\RoleRepositoryInterface;
 use App\Repository\Users\UserRepositoryInterface;
 use App\Services\BaseService;
 use App\Traits\GeneratesUniqueId;
-use Illuminate\Support\Facades\DB;
+use Illuminate\Database\Eloquent\Collection;
 
 class UserService extends BaseService implements UserServiceInterface
 {
@@ -20,23 +20,15 @@ class UserService extends BaseService implements UserServiceInterface
         $this->roleRepository = $roleRepository;
     }
 
-    public function read(): mixed
+    public function read(): Collection
     {
         return $this->repository->with('roles')->getAll();
     }
 
-    public function created(array $data): array
+    public function created(array $data)
     {
-        DB::beginTransaction();
-        try {
-            $data['uid'] = $this->generateUUIDv4(false);
-            $this->instance = $this->repository->create($data);
-            DB::commit();
-            return $this->instance;
-        } catch (\Exception $e) {
-            DB::rollBack();
-            throw $e;
-        }
+        $data['uid'] = $this->generateUUIDv4(false);
+        return $this->repository->create($data);
     }
 
     public function updated(int $id, array $data): array|bool

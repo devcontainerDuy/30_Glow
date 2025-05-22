@@ -4,7 +4,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { getDistricts, getProvinces, getWards } from '@/services/getMaps.service';
-import type { District, Provinces, UserForm, Ward } from '@/types';
+import type { District, Provinces, Ward } from '@/types';
 import { useEffect, useMemo, useState } from 'react';
 import { toast } from 'sonner';
 
@@ -43,7 +43,12 @@ const AddressSelect = ({ label, id, placeholder, items, onValueChange, disabled 
     </div>
 );
 
-export function DialogMaps({ data, setData }: { data: UserForm; setData: (key: keyof UserForm, value: string) => void }) {
+type DialogMapsProps<T> = {
+    data: T;
+    setData: React.Dispatch<React.SetStateAction<T>>;
+};
+
+export function DialogMaps<T extends { address?: string }>({ data, setData }: DialogMapsProps<T>) {
     const [open, setOpen] = useState(false);
     const [provinces, setProvinces] = useState<Provinces | null>(null);
     const [districts, setDistricts] = useState<District[] | null>(null);
@@ -101,7 +106,7 @@ export function DialogMaps({ data, setData }: { data: UserForm; setData: (key: k
             toast.error('Vui lòng nhập đầy đủ địa chỉ');
             return;
         }
-        setData('address', `${street}, ${addressParts.ward}, ${addressParts.district}, ${addressParts.province}`);
+        setData({ ...data, address: `${street}, ${addressParts.ward}, ${addressParts.district}, ${addressParts.province}` });
         setOpen(false);
     };
 

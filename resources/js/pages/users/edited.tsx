@@ -30,7 +30,7 @@ const breadcrumbs: BreadcrumbItem[] = [
 
 const Edited: React.FC<{ user: User }> = ({ user }) => {
     const { errors } = usePage().props;
-    const [data, setData] = useState<Required<UserUpdateForm>>({
+    const [values, setValues] = useState<Required<UserUpdateForm>>({
         id: Number(user.id),
         uid: user.uid || '',
         name: user.name || '',
@@ -51,7 +51,7 @@ const Edited: React.FC<{ user: User }> = ({ user }) => {
         e.preventDefault();
 
         const changedFields = Object.fromEntries(
-            Object.entries(getChangedFields(user, data)).filter(
+            Object.entries(getChangedFields(user, values)).filter(
                 ([, v]) => v !== '' && v !== null && v !== undefined && !(Array.isArray(v) && v.length === 0),
             ),
         ) as UserUpdateForm;
@@ -95,8 +95,8 @@ const Edited: React.FC<{ user: User }> = ({ user }) => {
                                     <Input
                                         id="name"
                                         placeholder="Nhập họ và tên"
-                                        value={data?.name}
-                                        onChange={(e) => setData((prev) => ({ ...prev, name: e.target.value }))}
+                                        value={values?.name}
+                                        onChange={(e) => setValues({ ...values, name: e.target.value })}
                                     />
                                     {errors?.name && <InputError message={errors.name} />}
                                 </div>
@@ -105,8 +105,8 @@ const Edited: React.FC<{ user: User }> = ({ user }) => {
                                     <Input
                                         id="phone"
                                         placeholder="Nhập số điện thoại"
-                                        value={data?.phone}
-                                        onChange={(e) => setData((prev) => ({ ...prev, phone: e.target.value }))}
+                                        value={values?.phone}
+                                        onChange={(e) => setValues({ ...values, phone: e.target.value })}
                                     />
                                     {errors?.phone && <InputError message={errors.phone} />}
                                 </div>
@@ -118,20 +118,24 @@ const Edited: React.FC<{ user: User }> = ({ user }) => {
                                     type="email"
                                     id="email"
                                     placeholder="Nhập email"
-                                    value={data?.email}
-                                    onChange={(e) => setData((prev) => ({ ...prev, email: e.target.value }))}
+                                    value={values?.email}
+                                    onChange={(e) => setValues({ ...values, email: e.target.value })}
                                 />
                                 {errors?.email && <InputError message={errors.email} />}
                             </div>
 
                             <div className="grid gap-2">
                                 <Label htmlFor="address">Địa chỉ</Label>
-                                <DialogMaps data={data} setData={(key, value) => setData((prev) => ({ ...prev, [key]: value }))} />
+                                <DialogMaps data={values} setData={setValues} />
 
                                 {errors?.address && <InputError message={errors.address} />}
                             </div>
 
-                            <ChangePassword data={data} setData={(key, value) => setData((prev) => ({ ...prev, [key]: value }))} errors={errors} />
+                            <ChangePassword
+                                data={values}
+                                setData={(key, value) => setValues((prev) => ({ ...prev, [key]: value }))}
+                                errors={errors}
+                            />
 
                             <Button type="submit" className="w-full" tabIndex={0}>
                                 Lưu thay đổi

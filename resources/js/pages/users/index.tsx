@@ -1,3 +1,4 @@
+import AlertDialogDelete from '@/components/alert-dialog-delete';
 import { DataTable } from '@/components/data-table';
 import Heading from '@/components/heading';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
@@ -14,7 +15,6 @@ import {
 import { useDelete } from '@/hooks/use-delete';
 import { useInitials } from '@/hooks/use-initials';
 import AppLayout from '@/layouts/app-layout';
-import AlertDialogDelete from '@/components/alert-dialog-delete';
 import { formatDate } from '@/lib/format';
 import type { BreadcrumbItem, User } from '@/types';
 import { Head, Link } from '@inertiajs/react';
@@ -48,8 +48,9 @@ const NameCell: React.FC<{ name: string }> = ({ name }) => {
     );
 };
 
-const Index: React.FC<{ data: User[] }> = ({ data }) => {
+const Index: React.FC<{ data: User[]; roles: { id: number; name: string }[] }> = ({ data, roles }) => {
     console.log('Data:', data);
+    console.log('Roles:', roles);
     const { open, confirmDelete, handleDelete, handleCancel } = useDelete();
 
     const columns: ColumnDef<User>[] = [
