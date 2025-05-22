@@ -11,7 +11,7 @@ use Illuminate\Database\Eloquent\Collection;
 class UserService extends BaseService implements UserServiceInterface
 {
     use GeneratesUniqueId;
-    // protected UserRepositoryInterface $repository;
+    
     protected RoleRepositoryInterface $roleRepository;
 
     public function __construct(UserRepositoryInterface $repository, RoleRepositoryInterface $roleRepository)
@@ -25,7 +25,7 @@ class UserService extends BaseService implements UserServiceInterface
         return $this->repository->with('roles')->getAll();
     }
 
-    public function created(array $data)
+    public function created(array $data): array|bool
     {
         $data['uid'] = $this->generateUUIDv4(false);
         return $this->repository->create($data);
@@ -33,10 +33,15 @@ class UserService extends BaseService implements UserServiceInterface
 
     public function updated(int $id, array $data): array|bool
     {
+        if (isset($data['roles'])) {
+            $this->instance = $this->repository->find($id);
+            $this->instance->syncRoles($data['roles']);
+            unset($data['roles']);
+        }
         return $this->repository->update($id, $data);
     }
 
-    public function deleted(int $id)
+    public function deleted(int $id): array|bool
     {
         return $this->repository->delete($id);
     }

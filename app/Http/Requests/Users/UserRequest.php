@@ -41,6 +41,8 @@ class UserRequest extends BaseRequest
             'password_attributes' => 'nullable|string|min:8',
             'password' => 'nullable|string|min:8|confirmed',
             'password_confirmation' => 'nullable|string|same:password',
+            'roles' => 'nullable|array|exists:roles,name',
+            'roles.*'=> 'string',
         ];
     }
 }

@@ -53,7 +53,7 @@ export type UserUpdateForm = {
     password_confirmation: string;
     created_at: string;
     updated_at: string;
-    role: Array<string>;
+    roles: Array<string>;
     status: string;
     avatar: string;
 };

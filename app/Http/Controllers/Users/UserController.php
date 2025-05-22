@@ -48,8 +48,8 @@ class UserController extends Controller
     {
         DB::beginTransaction();
         try {
-            DB::commit();
             $this->service->created($request->validated());
+            DB::commit();
             return response()->json([
                 'status' => true,
                 'message' => 'User created successfully',
@@ -79,7 +79,7 @@ class UserController extends Controller
     {
         return Inertia::render('users/edited', [
             'user' => $this->repository->with('roles')->firstBy(['uid' => $id]),
-            'roles' => $this->rolesRepository->getAll(),
+            'role' => $this->rolesRepository->getAll(),
         ]);
     }
 
@@ -88,9 +88,22 @@ class UserController extends Controller
      */
     public function update(string $id, UserRequest $request)
     {
-        $user = $this->repository->findBy(['id' => $id]);
-        $this->service->updated($id, $request->validated());
-        return redirect()->route('users.edit', ['user' => $user[0]->uid]);
+        DB::beginTransaction();
+        try {
+            $this->service->updated($id, $request->validated());
+            DB::commit();
+            return response()->json([
+                'status' => true,
+                'message' => 'User updated successfully',
+            ], 200);
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return response()->json([
+                'status' => false,
+                'message' => 'Failed to update user',
+                'error' => $e->getMessage(),
+            ], 500);
+        }
     }
 
     /**

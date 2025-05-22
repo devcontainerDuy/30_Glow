@@ -7,7 +7,23 @@ use Illuminate\Database\Eloquent\Collection;
 interface UserServiceInterface
 {
     public function read(): Collection;
-    public function created(array $data);
-    public function updated(int $id, array $data);
-    public function deleted(int $id);
+
+    /**
+     * @param array $data
+     * @return array|bool
+     */
+    public function created(array $data): array|bool;
+
+    /**
+     * @param int $id
+     * @param array $data
+     * @return array|bool
+     */
+    public function updated(int $id, array $data): array|bool;
+
+    /**
+     * @param int $id
+     * @return array|bool
+     */
+    public function deleted(int $id): array|bool;
 }

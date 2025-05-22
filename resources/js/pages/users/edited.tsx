@@ -3,13 +3,15 @@ import InputError from '@/components/input-error';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import AppLayout from '@/layouts/app-layout';
 import ChangePassword from '@/layouts/users/change-password';
 import { DialogMaps } from '@/layouts/users/dialog-maps';
 import { getChangedFields } from '@/lib/getChangedFields';
 import type { BreadcrumbItem, User, UserUpdateForm } from '@/types';
-import { Head, Link, router, usePage } from '@inertiajs/react';
-import { ArrowLeft } from 'lucide-react';
+import { Head, Link } from '@inertiajs/react';
+import axios from 'axios';
+import { ArrowLeft, LoaderCircle } from 'lucide-react';
 import { useState, type FormEventHandler } from 'react';
 import { toast } from 'sonner';
 
@@ -28,8 +30,7 @@ const breadcrumbs: BreadcrumbItem[] = [
     },
 ];
 
-const Edited: React.FC<{ user: User }> = ({ user }) => {
-    const { errors } = usePage().props;
+const Edited: React.FC<{ user: User; role: { id: number; name: string }[] }> = ({ user, role }) => {
     const [values, setValues] = useState<Required<UserUpdateForm>>({
         id: Number(user.id),
         uid: user.uid || '',
@@ -42,10 +43,12 @@ const Edited: React.FC<{ user: User }> = ({ user }) => {
         password_confirmation: '',
         created_at: user.created_at || '',
         updated_at: user.updated_at || '',
-        role: Array.isArray(user.role) ? user.role : [],
+        roles: Array.isArray(user.roles) ? user.roles.map((role) => role.name) : [],
         status: user.status || '',
         avatar: user.avatar || '',
     });
+    const [errors, setErrors] = useState<{ [key: string]: string }>({});
+    const [processing, setProcessing] = useState<boolean>(false);
 
     const submit: FormEventHandler = (e) => {
         e.preventDefault();
@@ -55,16 +58,24 @@ const Edited: React.FC<{ user: User }> = ({ user }) => {
                 ([, v]) => v !== '' && v !== null && v !== undefined && !(Array.isArray(v) && v.length === 0),
             ),
         ) as UserUpdateForm;
-        
+
         if (Object.keys(changedFields).length === 0) {
             toast.info('Không có thay đổi nào để cập nhật.');
             return;
         }
 
-        router.put(route('users.update', user.id), changedFields, {
-            onSuccess: () => toast.success('Cập nhật người dùng thành công!'),
-            onError: () => toast.error('Cập nhật thất bại!'),
-        });
+        axios
+            .put(route('users.update', user.id), changedFields)
+            .then((response) => {
+                toast.success(response.data.message);
+                setErrors({});
+            })
+            .catch((error) => {
+                if (error.response.status === 422) {
+                    setErrors(error.response.data.error);
+                } else toast.error(error.response.data.message);
+            })
+            .finally(() => setProcessing(false));
     };
 
     return (
@@ -113,15 +124,40 @@ const Edited: React.FC<{ user: User }> = ({ user }) => {
                             </div>
 
                             <div className="grid gap-2">
-                                <Label htmlFor="email">Email</Label>
-                                <Input
-                                    type="email"
-                                    id="email"
-                                    placeholder="Nhập email"
-                                    value={values?.email}
-                                    onChange={(e) => setValues({ ...values, email: e.target.value })}
-                                />
-                                {errors?.email && <InputError message={errors.email} />}
+                                <div className="flex flex-col gap-y-6 lg:flex-row lg:gap-3">
+                                    <div className="grid w-full gap-2 lg:w-1/2">
+                                        <Label htmlFor="email">
+                                            Email <span className="text-red-500">(*)</span>
+                                        </Label>
+                                        <Input
+                                            type="email"
+                                            id="email"
+                                            placeholder="Nhập email"
+                                            required
+                                            value={values?.email}
+                                            onChange={(e) => setValues({ ...values, email: e.target.value })}
+                                        />
+                                        {errors?.email && <InputError message={errors.email} />}
+                                    </div>
+
+                                    <div className="grid w-full gap-2 lg:w-1/2">
+                                        <Label htmlFor="role">Vai trò</Label>
+                                        <Select onValueChange={(e) => setValues({ ...values, roles: [e] })} defaultValue={values?.roles[0]}>
+                                            <SelectTrigger className="w-full">
+                                                <SelectValue placeholder="Chọn vai trò" />
+                                            </SelectTrigger>
+
+                                            <SelectContent>
+                                                {role.map((role) => (
+                                                    <SelectItem key={role.id} value={role.name}>
+                                                        {role.name}
+                                                    </SelectItem>
+                                                ))}
+                                            </SelectContent>
+                                        </Select>
+                                        {errors?.role && <InputError message={errors.role} />}
+                                    </div>
+                                </div>
                             </div>
 
                             <div className="grid gap-2">
@@ -137,7 +173,8 @@ const Edited: React.FC<{ user: User }> = ({ user }) => {
                                 errors={errors}
                             />
 
-                            <Button type="submit" className="w-full" tabIndex={0}>
+                            <Button type="submit" className="w-full" tabIndex={0} disabled={processing}>
+                                {processing && <LoaderCircle className="h-4 w-4 animate-spin" />}
                                 Lưu thay đổi
                             </Button>
                         </form>

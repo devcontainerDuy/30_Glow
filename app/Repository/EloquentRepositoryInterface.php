@@ -20,7 +20,7 @@ interface EloquentRepositoryInterface
      * @param int $id
      * @return Model|null
      */
-    public function find(int $id);
+    public function find(int $id): ?Model;
 
     /**
      * Create a new record in the repository.

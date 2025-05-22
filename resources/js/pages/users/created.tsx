@@ -28,9 +28,7 @@ const breadcrumbs: BreadcrumbItem[] = [
     },
 ];
 
-const Created: React.FC<{ roles: { id: number; name: string }[] }> = ({ roles }) => {
-    console.log('Roles:', roles);
-    
+const Created: React.FC = () => {
     const [values, setValues] = useState<Required<UserForm>>({
         name: '',
         email: '',
@@ -41,7 +39,7 @@ const Created: React.FC<{ roles: { id: number; name: string }[] }> = ({ roles })
     });
     const [errors, setErrors] = useState<{ [key: string]: string }>({});
     const [hidden, setHidden] = useState<boolean>(true);
-    const [processing, setProcessing] = useState<boolean>(false);    
+    const [processing, setProcessing] = useState<boolean>(false);
 
     const submit: FormEventHandler = (e) => {
         e.preventDefault();
