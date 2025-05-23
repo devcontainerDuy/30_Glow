@@ -1,16 +1,17 @@
+import AlertDialogDelete from '@/components/alert-dialog-delete';
+import { DataTable } from '@/components/data-table';
 import Heading from '@/components/heading';
 import { Button } from '@/components/ui/button';
+import { Checkbox } from '@/components/ui/checkbox';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
+import { useDelete } from '@/hooks/use-delete';
 import AppLayout from '@/layouts/app-layout';
-import AlertDialogDelete from '@/components/alert-dialog-delete';
+import { formatDate } from '@/lib/format';
 import type { BreadcrumbItem, Role } from '@/types';
 import { Head, Link } from '@inertiajs/react';
-import { ArrowUpDown, MoreHorizontal, Plus, Trash2 } from 'lucide-react';
-import { useDelete } from '@/hooks/use-delete';
-import { DataTable } from '@/components/data-table';
 import type { ColumnDef } from '@tanstack/react-table';
-import { Checkbox } from '@/components/ui/checkbox';
-import { formatDate } from '@/lib/format';
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
+import { ArrowUpDown, MoreHorizontal, Plus, Trash2 } from 'lucide-react';
+import { useMemo } from 'react';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -25,89 +26,90 @@ const breadcrumbs: BreadcrumbItem[] = [
 
 const Index: React.FC<{ data: Role[] }> = ({ data }) => {
     const { open, confirmDelete, handleDelete, handleCancel } = useDelete();
-    console.log('Data:', data);
-
-    const columns: ColumnDef<Role>[] = [
-        {
-            id: 'select',
-            header: ({ table }) => (
-                <Checkbox
-                    checked={table.getIsAllPageRowsSelected()}
-                    onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
-                    aria-label="Select all"
-                />
-            ),
-            cell: ({ row }) => (
-                <Checkbox checked={row.getIsSelected()} onCheckedChange={(value) => row.toggleSelected(!!value)} aria-label="Select row" />
-            ),
-            enableSorting: false,
-            enableHiding: false,
-        },
-        {
-            accessorKey: 'name',
-            header: ({ column }) => {
-                return (
-                    <Button variant="ghost" onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}>
-                        <span className="text-sm font-medium">Tên vai trò</span>
-                        <ArrowUpDown className="ml-2 h-4 w-4" />
-                    </Button>
-                );
+    const columns = useMemo<ColumnDef<Role>[]>(
+        () => [
+            {
+                id: 'select',
+                header: ({ table }) => (
+                    <Checkbox
+                        checked={table.getIsAllPageRowsSelected()}
+                        onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
+                        aria-label="Select all"
+                    />
+                ),
+                cell: ({ row }) => (
+                    <Checkbox checked={row.getIsSelected()} onCheckedChange={(value) => row.toggleSelected(!!value)} aria-label="Select row" />
+                ),
+                enableSorting: false,
+                enableHiding: false,
             },
-            cell: ({ row }) => row.getValue('name'),
-        },
-        {
-            accessorKey: 'guard_name',
-            header: ({ column }) => {
-                return (
-                    <Button variant="ghost" onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}>
-                        <span className="text-sm font-medium">Guard Name</span>
-                        <ArrowUpDown className="ml-2 h-4 w-4" />
-                    </Button>
-                );
-            },
-            cell: ({ row }) => <span className="text-sm font-medium">{row.getValue('guard_name')}</span>,
-        },
-        {
-            accessorKey: 'created_at',
-            header: ({ column }) => {
-                return (
-                    <Button variant="ghost" onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}>
-                        Created At
-                        <ArrowUpDown className="ml-2 h-4 w-4" />
-                    </Button>
-                );
-            },
-            cell: ({ row }) => <div>{formatDate(row.getValue('created_at'))}</div>,
-        },
-        {
-            accessorKey: 'actions',
-            header: 'Actions',
-            cell: ({ row }) => (
-                <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                        <Button variant="ghost" className="h-8 w-8 p-0" aria-label="Open menu">
-                            <span className="sr-only">Open menu</span>
-                            <MoreHorizontal className="h-4 w-4" />
+            {
+                accessorKey: 'name',
+                header: ({ column }) => {
+                    return (
+                        <Button variant="ghost" onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}>
+                            <span className="text-sm font-medium">Tên vai trò</span>
+                            <ArrowUpDown className="ml-2 h-4 w-4" />
                         </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end">
-                        <DropdownMenuLabel>Hành động</DropdownMenuLabel>
-                        <Link href={route('roles.edit', row.original.id)}>
-                            <DropdownMenuItem className="cursor-pointer">Sửa</DropdownMenuItem>
-                        </Link>
-                        <DropdownMenuItem className="cursor-pointer" onClick={() => confirmDelete(route('roles.destroy', row.original.id))}>
-                            Xóa
-                        </DropdownMenuItem>
-                    </DropdownMenuContent>
-                </DropdownMenu>
-            ),
-        },
-    ];
+                    );
+                },
+                cell: ({ row }) => row.getValue('name'),
+            },
+            {
+                accessorKey: 'guard_name',
+                header: ({ column }) => {
+                    return (
+                        <Button variant="ghost" onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}>
+                            <span className="text-sm font-medium">Guard Name</span>
+                            <ArrowUpDown className="ml-2 h-4 w-4" />
+                        </Button>
+                    );
+                },
+                cell: ({ row }) => <span className="text-sm font-medium">{row.getValue('guard_name')}</span>,
+            },
+            {
+                accessorKey: 'created_at',
+                header: ({ column }) => {
+                    return (
+                        <Button variant="ghost" onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}>
+                            Created At
+                            <ArrowUpDown className="ml-2 h-4 w-4" />
+                        </Button>
+                    );
+                },
+                cell: ({ row }) => <div>{formatDate(row.getValue('created_at'))}</div>,
+            },
+            {
+                accessorKey: 'actions',
+                header: 'Actions',
+                cell: ({ row }) => (
+                    <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                            <Button variant="ghost" className="h-8 w-8 p-0" aria-label="Open menu">
+                                <span className="sr-only">Open menu</span>
+                                <MoreHorizontal className="h-4 w-4" />
+                            </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end">
+                            <DropdownMenuLabel>Hành động</DropdownMenuLabel>
+                            <Link href={route('roles.edit', row.original.id)}>
+                                <DropdownMenuItem className="cursor-pointer">Sửa</DropdownMenuItem>
+                            </Link>
+                            <DropdownMenuItem className="cursor-pointer" onClick={() => confirmDelete(route('roles.destroy', row.original.id))}>
+                                Xóa
+                            </DropdownMenuItem>
+                        </DropdownMenuContent>
+                    </DropdownMenu>
+                ),
+            },
+        ],
+        [confirmDelete],
+    );
 
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title="Vai trò" />
-            <AlertDialogDelete open={open} handleCancel={handleCancel} handleDelete={handleDelete} />
+            <AlertDialogDelete open={open} cancel={handleCancel} handle={handleDelete} />
 
             <div className="flex h-full flex-1 flex-col gap-4 rounded-xl px-4 py-6">
                 <div className="flex items-center justify-between">
@@ -128,7 +130,7 @@ const Index: React.FC<{ data: Role[] }> = ({ data }) => {
                     </div>
                 </div>
                 <div className="border-sidebar-border/70 dark:border-sidebar-border relative overflow-hidden rounded-xl border">
-                    <DataTable columns={columns} data={data} searchKey="name"/>
+                    <DataTable columns={columns} data={data} searchKey="name" />
                 </div>
             </div>
         </AppLayout>
