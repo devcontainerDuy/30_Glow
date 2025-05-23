@@ -28,7 +28,7 @@ const breadcrumbs: BreadcrumbItem[] = [
     },
 ];
 
-const Created: React.FC = () => {
+const Created: React.FC<{ title: string }> = ({ title }) => {
     const [values, setValues] = useState<Required<UserForm>>({
         name: '',
         email: '',
@@ -74,7 +74,7 @@ const Created: React.FC = () => {
 
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
-            <Head title="Tạo mới" />
+            <Head title={title} />
             <div className="flex h-full flex-1 flex-col gap-4 rounded-xl px-4 py-6">
                 <div className="flex items-center justify-between">
                     <Heading title="Tạo mới" description="Tạo người dùng mới" />

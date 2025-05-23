@@ -30,7 +30,7 @@ const breadcrumbs: BreadcrumbItem[] = [
     },
 ];
 
-const Edited: React.FC<{ user: User; role: RoleProps[] }> = ({ user, role }) => {
+const Edited: React.FC<{ title: string; user: User; role: RoleProps[] }> = ({ title, user, role }) => {
     const [values, setValues] = useState<Required<UserUpdateForm>>({
         id: Number(user.id),
         uid: user.uid || '',
@@ -80,7 +80,7 @@ const Edited: React.FC<{ user: User; role: RoleProps[] }> = ({ user, role }) => 
 
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
-            <Head title="Chỉnh sửa" />
+            <Head title={title} />
             <div className="flex h-full flex-1 flex-col gap-4 rounded-xl px-4 py-6">
                 <div className="flex items-center justify-between">
                     <Heading title="Chỉnh sửa" description="Chỉnh sửa thông tin người dùng" />

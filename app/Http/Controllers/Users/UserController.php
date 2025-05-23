@@ -28,7 +28,8 @@ class UserController extends Controller
     public function index()
     {
         return Inertia::render('users/index', [
-            'data' => Cache::remember('users.list', 60, fn() => UserResource::collection($this->service->read())->resolve()),
+            'title' => 'Danh sách người dùng',
+            'data' => UserResource::collection($this->service->read())->resolve(),
             'roles' => Cache::remember('roles.list', 60, fn() => $this->rolesRepository->select(['id', 'name'])->getAll()),
         ]);
     }
@@ -39,7 +40,7 @@ class UserController extends Controller
     public function create()
     {
         return Inertia::render('users/created', [
-            'roles' => Cache::remember('roles.list', 60, fn() => $this->rolesRepository->select(['id', 'name'])->getAll()),
+            'title' => 'Thêm người dùng',
         ]);
     }
 
@@ -80,8 +81,9 @@ class UserController extends Controller
     public function edit(string $id)
     {
         return Inertia::render('users/edited', [
+            'title' => 'Chỉnh sửa người dùng',
             'user' => $this->repository->with('roles')->firstBy(['uid' => $id]),
-            'role' => $this->rolesRepository->getAll(),
+            'role' => Cache::remember('roles.list', 60, fn() => $this->rolesRepository->select(['id', 'name'])->getAll()),
         ]);
     }
 
