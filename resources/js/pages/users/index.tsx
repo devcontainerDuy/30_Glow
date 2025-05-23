@@ -243,7 +243,7 @@ const Index: React.FC<{ title: string; data: User[]; roles: RoleProps[] }> = ({ 
                 ),
             },
         ],
-        [confirmDelete, roles],
+        [confirmDelete, onChangeRoleForUser, roles],
     );
 
     return (
