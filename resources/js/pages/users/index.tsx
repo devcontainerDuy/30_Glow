@@ -20,8 +20,10 @@ import { formatDate } from '@/lib/format';
 import type { BreadcrumbItem, RoleProps, User } from '@/types';
 import { Head, Link } from '@inertiajs/react';
 import type { ColumnDef } from '@tanstack/react-table';
+import axios from 'axios';
 import { ArrowUpDown, MoreHorizontal, Plus, Trash2 } from 'lucide-react';
-import { memo, useMemo } from 'react';
+import { memo, useCallback, useMemo } from 'react';
+import { toast } from 'sonner';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -50,32 +52,59 @@ const NameCell: React.FC<{ name: string }> = ({ name }) => {
     );
 };
 
-const RoleCell = memo(({ item, roles }: { item: { name: string }[]; roles: RoleProps[] }) => (
-    <Select defaultValue={item[0]?.name} onValueChange={(e) => console.log('Selected role:', e)}>
-        <SelectTrigger>
-            <SelectValue placeholder="Chọn vai trò" />
-        </SelectTrigger>
-        <SelectContent>
-            <SelectGroup>
-                <SelectLabel>Danh sách vai trò</SelectLabel>
-                {roles.length > 0 ? (
-                    roles.map((role) => (
-                        <SelectItem key={role.id} value={role.name}>
-                            {role.name}
+const RoleCell = memo(
+    ({
+        item,
+        roles,
+        userId,
+        handle,
+    }: {
+        item: { name: string }[];
+        roles: RoleProps[];
+        userId: number;
+        handle: (userId: number, roleName: string) => void;
+    }) => (
+        <Select defaultValue={item[0]?.name} onValueChange={(e) => handle(userId, e)}>
+            <SelectTrigger>
+                <SelectValue placeholder="Chọn vai trò" />
+            </SelectTrigger>
+            <SelectContent>
+                <SelectGroup>
+                    <SelectLabel>Danh sách vai trò</SelectLabel>
+                    {roles.length > 0 ? (
+                        roles.map((role) => (
+                            <SelectItem key={role.id} value={role.name}>
+                                {role.name}
+                            </SelectItem>
+                        ))
+                    ) : (
+                        <SelectItem value="N/A" disabled>
+                            Không có vai trò nào
                         </SelectItem>
-                    ))
-                ) : (
-                    <SelectItem value="N/A" disabled>
-                        Không có vai trò nào
-                    </SelectItem>
-                )}
-            </SelectGroup>
-        </SelectContent>
-    </Select>
-));
+                    )}
+                </SelectGroup>
+            </SelectContent>
+        </Select>
+    ),
+);
 
 const Index: React.FC<{ title: string; data: User[]; roles: RoleProps[] }> = ({ title, data, roles }) => {
     const { open, confirmDelete, handleDelete, handleCancel } = useDelete();
+    const onChangeRoleForUser = useCallback((userId: number, roleName: string) => {
+        axios
+            .put(route('users.update', userId), {
+                roles: [String(roleName)],
+            })
+            .then((response) => {
+                toast.success(response.data.message);
+            })
+            .catch((error) => {
+                if (error.response.status === 422) {
+                    toast.error(error.response.data.error);
+                } else toast.error(error.response.data.message);
+            });
+    }, []);
+
     const columns = useMemo<ColumnDef<User>[]>(
         () => [
             {
@@ -163,7 +192,14 @@ const Index: React.FC<{ title: string; data: User[]; roles: RoleProps[] }> = ({ 
                         </Button>
                     );
                 },
-                cell: ({ row }) => <RoleCell item={row.getValue('roles') as { name: string }[]} roles={roles} />,
+                cell: ({ row }) => (
+                    <RoleCell
+                        item={row.getValue('roles') as { name: string }[]}
+                        roles={roles}
+                        userId={row.original.id}
+                        handle={onChangeRoleForUser}
+                    />
+                ),
             },
             {
                 accessorKey: 'created_at',
