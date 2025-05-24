@@ -25,17 +25,6 @@ import { ArrowUpDown, MoreHorizontal, Plus, Trash2 } from 'lucide-react';
 import { memo, useCallback, useMemo } from 'react';
 import { toast } from 'sonner';
 
-const breadcrumbs: BreadcrumbItem[] = [
-    {
-        title: 'Tài khoản',
-        href: '/users',
-    },
-    {
-        title: 'Người dùng',
-        href: '/users',
-    },
-];
-
 const NameCell: React.FC<{ name: string }> = ({ name }) => {
     const getInitials = useInitials();
 
@@ -88,7 +77,22 @@ const RoleCell = memo(
     ),
 );
 
-const Index: React.FC<{ title: string; data: User[]; roles: RoleProps[] }> = ({ title, data, roles }) => {
+const Index: React.FC<{ title: string; head: { title: string; description?: string }; data: User[]; roles: RoleProps[] }> = ({
+    title,
+    head,
+    data,
+    roles,
+}) => {
+    const breadcrumbs: BreadcrumbItem[] = [
+        {
+            title: 'Tài khoản',
+            href: route('users.index'),
+        },
+        {
+            title: head.title,
+            href: route('users.index'),
+        },
+    ];
     const { open, confirmDelete, handleDelete, handleCancel } = useDelete();
     const onChangeRoleForUser = useCallback((userId: number, roleName: string) => {
         axios
@@ -253,7 +257,7 @@ const Index: React.FC<{ title: string; data: User[]; roles: RoleProps[] }> = ({ 
 
             <div className="flex h-full flex-1 flex-col gap-4 rounded-xl px-4 py-6">
                 <div className="flex items-center justify-between">
-                    <Heading title="Người dùng" description="Quản lý danh sách người dùng" />
+                    <Heading title={head.title} description={head?.description} />
                     <div className="flex items-center gap-2">
                         <Link href="/users/trash">
                             <Button variant={'destructive'}>
@@ -261,7 +265,7 @@ const Index: React.FC<{ title: string; data: User[]; roles: RoleProps[] }> = ({ 
                                 <span>Thùng rác</span>
                             </Button>
                         </Link>
-                        <Link href="/users/create">
+                        <Link href={route('users.create')}>
                             <Button>
                                 <Plus className="h-4 w-4" />
                                 <span>Tạo mới</span>

@@ -23,6 +23,11 @@ class RoleController extends Controller
     public function index()
     {
         return Inertia::render('roles/index', [
+            'title' => 'Danh sách vai trò',
+            'head' => [
+                'title' => 'Vai trò',
+                'description' => 'Quản lý các vai trò trong hệ thống',
+            ],
             'data' => $this->service->read()
         ]);
     }
@@ -32,7 +37,13 @@ class RoleController extends Controller
      */
     public function create()
     {
-        return Inertia::render('roles/created');
+        return Inertia::render('roles/created', [
+            'title' => 'Tạo mới vai trò',
+            'head' => [
+                'title' => 'Tạo mới',
+                'description' => 'Thêm vai trò mới vào hệ thống',
+            ],
+        ]);
     }
 
     /**
@@ -49,9 +60,7 @@ class RoleController extends Controller
      */
     public function show(string $id)
     {
-        return Inertia::render('roles/show', [
-            'data' => $this->repository->find($id)
-        ]);
+        // 
     }
 
     /**
@@ -59,7 +68,14 @@ class RoleController extends Controller
      */
     public function edit(string $id)
     {
-        //
+        return Inertia::render('roles/edited', [
+            'title' => 'Chỉnh sửa vai trò',
+            'head' => [
+                'title' => 'Chỉnh sửa',
+                'description' => 'Cập nhật thông tin vai trò trong hệ thống',
+            ],
+            'data' => $this->repository->find($id)
+        ]);
     }
 
     /**

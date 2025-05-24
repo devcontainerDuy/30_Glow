@@ -24,7 +24,7 @@ const breadcrumbs: BreadcrumbItem[] = [
     },
 ];
 
-const Index: React.FC<{ data: Role[] }> = ({ data }) => {
+const Index: React.FC<{ title: string; head: { title: string; description?: string }; data: Role[] }> = ({ title, head, data }) => {
     const { open, confirmDelete, handleDelete, handleCancel } = useDelete();
     const columns = useMemo<ColumnDef<Role>[]>(
         () => [
@@ -108,12 +108,13 @@ const Index: React.FC<{ data: Role[] }> = ({ data }) => {
 
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
-            <Head title="Vai trò" />
+            <Head title={title} />
             <AlertDialogDelete open={open} cancel={handleCancel} handle={handleDelete} />
 
             <div className="flex h-full flex-1 flex-col gap-4 rounded-xl px-4 py-6">
                 <div className="flex items-center justify-between">
-                    <Heading title="Vai trò" description="Quản lý danh sách vai trò" />
+                    <Heading title={head.title} description={head?.description} />
+                    
                     <div className="flex items-center gap-2">
                         <Link href="/roles/trash">
                             <Button variant={'destructive'}>
@@ -121,7 +122,7 @@ const Index: React.FC<{ data: Role[] }> = ({ data }) => {
                                 <span>Thùng rác</span>
                             </Button>
                         </Link>
-                        <Link href="/roles/create">
+                        <Link href={route('roles.create')}>
                             <Button>
                                 <Plus className="h-4 w-4" />
                                 <span>Tạo mới</span>

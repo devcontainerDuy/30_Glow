@@ -15,22 +15,26 @@ import { ArrowLeft, LoaderCircle } from 'lucide-react';
 import { useState, type FormEventHandler } from 'react';
 import { toast } from 'sonner';
 
-const breadcrumbs: BreadcrumbItem[] = [
-    {
-        title: 'Tài khoản',
-        href: '/users',
-    },
-    {
-        title: 'Người dùng',
-        href: '/users',
-    },
-    {
-        title: 'Chỉnh sửa',
-        href: '/users/{id}/edit',
-    },
-];
-
-const Edited: React.FC<{ title: string; user: User; role: RoleProps[] }> = ({ title, user, role }) => {
+const Edited: React.FC<{ title: string; head: { title: string; description?: string }; user: User; role: RoleProps[] }> = ({
+    title,
+    head,
+    user,
+    role,
+}) => {
+    const breadcrumbs: BreadcrumbItem[] = [
+        {
+            title: 'Tài khoản',
+            href: route('users.index'),
+        },
+        {
+            title: 'Người dùng',
+            href: route('users.index'),
+        },
+        {
+            title: head.title,
+            href: route('users.edit', user.id),
+        },
+    ];
     const [values, setValues] = useState<Required<UserUpdateForm>>({
         id: Number(user.id),
         uid: user.uid || '',
@@ -83,7 +87,7 @@ const Edited: React.FC<{ title: string; user: User; role: RoleProps[] }> = ({ ti
             <Head title={title} />
             <div className="flex h-full flex-1 flex-col gap-4 rounded-xl px-4 py-6">
                 <div className="flex items-center justify-between">
-                    <Heading title="Chỉnh sửa" description="Chỉnh sửa thông tin người dùng" />
+                    <Heading title={head.title} description={head?.description} />
 
                     <Link href={route('users.index')} className="flex items-center gap-2">
                         <Button variant={'link'}>

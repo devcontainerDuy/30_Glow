@@ -29,6 +29,10 @@ class UserController extends Controller
     {
         return Inertia::render('users/index', [
             'title' => 'Danh sách người dùng',
+            'head' => [
+                'title' => 'Người dùng',
+                'description' => 'Quản lý người dùng trong hệ thống',
+            ],
             'data' => UserResource::collection($this->service->read())->resolve(),
             'roles' => Cache::remember('roles.list', 60, fn() => $this->rolesRepository->select(['id', 'name'])->getAll()),
         ]);
@@ -40,7 +44,11 @@ class UserController extends Controller
     public function create()
     {
         return Inertia::render('users/created', [
-            'title' => 'Thêm người dùng',
+            'title' => 'Tạo mới người dùng',
+            'head' => [
+                'title' => 'Tạo mới',
+                'description' => 'Thêm người dùng mới vào hệ thống',
+            ],
         ]);
     }
 
@@ -82,6 +90,10 @@ class UserController extends Controller
     {
         return Inertia::render('users/edited', [
             'title' => 'Chỉnh sửa người dùng',
+            'head' => [
+                'title' => 'Chỉnh sửa',
+                'description' => 'Cập nhật thông tin người dùng trong hệ thống',
+            ],
             'user' => $this->repository->with('roles')->firstBy(['uid' => $id]),
             'role' => Cache::remember('roles.list', 60, fn() => $this->rolesRepository->select(['id', 'name'])->getAll()),
         ]);

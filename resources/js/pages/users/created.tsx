@@ -13,22 +13,21 @@ import { ArrowLeft, Eye, EyeOff, LoaderCircle } from 'lucide-react';
 import { type FormEventHandler, useState } from 'react';
 import { toast } from 'sonner';
 
-const breadcrumbs: BreadcrumbItem[] = [
-    {
-        title: 'Tài khoản',
-        href: '/users',
-    },
-    {
-        title: 'Người dùng',
-        href: '/users',
-    },
-    {
-        title: 'Tạo mới',
-        href: '/users/create',
-    },
-];
-
-const Created: React.FC<{ title: string }> = ({ title }) => {
+const Created: React.FC<{ title: string; head: { title: string; description?: string } }> = ({ title, head }) => {
+    const breadcrumbs: BreadcrumbItem[] = [
+        {
+            title: 'Tài khoản',
+            href: route('users.index'),
+        },
+        {
+            title: 'Người dùng',
+            href: route('users.index'),
+        },
+        {
+            title: head.title,
+            href: route('users.create'),
+        },
+    ];
     const [values, setValues] = useState<Required<UserForm>>({
         name: '',
         email: '',
@@ -77,7 +76,7 @@ const Created: React.FC<{ title: string }> = ({ title }) => {
             <Head title={title} />
             <div className="flex h-full flex-1 flex-col gap-4 rounded-xl px-4 py-6">
                 <div className="flex items-center justify-between">
-                    <Heading title="Tạo mới" description="Tạo người dùng mới" />
+                    <Heading title={head.title} description={head?.description} />
 
                     <Link href={route('users.index')} className="flex items-center gap-2">
                         <Button variant={'link'}>
