@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\District;
 use App\Models\Province;
 use App\Models\Ward;
+use Illuminate\Http\JsonResponse;
 
 class MapsController extends Controller
 {
@@ -14,7 +15,7 @@ class MapsController extends Controller
         $this->model = Province::class;
     }
 
-    public function getProvince()
+    public function getProvince(): JsonResponse
     {
         return response()->json([
             'status' => true,
@@ -22,7 +23,7 @@ class MapsController extends Controller
         ], 200);
     }
 
-    public function getDistrict($id)
+    public function getDistrict(int $id): JsonResponse
     {
         return response()->json([
             'status' => true,
@@ -30,7 +31,7 @@ class MapsController extends Controller
         ], 200);
     }
 
-    public function getWard($id)
+    public function getWard(int $id): JsonResponse
     {
         return response()->json([
             'status' => true,
