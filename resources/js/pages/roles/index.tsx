@@ -7,13 +7,13 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel,
 import { useDelete } from '@/hooks/use-delete';
 import AppLayout from '@/layouts/app-layout';
 import { formatDate } from '@/lib/format';
-import type { BreadcrumbItem, Role } from '@/types';
+import type { BreadcrumbItem, HeadProps, Role } from '@/types';
 import { Head, Link } from '@inertiajs/react';
 import type { ColumnDef } from '@tanstack/react-table';
 import { ArrowUpDown, MoreHorizontal, Plus, Trash2 } from 'lucide-react';
 import { useMemo } from 'react';
 
-const Index: React.FC<{ title: string; head: { title: string; description?: string }; data: Role[] }> = ({ title, head, data }) => {
+const Index: React.FC<{ title: string; head: HeadProps; data: Role[] }> = ({ title, head, data }) => {
     const breadcrumbs: BreadcrumbItem[] = [
         {
             title: 'Tài khoản',
@@ -113,7 +113,7 @@ const Index: React.FC<{ title: string; head: { title: string; description?: stri
             <div className="flex h-full flex-1 flex-col gap-4 rounded-xl px-4 py-6">
                 <div className="flex items-center justify-between">
                     <Heading title={head.title} description={head?.description} />
-                    
+
                     <div className="flex items-center gap-2">
                         <Link href="/roles/trash">
                             <Button variant={'destructive'}>

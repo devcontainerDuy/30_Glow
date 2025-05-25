@@ -8,19 +8,14 @@ import AppLayout from '@/layouts/app-layout';
 import ChangePassword from '@/layouts/users/change-password';
 import { DialogMaps } from '@/layouts/users/dialog-maps';
 import { getChangedFields } from '@/lib/getChangedFields';
-import type { BreadcrumbItem, RoleProps, User, UserUpdateForm } from '@/types';
+import type { BreadcrumbItem, HeadProps, RoleProps, User, UserUpdateForm } from '@/types';
 import { Head, Link } from '@inertiajs/react';
 import axios from 'axios';
 import { ArrowLeft, LoaderCircle } from 'lucide-react';
 import { useState, type FormEventHandler } from 'react';
 import { toast } from 'sonner';
 
-const Edited: React.FC<{ title: string; head: { title: string; description?: string }; user: User; role: RoleProps[] }> = ({
-    title,
-    head,
-    user,
-    role,
-}) => {
+const Edited: React.FC<{ title: string; head: HeadProps; user: User; role: RoleProps[] }> = ({ title, head, user, role }) => {
     const breadcrumbs: BreadcrumbItem[] = [
         {
             title: 'Tài khoản',

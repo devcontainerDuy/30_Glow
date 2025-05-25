@@ -17,7 +17,7 @@ import { useDelete } from '@/hooks/use-delete';
 import { useInitials } from '@/hooks/use-initials';
 import AppLayout from '@/layouts/app-layout';
 import { formatDate } from '@/lib/format';
-import type { BreadcrumbItem, RoleProps, User } from '@/types';
+import type { BreadcrumbItem, HeadProps, RoleProps, User } from '@/types';
 import { Head, Link } from '@inertiajs/react';
 import type { ColumnDef } from '@tanstack/react-table';
 import axios from 'axios';
@@ -77,12 +77,7 @@ const RoleCell = memo(
     ),
 );
 
-const Index: React.FC<{ title: string; head: { title: string; description?: string }; data: User[]; roles: RoleProps[] }> = ({
-    title,
-    head,
-    data,
-    roles,
-}) => {
+const Index: React.FC<{ title: string; head: HeadProps; data: User[]; roles: RoleProps[] }> = ({ title, head, data, roles }) => {
     const breadcrumbs: BreadcrumbItem[] = [
         {
             title: 'Tài khoản',

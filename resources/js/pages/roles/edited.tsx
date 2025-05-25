@@ -5,14 +5,14 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue } from '@/components/ui/select';
 import AppLayout from '@/layouts/app-layout';
-import type { BreadcrumbItem, Role, RoleForm } from '@/types';
+import type { BreadcrumbItem, HeadProps, Role, RoleForm } from '@/types';
 import { Head, Link } from '@inertiajs/react';
 import axios from 'axios';
 import { ArrowLeft, LoaderCircle } from 'lucide-react';
 import { useState, type FC, type FormEventHandler } from 'react';
 import { toast } from 'sonner';
 
-const Edited: FC<{ title: string; head: { title: string; description?: string }; role: Role }> = ({ title, head, role }) => {
+const Edited: FC<{ title: string; head: HeadProps; role: Role }> = ({ title, head, role }) => {
     const breadcrumbs: BreadcrumbItem[] = [
         {
             title: 'Tài khoản',

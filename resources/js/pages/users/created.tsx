@@ -6,14 +6,14 @@ import { Label } from '@/components/ui/label';
 import AppLayout from '@/layouts/app-layout';
 import { DialogMaps } from '@/layouts/users/dialog-maps';
 import { generatePassword } from '@/lib/generatesPassword';
-import type { BreadcrumbItem, UserForm } from '@/types';
+import type { BreadcrumbItem, HeadProps, UserForm } from '@/types';
 import { Head, Link } from '@inertiajs/react';
 import axios from 'axios';
 import { ArrowLeft, Eye, EyeOff, LoaderCircle } from 'lucide-react';
 import { type FormEventHandler, useState } from 'react';
 import { toast } from 'sonner';
 
-const Created: React.FC<{ title: string; head: { title: string; description?: string } }> = ({ title, head }) => {
+const Created: React.FC<{ title: string; head: HeadProps }> = ({ title, head }) => {
     const breadcrumbs: BreadcrumbItem[] = [
         {
             title: 'Tài khoản',
