@@ -24,8 +24,6 @@ class RoleRequest extends BaseRequest
         return [
             'name' => 'required|string|max:255',
             'guard_name' => 'required|string|max:255',
-            'permissions' => 'nullable|array',
-            'permissions.*' => 'string|distinct',
         ];
     }
 

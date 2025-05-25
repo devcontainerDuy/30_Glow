@@ -13,18 +13,17 @@ import type { ColumnDef } from '@tanstack/react-table';
 import { ArrowUpDown, MoreHorizontal, Plus, Trash2 } from 'lucide-react';
 import { useMemo } from 'react';
 
-const breadcrumbs: BreadcrumbItem[] = [
-    {
-        title: 'Tài khoản',
-        href: '/users',
-    },
-    {
-        title: 'Vai trò',
-        href: '/roles',
-    },
-];
-
 const Index: React.FC<{ title: string; head: { title: string; description?: string }; data: Role[] }> = ({ title, head, data }) => {
+    const breadcrumbs: BreadcrumbItem[] = [
+        {
+            title: 'Tài khoản',
+            href: route('users.index'),
+        },
+        {
+            title: 'Vai trò',
+            href: route('roles.index'),
+        },
+    ];
     const { open, confirmDelete, handleDelete, handleCancel } = useDelete();
     const columns = useMemo<ColumnDef<Role>[]>(
         () => [

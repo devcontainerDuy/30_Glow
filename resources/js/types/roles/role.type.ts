@@ -10,3 +10,8 @@ export interface RoleProps {
     id: number;
     name: string;
 }
+
+export type RoleForm = {
+    name: string;
+    guard_name: string;
+};

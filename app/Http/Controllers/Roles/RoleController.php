@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Roles\RoleRequest;
 use App\Repository\Roles\RoleRepositoryInterface;
 use App\Services\Roles\RoleServiceInterface;
+use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
 
 class RoleController extends Controller
@@ -51,8 +52,22 @@ class RoleController extends Controller
      */
     public function store(RoleRequest $request)
     {
-        $this->service->created($request->validated());
-        return redirect()->route('roles.create');
+        DB::beginTransaction();
+        try {
+            $this->service->created($request->validated());
+            DB::commit();
+            return response()->json([
+                'status' => true,
+                'message' => 'Tạo mới vai trò thành công',
+            ], 201);
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return response()->json([
+                'status' => false,
+                'message' => 'Tạo mới vai trò thất bại',
+                'error' => $e->getMessage(),
+            ], 500);
+        }
     }
 
     /**
@@ -74,7 +89,7 @@ class RoleController extends Controller
                 'title' => 'Chỉnh sửa',
                 'description' => 'Cập nhật thông tin vai trò trong hệ thống',
             ],
-            'data' => $this->repository->find($id)
+            'role' => $this->repository->find($id)
         ]);
     }
 
@@ -83,7 +98,22 @@ class RoleController extends Controller
      */
     public function update(RoleRequest $request, string $id)
     {
-        //
+        DB::beginTransaction();
+        try {
+            $this->service->updated($id, $request->validated());
+            DB::commit();
+            return response()->json([
+                'status' => true,
+                'message' => 'Cập nhật vai trò thành công',
+            ], 200);
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return response()->json([
+                'status' => false,
+                'message' => 'Cập nhật vai trò thất bại',
+                'error' => $e->getMessage(),
+            ], 500);
+        }
     }
 
     /**
@@ -91,6 +121,7 @@ class RoleController extends Controller
      */
     public function destroy(string $id)
     {
-        //
+        $this->service->deleted($id);
+        return redirect()->route('roles.index');
     }
 }

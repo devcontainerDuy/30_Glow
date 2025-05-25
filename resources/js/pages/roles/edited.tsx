@@ -5,14 +5,14 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue } from '@/components/ui/select';
 import AppLayout from '@/layouts/app-layout';
-import type { BreadcrumbItem, RoleForm } from '@/types';
+import type { BreadcrumbItem, Role, RoleForm } from '@/types';
 import { Head, Link } from '@inertiajs/react';
 import axios from 'axios';
 import { ArrowLeft, LoaderCircle } from 'lucide-react';
 import { useState, type FC, type FormEventHandler } from 'react';
 import { toast } from 'sonner';
 
-const Created: FC<{ title: string; head: { title: string; description?: string } }> = ({ title, head }) => {
+const Edited: FC<{ title: string; head: { title: string; description?: string }; role: Role }> = ({ title, head, role }) => {
     const breadcrumbs: BreadcrumbItem[] = [
         {
             title: 'Tài khoản',
@@ -23,14 +23,14 @@ const Created: FC<{ title: string; head: { title: string; description?: string }
             href: route('roles.index'),
         },
         {
-            title: 'Tạo mới',
-            href: route('roles.create'),
+            title: 'Chỉnh sửa',
+            href: route('roles.edit', role.id),
         },
     ];
 
     const [values, setValues] = useState<Required<RoleForm>>({
-        name: '',
-        guard_name: '',
+        name: role.name,
+        guard_name: role.guard_name,
     });
     const [errors, setErrors] = useState<{ [key: string]: string }>({});
     const [processing, setProcessing] = useState<boolean>(false);
@@ -40,10 +40,9 @@ const Created: FC<{ title: string; head: { title: string; description?: string }
         setProcessing(true);
 
         axios
-            .post(route('roles.store'), values)
+            .put(route('roles.update', role.id), values)
             .then((response) => {
                 toast.success(response.data.message);
-                reset();
             })
             .catch((error) => {
                 if (error.response.status === 422) {
@@ -51,15 +50,6 @@ const Created: FC<{ title: string; head: { title: string; description?: string }
                 } else toast.error(error.response.data.message);
             })
             .finally(() => setProcessing(false));
-    };
-
-    const reset = () => {
-        setValues({
-            name: '',
-            guard_name: '',
-        });
-        setErrors({});
-        setProcessing(false);
     };
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
@@ -129,4 +119,4 @@ const Created: FC<{ title: string; head: { title: string; description?: string }
     );
 };
 
-export default Created;
+export default Edited;

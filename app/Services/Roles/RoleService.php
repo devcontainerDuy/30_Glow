@@ -19,7 +19,7 @@ class RoleService implements RoleServiceInterface
         return $this->repository->with('permissions')->getAll();
     }
 
-    public function created(array $data): array
+    public function created(array $data): array|bool
     {
         return $this->repository->create($data);
     }
