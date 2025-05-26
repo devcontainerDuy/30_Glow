@@ -4,16 +4,14 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { useUpdateForm } from '@/hooks/use-update-form';
 import AppLayout from '@/layouts/app-layout';
 import ChangePassword from '@/layouts/users/change-password';
 import { DialogMaps } from '@/layouts/users/dialog-maps';
-import { getChangedFields } from '@/lib/getChangedFields';
 import type { BreadcrumbItem, HeadProps, RoleProps, User, UserUpdateForm } from '@/types';
 import { Head, Link } from '@inertiajs/react';
-import axios from 'axios';
 import { ArrowLeft, LoaderCircle } from 'lucide-react';
-import { useState, type FormEventHandler } from 'react';
-import { toast } from 'sonner';
+import { useState } from 'react';
 
 const Edited: React.FC<{ title: string; head: HeadProps; user: User; role: RoleProps[] }> = ({ title, head, user, role }) => {
     const breadcrumbs: BreadcrumbItem[] = [
@@ -46,36 +44,11 @@ const Edited: React.FC<{ title: string; head: HeadProps; user: User; role: RoleP
         status: user.status || '',
         avatar: user.avatar || '',
     });
-    const [errors, setErrors] = useState<{ [key: string]: string }>({});
-    const [processing, setProcessing] = useState<boolean>(false);
-
-    const submit: FormEventHandler = (e) => {
-        e.preventDefault();
-
-        const changedFields = Object.fromEntries(
-            Object.entries(getChangedFields(user, values)).filter(
-                ([, v]) => v !== '' && v !== null && v !== undefined && !(Array.isArray(v) && v.length === 0),
-            ),
-        ) as UserUpdateForm;
-
-        if (Object.keys(changedFields).length === 0) {
-            toast.info('Không có thay đổi nào để cập nhật.');
-            return;
-        }
-
-        axios
-            .put(route('users.update', user.id), changedFields)
-            .then((response) => {
-                toast.success(response.data.message);
-                setErrors({});
-            })
-            .catch((error) => {
-                if (error.response.status === 422) {
-                    setErrors(error.response.data.error);
-                } else toast.error(error.response.data.message);
-            })
-            .finally(() => setProcessing(false));
-    };
+    const { errors, processing, submit } = useUpdateForm<UserUpdateForm>({
+        url: route('users.update', user.id),
+        oldData: user,
+        initialData: values,
+    });
 
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
@@ -141,7 +114,7 @@ const Edited: React.FC<{ title: string; head: HeadProps; user: User; role: RoleP
 
                                     <div className="grid w-full gap-2 lg:w-1/2">
                                         <Label htmlFor="role">Vai trò</Label>
-                                        <Select onValueChange={(e) => setValues({ ...values, roles: [e] })} defaultValue={values?.roles[0]}>
+                                        <Select onValueChange={(e) => setValues({ ...values, roles: [e] })} defaultValue={String(values?.roles[0])}>
                                             <SelectTrigger className="w-full">
                                                 <SelectValue placeholder="Chọn vai trò" />
                                             </SelectTrigger>

@@ -1,4 +1,5 @@
 import type { Config } from 'ziggy-js';
+import type { RoleProps } from '@/types';
 
 export interface Auth {
     user: User;
@@ -13,47 +14,44 @@ export interface SharedData {
     [key: string]: unknown;
 }
 
-export interface User {
-    id: number;
-    uid: string;
+export interface UserBase {
     name: string;
     email: string;
+    phone?: string;
+    address?: string;
     avatar?: string;
+    status?: string;
+}
+
+export interface User extends UserBase {
+    id: number;
+    uid: string;
     email_verified_at?: string | null;
-    phone? : string | null;
-    address? : string | null;
-    status: string;
     banned_at?: string | null;
     ban_reason?: string | null;
     banned_by?: string | null;
-    created_at?: string | null;
-    updated_at?: string | null;
-    deleted_at?: string | null;
-    [key: string]: unknown; // This allows for additional properties...
+    created_at?: Date;
+    updated_at?: Date;
+    deleted_at?: Date | null;
+    roles?: RoleProps[] | undefined;
+    [key: string]: unknown;
 }
 
-export type UserForm = {
-    name: string;
-    email: string;
-    phone: string;
-    address: string;
+export interface UserForm extends UserBase {
     password: string;
     password_confirmation: string;
-};
+}
 
-export type UserUpdateForm = {
+export interface UserUpdateForm extends UserBase {
     id: number;
     uid: string;
-    name: string;
-    email: string;
-    phone: string;
-    address: string;
-    password_attributes: string;
-    password: string;
-    password_confirmation: string;
-    created_at: string;
-    updated_at: string;
-    roles: Array<string>;
-    status: string;
-    avatar: string;
-};
+    password_attributes?: string;
+    password?: string;
+    password_confirmation?: string;
+    created_at?: Date | string;
+    updated_at?: Date | string;
+    roles?: RoleProps[] | string[];
+    status?: string;
+    avatar?: string;
+    [key: string]: unknown;
+}

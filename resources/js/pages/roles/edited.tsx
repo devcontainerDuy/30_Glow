@@ -4,13 +4,12 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { useUpdateForm } from '@/hooks/use-update-form';
 import AppLayout from '@/layouts/app-layout';
 import type { BreadcrumbItem, HeadProps, Role, RoleForm } from '@/types';
 import { Head, Link } from '@inertiajs/react';
-import axios from 'axios';
 import { ArrowLeft, LoaderCircle } from 'lucide-react';
-import { useState, type FC, type FormEventHandler } from 'react';
-import { toast } from 'sonner';
+import { useState, type FC } from 'react';
 
 const Edited: FC<{ title: string; head: HeadProps; role: Role }> = ({ title, head, role }) => {
     const breadcrumbs: BreadcrumbItem[] = [
@@ -32,25 +31,11 @@ const Edited: FC<{ title: string; head: HeadProps; role: Role }> = ({ title, hea
         name: role.name,
         guard_name: role.guard_name,
     });
-    const [errors, setErrors] = useState<{ [key: string]: string }>({});
-    const [processing, setProcessing] = useState<boolean>(false);
-
-    const submit: FormEventHandler<HTMLFormElement> = (e) => {
-        e.preventDefault();
-        setProcessing(true);
-
-        axios
-            .put(route('roles.update', role.id), values)
-            .then((response) => {
-                toast.success(response.data.message);
-            })
-            .catch((error) => {
-                if (error.response.status === 422) {
-                    setErrors(error.response.data.error);
-                } else toast.error(error.response.data.message);
-            })
-            .finally(() => setProcessing(false));
-    };
+    const { errors, processing, submit } = useUpdateForm<RoleForm>({
+        url: route('roles.update', role.id),
+        oldData: role,
+        initialData: values,
+    });
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title={title} />
@@ -109,7 +94,7 @@ const Edited: FC<{ title: string; head: HeadProps; role: Role }> = ({ title, hea
                             </div>
                             <Button type="submit" className="w-full" tabIndex={0} disabled={processing}>
                                 {processing && <LoaderCircle className="h-4 w-4 animate-spin" />}
-                                Tạo mới
+                                Lưu thay đổi
                             </Button>
                         </form>
                     </div>
