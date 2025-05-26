@@ -48,7 +48,7 @@ type DialogMapsProps<T> = {
     setData: React.Dispatch<React.SetStateAction<T>>;
 };
 
-export function DialogMaps<T extends { address?: string }>({ data, setData }: DialogMapsProps<T>) {
+export function DialogMaps<T extends Record<string, unknown>>({ data, setData }: DialogMapsProps<T>) {
     const [open, setOpen] = useState(false);
     const [provinces, setProvinces] = useState<Provinces | null>(null);
     const [districts, setDistricts] = useState<District[] | null>(null);
@@ -106,14 +106,14 @@ export function DialogMaps<T extends { address?: string }>({ data, setData }: Di
             toast.error('Vui lòng nhập đầy đủ địa chỉ');
             return;
         }
-        setData({ ...data, address: `${street}, ${addressParts.ward}, ${addressParts.district}, ${addressParts.province}` });
+        setData({ ...data, address: `${street}, ${addressParts.ward}, ${addressParts.district}, ${addressParts.province}` as string });
         setOpen(false);
     };
 
     return (
         <Dialog open={open} onOpenChange={setOpen}>
             <DialogTrigger asChild>
-                <Input className="text-left" id="address" placeholder="Nhập địa chỉ" value={data.address} readOnly />
+                <Input className="text-left" id="address" placeholder="Nhập địa chỉ" value={data.address as string} readOnly />
             </DialogTrigger>
             <DialogContent className="sm:max-w-[425px]">
                 <DialogHeader>

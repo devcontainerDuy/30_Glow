@@ -6,10 +6,10 @@ export interface Role {
     updated_at: string;
 }
 
-export interface RoleProps {
+export type RoleProps = {
     id: number;
     name: string;
-}
+};
 
 export type RoleForm = {
     name: string;

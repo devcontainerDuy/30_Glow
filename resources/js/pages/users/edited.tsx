@@ -38,9 +38,9 @@ const Edited: React.FC<{ title: string; head: HeadProps; user: User; role: RoleP
         password_attributes: '',
         password: '',
         password_confirmation: '',
-        created_at: user.created_at || '',
-        updated_at: user.updated_at || '',
-        roles: Array.isArray(user.roles) ? user.roles.map((role: RoleProps) => role.name) : [],
+        created_at: new Date(user.created_at || ''),
+        updated_at: new Date(user.updated_at || ''),
+        roles: user.roles?.map((role) => role.name),
         status: user.status || '',
         avatar: user.avatar || '',
     });
@@ -78,7 +78,7 @@ const Edited: React.FC<{ title: string; head: HeadProps; user: User; role: RoleP
                                     <Input
                                         id="name"
                                         placeholder="Nhập họ và tên"
-                                        value={values?.name}
+                                        value={values?.name as string}
                                         onChange={(e) => setValues({ ...values, name: e.target.value })}
                                     />
                                     {errors?.name && <InputError message={errors.name} />}
@@ -88,7 +88,7 @@ const Edited: React.FC<{ title: string; head: HeadProps; user: User; role: RoleP
                                     <Input
                                         id="phone"
                                         placeholder="Nhập số điện thoại"
-                                        value={values?.phone}
+                                        value={values?.phone as string}
                                         onChange={(e) => setValues({ ...values, phone: e.target.value })}
                                     />
                                     {errors?.phone && <InputError message={errors.phone} />}
@@ -106,7 +106,7 @@ const Edited: React.FC<{ title: string; head: HeadProps; user: User; role: RoleP
                                             id="email"
                                             placeholder="Nhập email"
                                             required
-                                            value={values?.email}
+                                            value={values?.email as string}
                                             onChange={(e) => setValues({ ...values, email: e.target.value })}
                                         />
                                         {errors?.email && <InputError message={errors.email} />}
@@ -114,7 +114,7 @@ const Edited: React.FC<{ title: string; head: HeadProps; user: User; role: RoleP
 
                                     <div className="grid w-full gap-2 lg:w-1/2">
                                         <Label htmlFor="role">Vai trò</Label>
-                                        <Select onValueChange={(e) => setValues({ ...values, roles: [e] })} defaultValue={String(values?.roles[0])}>
+                                        <Select onValueChange={(e) => setValues({ ...values, roles: [e] })} defaultValue={(values?.roles as string[])[0]}>
                                             <SelectTrigger className="w-full">
                                                 <SelectValue placeholder="Chọn vai trò" />
                                             </SelectTrigger>
