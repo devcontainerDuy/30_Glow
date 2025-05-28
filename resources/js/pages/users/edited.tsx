@@ -11,7 +11,7 @@ import { DialogMaps } from '@/layouts/users/dialog-maps';
 import type { BreadcrumbItem, HeadProps, RoleProps, User, UserUpdateForm } from '@/types';
 import { Head, Link } from '@inertiajs/react';
 import { ArrowLeft, LoaderCircle } from 'lucide-react';
-import { useState } from 'react';
+import React, { useState } from 'react';
 
 const Edited: React.FC<{ title: string; head: HeadProps; user: User; role: RoleProps[] }> = ({ title, head, user, role }) => {
     const breadcrumbs: BreadcrumbItem[] = [

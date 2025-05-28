@@ -1,3 +1,4 @@
+import React from 'react';
 import AlertDialogDelete from '@/components/alert-dialog-delete';
 import { DataTable } from '@/components/data-table';
 import Heading from '@/components/heading';
@@ -22,7 +23,6 @@ import { Head, Link } from '@inertiajs/react';
 import type { ColumnDef } from '@tanstack/react-table';
 import axios from 'axios';
 import { ArrowUpDown, MoreHorizontal, Plus, Trash2 } from 'lucide-react';
-import { memo, useCallback, useMemo } from 'react';
 import { toast } from 'sonner';
 
 const NameCell: React.FC<{ name: string }> = ({ name }) => {
@@ -41,7 +41,7 @@ const NameCell: React.FC<{ name: string }> = ({ name }) => {
     );
 };
 
-const RoleCell = memo(
+const RoleCell = React.memo(
     ({
         item,
         roles,
@@ -89,7 +89,7 @@ const Index: React.FC<{ title: string; head: HeadProps; data: User[]; roles: Rol
         },
     ];
     const { open, confirmDelete, handleDelete, handleCancel } = useDelete();
-    const onChangeRoleForUser = useCallback((userId: number, roleName: string) => {
+    const onChangeRoleForUser = React.useCallback((userId: number, roleName: string) => {
         axios
             .put(route('users.update', userId), {
                 roles: [String(roleName)],
@@ -104,7 +104,7 @@ const Index: React.FC<{ title: string; head: HeadProps; data: User[]; roles: Rol
             });
     }, []);
 
-    const columns = useMemo<ColumnDef<User>[]>(
+    const columns = React.useMemo<ColumnDef<User>[]>(
         () => [
             {
                 id: 'select',

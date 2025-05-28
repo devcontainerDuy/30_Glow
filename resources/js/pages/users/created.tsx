@@ -10,7 +10,7 @@ import type { BreadcrumbItem, HeadProps, UserForm } from '@/types';
 import { Head, Link } from '@inertiajs/react';
 import axios from 'axios';
 import { ArrowLeft, Eye, EyeOff, LoaderCircle } from 'lucide-react';
-import { type FormEventHandler, useState } from 'react';
+import React, { type FormEventHandler, useState } from 'react';
 import { toast } from 'sonner';
 
 const Created: React.FC<{ title: string; head: HeadProps }> = ({ title, head }) => {
