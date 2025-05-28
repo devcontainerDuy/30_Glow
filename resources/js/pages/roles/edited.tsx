@@ -33,9 +33,7 @@ const Edited: FC<{ title: string; head: HeadProps; role: Role; permission: Permi
             href: route('roles.edit', role.id),
         },
     ];
-    console.log('role', role);
     
-
     const [values, setValues] = useState<Required<RoleForm>>({
         name: role.name,
         guard_name: role.guard_name,

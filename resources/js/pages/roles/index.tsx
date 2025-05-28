@@ -24,7 +24,6 @@ const Index: React.FC<{ title: string; head: HeadProps; data: Role[] }> = ({ tit
             href: route('roles.index'),
         },
     ];
-    // console.log('Roles data:', data);
     
     const { open, confirmDelete, handleDelete, handleCancel } = useDelete();
     const columns = useMemo<ColumnDef<Role>[]>(
@@ -67,6 +66,21 @@ const Index: React.FC<{ title: string; head: HeadProps; data: Role[] }> = ({ tit
                     );
                 },
                 cell: ({ row }) => <span className="text-sm font-medium">{row.getValue('guard_name')}</span>,
+            },
+            {
+                accessorKey: 'permissions',
+                header: ({ column }) => {
+                    return (
+                        <Button variant="ghost" onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}>
+                            <span className="text-sm font-medium">Quyền hạn</span>
+                            <ArrowUpDown className="ml-2 h-4 w-4" />
+                        </Button>
+                    );
+                },
+                cell: ({ row }) => {
+                    const permissions = row.getValue('permissions') as { name: string }[];
+                    return <span className="text-sm font-medium">{permissions.map((permission) => permission.name).join(', ') || 'N/A'}</span>;
+                },
             },
             {
                 accessorKey: 'created_at',
