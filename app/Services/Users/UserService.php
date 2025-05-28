@@ -16,7 +16,7 @@ class UserService extends BaseService implements UserServiceInterface
 
     public function __construct(UserRepositoryInterface $repository, RoleRepositoryInterface $roleRepository)
     {
-        $this->repository = $repository;
+        parent::__construct($repository);
         $this->roleRepository = $roleRepository;
     }
 

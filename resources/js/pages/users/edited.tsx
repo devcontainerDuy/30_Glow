@@ -121,7 +121,7 @@ const Edited: React.FC<{ title: string; head: HeadProps; user: User; role: RoleP
 
                                             <SelectContent>
                                                 {role?.map((role: RoleProps) => (
-                                                    <SelectItem key={role.id} value={role.name}>
+                                                    <SelectItem key={role.id} value={role.name as string}>
                                                         {role.name}
                                                     </SelectItem>
                                                 ))}

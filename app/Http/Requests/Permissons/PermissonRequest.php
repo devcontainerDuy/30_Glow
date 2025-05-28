@@ -1,10 +1,10 @@
 <?php
 
-namespace App\Http\Requests\Roles;
+namespace App\Http\Requests\Permissons;
 
 use App\Http\Requests\BaseRequest;
 
-class RoleRequest extends BaseRequest
+class PermissonRequest extends BaseRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -22,19 +22,16 @@ class RoleRequest extends BaseRequest
     public function methodPost(): array
     {
         return [
-            'name' => 'required|string|max:255',
+            'name' => 'required|string|max:255|unique:permissions,name',
             'guard_name' => 'required|string|max:255',
-        ];
+        ];   
     }
 
     public function methodPut(): array
     {
         return [
-            'name' => 'nullable|string|max:255',
-            'guard_name' => 'nullable|string|max:255',
-            'permissions' => 'nullable|array',
-            'permissions.*.id' => 'numeric|distinct',
-            'permissions.*.name'=> 'string|max:255',
+            'name' => 'required|string|max:255|unique:permissions,name,' . $this->route('permission'),
+            'guard_name' => 'required|string|max:255',
         ];
     }
 }

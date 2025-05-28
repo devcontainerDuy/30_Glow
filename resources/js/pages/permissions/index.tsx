@@ -7,27 +7,25 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel,
 import { useDelete } from '@/hooks/use-delete';
 import AppLayout from '@/layouts/app-layout';
 import { formatDate } from '@/lib/format';
-import type { BreadcrumbItem, HeadProps, Role } from '@/types';
+import type { BreadcrumbItem, HeadProps, Permission } from '@/types';
 import { Head, Link } from '@inertiajs/react';
 import type { ColumnDef } from '@tanstack/react-table';
 import { ArrowUpDown, MoreHorizontal, Plus, Trash2 } from 'lucide-react';
 import { useMemo } from 'react';
 
-const Index: React.FC<{ title: string; head: HeadProps; data: Role[] }> = ({ title, head, data }) => {
+const Index: React.FC<{ title: string; head: HeadProps; data: Permission[] }> = ({ title, head, data }) => {
     const breadcrumbs: BreadcrumbItem[] = [
         {
             title: 'Tài khoản',
             href: route('users.index'),
         },
         {
-            title: 'Vai trò',
-            href: route('roles.index'),
+            title: 'Quyền hạn',
+            href: route('permissions.index'),
         },
     ];
-    // console.log('Roles data:', data);
-    
     const { open, confirmDelete, handleDelete, handleCancel } = useDelete();
-    const columns = useMemo<ColumnDef<Role>[]>(
+    const columns = useMemo<ColumnDef<Permission>[]>(
         () => [
             {
                 id: 'select',
@@ -49,7 +47,7 @@ const Index: React.FC<{ title: string; head: HeadProps; data: Role[] }> = ({ tit
                 header: ({ column }) => {
                     return (
                         <Button variant="ghost" onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}>
-                            <span className="text-sm font-medium">Tên vai trò</span>
+                            <span className="text-sm font-medium">Tên quyền hạn</span>
                             <ArrowUpDown className="ml-2 h-4 w-4" />
                         </Button>
                     );
@@ -93,10 +91,10 @@ const Index: React.FC<{ title: string; head: HeadProps; data: Role[] }> = ({ tit
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end">
                             <DropdownMenuLabel>Hành động</DropdownMenuLabel>
-                            <Link href={route('roles.edit', row.original.id)}>
+                            <Link href={route('permissions.edit', row.original.id)}>
                                 <DropdownMenuItem className="cursor-pointer">Sửa</DropdownMenuItem>
                             </Link>
-                            <DropdownMenuItem className="cursor-pointer" onClick={() => confirmDelete(route('roles.destroy', row.original.id))}>
+                            <DropdownMenuItem className="cursor-pointer" onClick={() => confirmDelete(route('permissions.destroy', row.original.id))}>
                                 Xóa
                             </DropdownMenuItem>
                         </DropdownMenuContent>
@@ -117,13 +115,13 @@ const Index: React.FC<{ title: string; head: HeadProps; data: Role[] }> = ({ tit
                     <Heading title={head.title} description={head?.description} />
 
                     <div className="flex items-center gap-2">
-                        <Link href="/roles/trash">
+                        <Link href="/permissions/trash">
                             <Button variant={'destructive'}>
                                 <Trash2 className="h-4 w-4" />
                                 <span>Thùng rác</span>
                             </Button>
                         </Link>
-                        <Link href={route('roles.create')}>
+                        <Link href={route('permissions.create')}>
                             <Button>
                                 <Plus className="h-4 w-4" />
                                 <span>Tạo mới</span>

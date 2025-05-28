@@ -14,6 +14,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     Route::resource('users', App\Http\Controllers\Users\UserController::class);
     Route::resource('roles', App\Http\Controllers\Roles\RoleController::class);
+    Route::resource('permissions', App\Http\Controllers\Permissions\PermissionController::class);
 });
 
 Route::group(['prefix' => 'laravel-filemanager', 'middleware' => ['web', 'auth']], function () {

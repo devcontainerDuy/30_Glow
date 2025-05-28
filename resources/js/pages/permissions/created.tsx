@@ -4,21 +4,15 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { useUpdateForm } from '@/hooks/use-update-form';
 import AppLayout from '@/layouts/app-layout';
-import type { BreadcrumbItem, HeadProps, PermissionProps, Role, RoleForm } from '@/types';
+import type { BreadcrumbItem, HeadProps, PermissionForm } from '@/types';
 import { Head, Link } from '@inertiajs/react';
+import axios from 'axios';
 import { ArrowLeft, LoaderCircle } from 'lucide-react';
-import { useState, type FC } from 'react';
-import makeAnimated from 'react-select/animated';
-import AsyncSelect from 'react-select/async';
+import { useState, type FC, type FormEventHandler } from 'react';
+import { toast } from 'sonner';
 
-type OptionType = {
-    label: string;
-    value: string | number;
-};
-
-const Edited: FC<{ title: string; head: HeadProps; role: Role; permission: PermissionProps[] }> = ({ title, head, role, permission }) => {
+const Created: FC<{ title: string; head: HeadProps }> = ({ title, head }) => {
     const breadcrumbs: BreadcrumbItem[] = [
         {
             title: 'Tài khoản',
@@ -26,54 +20,46 @@ const Edited: FC<{ title: string; head: HeadProps; role: Role; permission: Permi
         },
         {
             title: 'Vai trò',
-            href: route('roles.index'),
+            href: route('permissions.index'),
         },
         {
-            title: 'Chỉnh sửa',
-            href: route('roles.edit', role.id),
+            title: 'Tạo mới',
+            href: route('permissions.create'),
         },
     ];
-    console.log('role', role);
-    
 
-    const [values, setValues] = useState<Required<RoleForm>>({
-        name: role.name,
-        guard_name: role.guard_name,
-        permissions: role.permissions,
+    const [values, setValues] = useState<Required<PermissionForm>>({
+        name: '',
+        guard_name: '',
     });
-    const [selectedPermissions, setSelectedPermissions] = useState<OptionType[]>(
-        role.permissions?.map((perm) => ({
-            value: Number(perm.id),
-            label: String(perm.name),
-        })),
-    );
+    const [errors, setErrors] = useState<{ [key: string]: string }>({});
+    const [processing, setProcessing] = useState<boolean>(false);
 
-    const { errors, processing, submit } = useUpdateForm<RoleForm>({
-        url: route('roles.update', role.id),
-        oldData: role,
-        initialData: {
-            ...values,
-            permissions: selectedPermissions?.map((perm) => ({
-                id: Number(perm.value),
-                name: perm.label,
-            })),
-        },
-    });
+    const submit: FormEventHandler<HTMLFormElement> = (e) => {
+        e.preventDefault();
+        setProcessing(true);
 
-    const filterData = (value: string): OptionType[] => {
-        return permission
-            .filter((i) => String(i.name).toLowerCase().includes(value.toLowerCase()))
-            .map((p) => ({
-                value: p.id,
-                label: p.name,
-            })) as OptionType[];
+        axios
+            .post(route('permissions.store'), values)
+            .then((response) => {
+                toast.success(response.data.message);
+                reset();
+            })
+            .catch((error) => {
+                if (error.response.status === 422) {
+                    setErrors(error.response.data.error);
+                } else toast.error(error.response.data.message);
+            })
+            .finally(() => setProcessing(false));
     };
 
-    const loadOptions = (inputValue: string, callback: (options: OptionType[]) => void) => {
-        setTimeout(() => {
-            const result = filterData(inputValue);
-            callback(result);
-        }, 500);
+    const reset = () => {
+        setValues({
+            name: '',
+            guard_name: '',
+        });
+        setErrors({});
+        setProcessing(false);
     };
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
@@ -82,7 +68,7 @@ const Edited: FC<{ title: string; head: HeadProps; role: Role; permission: Permi
                 <div className="flex items-center justify-between">
                     <Heading title={head.title} description={head?.description} />
 
-                    <Link href={route('roles.index')} className="flex items-center gap-2">
+                    <Link href={route('permissions.index')} className="flex items-center gap-2">
                         <Button variant={'link'}>
                             <ArrowLeft className="h-4 w-4" />
                             <span>Quay lại trang trước</span>
@@ -93,19 +79,19 @@ const Edited: FC<{ title: string; head: HeadProps; role: Role; permission: Permi
                 <div className="relative flex items-center justify-center">
                     <div className="border-sidebar-border/70 dark:border-sidebar-border overflow-hidden rounded-xl border md:w-3/4 lg:w-1/2">
                         <div className="border-b-border/70 dark:border-b-border/70 flex flex-col items-center justify-between border-b p-4 lg:flex-row">
-                            <h3 className="text-lg font-semibold">Thông tin vai trò</h3>
-                            <p className="text-muted-foreground text-sm">Nhập thông tin vai trò</p>
+                            <h3 className="text-lg font-semibold">Thông tin quyền hạn</h3>
+                            <p className="text-muted-foreground text-sm">Nhập thông tin quyền hạn</p>
                         </div>
 
                         <form onSubmit={submit} className="grid w-full grid-cols-1 gap-6 p-8">
                             <div className="grid gap-2">
                                 <Label htmlFor="name">
-                                    Tên vai trò <span className="text-red-500">(*)</span>
+                                    Tên quyền hạn <span className="text-red-500">(*)</span>
                                 </Label>
                                 <Input
                                     type="text"
                                     id="name"
-                                    placeholder="Nhập tên vai trò"
+                                    placeholder="Nhập tên quyền hạn"
                                     required
                                     value={values?.name}
                                     onChange={(e) => setValues({ ...values, name: e.target.value })}
@@ -131,31 +117,9 @@ const Edited: FC<{ title: string; head: HeadProps; role: Role; permission: Permi
                                 </Select>
                                 {errors?.guard_name && <InputError message={errors.guard_name} />}
                             </div>
-
-                            <div className="grid gap-2">
-                                <Label htmlFor="role">Vai trò</Label>
-                                <AsyncSelect
-                                    name="permissions"
-                                    cacheOptions={true}
-                                    closeMenuOnSelect={false}
-                                    components={makeAnimated()}
-                                    isMulti
-                                    isSearchable={true}
-                                    loadOptions={loadOptions}
-                                    value={selectedPermissions}
-                                    defaultOptions={true}
-                                    onChange={(value) => setSelectedPermissions(value as OptionType[])}
-                                    placeholder="Chọn quyền"
-                                    noOptionsMessage={() => {
-                                        return 'Không có quyền';
-                                    }}
-                                />
-                                {errors?.permissions && <InputError message={errors.permissions} />}
-                            </div>
-
                             <Button type="submit" className="w-full" tabIndex={0} disabled={processing}>
                                 {processing && <LoaderCircle className="h-4 w-4 animate-spin" />}
-                                Lưu thay đổi
+                                Tạo mới
                             </Button>
                         </form>
                     </div>
@@ -165,4 +129,4 @@ const Edited: FC<{ title: string; head: HeadProps; role: Role; permission: Permi
     );
 };
 
-export default Edited;
+export default Created;

@@ -3,15 +3,14 @@
 namespace App\Services\Roles;
 
 use App\Repository\Roles\RoleRepositoryInterface;
+use App\Services\BaseService;
 use Illuminate\Http\Request;
 
-class RoleService implements RoleServiceInterface
+class RoleService extends BaseService implements RoleServiceInterface
 {
-    protected RoleRepositoryInterface $repository;
-
     public function __construct(RoleRepositoryInterface $repository)
     {
-        $this->repository = $repository;
+        parent::__construct($repository);
     }
 
     public function read(): mixed
@@ -26,6 +25,11 @@ class RoleService implements RoleServiceInterface
 
     public function updated(int $id, array $data): array|bool
     {
+        if (isset($data['permissions'])) {
+            $this->instance = $this->repository->find($id);
+            $this->instance->syncPermissions($data['permissions']);
+            unset($data['permissions']);
+        }
         return $this->repository->update($id, $data);
     }
 

@@ -1,6 +1,7 @@
 import type { LucideIcon } from 'lucide-react';
 export * from './users';
 export * from './roles';
+export * from './permissions';
 export * from './maps';
 
 export interface BreadcrumbItem {

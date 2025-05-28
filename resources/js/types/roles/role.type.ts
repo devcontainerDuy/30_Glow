@@ -1,17 +1,14 @@
+import type { PermissionProps } from "@/types";
+
 export interface Role {
     id: number;
     name: string;
     guard_name: string;
     created_at: string;
     updated_at: string;
+    permissions: PermissionProps[];
 }
 
-export type RoleProps = {
-    id: number;
-    name: string;
-};
+export type RoleProps = Partial<Omit<Role, 'guard_name' | 'created_at' | 'updated_at'>>;
 
-export type RoleForm = {
-    name: string;
-    guard_name: string;
-};
+export type RoleForm = Partial<Omit<Role, 'id' | 'created_at' | 'updated_at'>>;

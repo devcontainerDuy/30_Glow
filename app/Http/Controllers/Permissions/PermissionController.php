@@ -1,23 +1,20 @@
 <?php
 
-namespace App\Http\Controllers\Roles;
+namespace App\Http\Controllers\Permissions;
 
 use App\Http\Controllers\Controller;
-use App\Http\Requests\Roles\RoleRequest;
+use App\Http\Requests\Permissons\PermissonRequest;
 use App\Repository\Permissions\PermissionRepositoryInterface;
-use App\Repository\Roles\RoleRepositoryInterface;
-use App\Services\Roles\RoleServiceInterface;
+use App\Services\Permissions\PermissionServiceInterface;
 use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
 
-class RoleController extends Controller
+class PermissionController extends Controller
 {
-    protected PermissionRepositoryInterface $permissionRepository;
-    public function __construct(RoleServiceInterface $service, RoleRepositoryInterface $repository, PermissionRepositoryInterface $permissionRepository)
+    public function __construct(PermissionServiceInterface $service,PermissionRepositoryInterface $repository)
     {
         $this->service = $service;
         $this->repository = $repository;
-        $this->permissionRepository = $permissionRepository;
     }
 
     /**
@@ -25,11 +22,11 @@ class RoleController extends Controller
      */
     public function index()
     {
-        return Inertia::render('roles/index', [
-            'title' => 'Danh sách vai trò',
+        return Inertia::render('permissions/index', [
+            'title' => 'Danh sách quyền',
             'head' => [
-                'title' => 'Vai trò',
-                'description' => 'Quản lý các vai trò trong hệ thống',
+                'title' => 'Quyền hạn',
+                'description' => 'Quản lý các quyền hạn trong hệ thống',
             ],
             'data' => $this->service->read()
         ]);
@@ -40,11 +37,11 @@ class RoleController extends Controller
      */
     public function create()
     {
-        return Inertia::render('roles/created', [
-            'title' => 'Tạo mới vai trò',
+        return Inertia::render('permissions/created', [
+            'title' => 'Tạo mới quyền hạn',
             'head' => [
                 'title' => 'Tạo mới',
-                'description' => 'Thêm vai trò mới vào hệ thống',
+                'description' => 'Thêm mới quyền hạn trong hệ thống',
             ],
         ]);
     }
@@ -52,7 +49,7 @@ class RoleController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(RoleRequest $request)
+    public function store(PermissonRequest $request)
     {
         DB::beginTransaction();
         try {
@@ -60,14 +57,13 @@ class RoleController extends Controller
             DB::commit();
             return response()->json([
                 'status' => true,
-                'message' => 'Tạo mới vai trò thành công',
-            ], 201);
+                'message' => 'Thêm mới quyền hạn thành công'
+            ]);
         } catch (\Exception $e) {
             DB::rollBack();
             return response()->json([
                 'status' => false,
-                'message' => 'Tạo mới vai trò thất bại',
-                'error' => $e->getMessage(),
+                'message' => 'Thêm mới quyền hạn thất bại: ' . $e->getMessage()
             ], 500);
         }
     }
@@ -77,7 +73,7 @@ class RoleController extends Controller
      */
     public function show(string $id)
     {
-        // 
+        //
     }
 
     /**
@@ -85,21 +81,20 @@ class RoleController extends Controller
      */
     public function edit(string $id)
     {
-        return Inertia::render('roles/edited', [
-            'title' => 'Chỉnh sửa vai trò',
+        return Inertia::render('permissions/edited', [
+            'title' => 'Chỉnh sửa quyền hạn',
             'head' => [
                 'title' => 'Chỉnh sửa',
-                'description' => 'Cập nhật thông tin vai trò trong hệ thống',
+                'description' => 'Cập nhật thông tin quyền hạn',
             ],
-            'role' => $this->repository->with('permissions')->find($id),
-            'permission' => $this->permissionRepository->getAll(),
+            'permission' => $this->repository->find($id)
         ]);
     }
 
     /**
      * Update the specified resource in storage.
      */
-    public function update(RoleRequest $request, string $id)
+    public function update(PermissonRequest $request, string $id)
     {
         DB::beginTransaction();
         try {
@@ -107,14 +102,13 @@ class RoleController extends Controller
             DB::commit();
             return response()->json([
                 'status' => true,
-                'message' => 'Cập nhật vai trò thành công',
-            ], 200);
+                'message' => 'Cập nhật quyền hạn thành công'
+            ]);
         } catch (\Exception $e) {
             DB::rollBack();
             return response()->json([
                 'status' => false,
-                'message' => 'Cập nhật vai trò thất bại',
-                'error' => $e->getMessage(),
+                'message' => 'Cập nhật quyền hạn thất bại: ' . $e->getMessage()
             ], 500);
         }
     }
@@ -124,7 +118,7 @@ class RoleController extends Controller
      */
     public function destroy(string $id)
     {
-        $this->service->deleted($id);
-        return redirect()->route('roles.index');
+        $this->service->delete($id);
+        return redirect()->route('permissions.index');
     }
 }
