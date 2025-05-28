@@ -6,33 +6,8 @@ import type { NavItem } from '@/types';
 import { Link } from '@inertiajs/react';
 import { BookOpen, Folder, LayoutGrid, User } from 'lucide-react';
 import AppLogo from './app-logo';
-
-const mainNavItems: NavItem[] = [
-    {
-        title: 'Bảng điều khiển',
-        href: '/dashboard',
-        icon: LayoutGrid,
-    },
-    {
-        title: 'Tài khoản',
-        href: '/#',
-        icon: User,
-        items: [
-            {
-                title: 'Người dùng',
-                url: '/users',
-            },
-            {
-                title: 'Vai trò',
-                url: '/roles',
-            },
-            {
-                title: 'Quyền hạn',
-                url: '/permissions',
-            },
-        ],
-    }
-];
+import { useCallback } from 'react';
+import { useAuthorization } from '@/contexts/authorization-context';
 
 const footerNavItems: NavItem[] = [
     {
@@ -48,6 +23,39 @@ const footerNavItems: NavItem[] = [
 ];
 
 export function AppSidebar() {
+    const permissions = useAuthorization();
+
+    const handlePolicy = useCallback((params: string) => {
+        return permissions.filter((p) => p.name === params);
+    }, [permissions])
+
+    const mainNavItems: NavItem[] = [
+        {
+            title: 'Bảng điều khiển',
+            href: '/dashboard',
+            icon: LayoutGrid,
+        },
+        {
+            title: 'Tài khoản',
+            href: '/#',
+            icon: User,
+            items: [
+                ...(handlePolicy('real-users') ? [{
+                    title: 'Người dùng',
+                    url: '/users',
+                }] : []),
+                {
+                    title: 'Vai trò',
+                    url: '/roles',
+                },
+                {
+                    title: 'Quyền hạn',
+                    url: '/permissions',
+                },
+            ],
+        },
+    ];
+
     return (
         <Sidebar collapsible="icon" variant="inset">
             <SidebarHeader>

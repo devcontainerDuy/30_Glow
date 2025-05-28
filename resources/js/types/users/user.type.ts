@@ -1,8 +1,9 @@
-import type { RoleProps } from '@/types';
+import type { PermissionProps, RoleProps } from '@/types';
 import type { Config } from 'ziggy-js';
 
 export interface Auth {
     user: User;
+    permissions: PermissionProps[];
 }
 
 export interface SharedData {
