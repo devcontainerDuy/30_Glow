@@ -33,7 +33,7 @@ const Edited: FC<{ title: string; head: HeadProps; role: Role; permission: Permi
             href: route('roles.edit', role.id),
         },
     ];
-    
+
     const [values, setValues] = useState<Required<RoleForm>>({
         name: role.name,
         guard_name: role.guard_name,
@@ -147,6 +147,7 @@ const Edited: FC<{ title: string; head: HeadProps; role: Role; permission: Permi
                                     noOptionsMessage={() => {
                                         return 'Không có quyền';
                                     }}
+                                    menuPortalTarget={document.body}
                                 />
                                 {errors?.permissions && <InputError message={errors.permissions} />}
                             </div>
