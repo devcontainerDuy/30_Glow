@@ -27,6 +27,7 @@ class UserController extends Controller
      */
     public function index()
     {
+        $this->authorize('real-users');
         return Inertia::render('users/index', [
             'title' => 'Danh sách người dùng',
             'head' => [
@@ -43,6 +44,7 @@ class UserController extends Controller
      */
     public function create()
     {
+        $this->authorize('create-users');
         return Inertia::render('users/created', [
             'title' => 'Tạo mới người dùng',
             'head' => [
@@ -57,6 +59,7 @@ class UserController extends Controller
      */
     public function store(UserRequest $request)
     {
+        $this->authorize('view-users');
         DB::beginTransaction();
         try {
             $this->service->created($request->validated());
@@ -88,6 +91,7 @@ class UserController extends Controller
      */
     public function edit(string $id)
     {
+        $this->authorize('view-users');
         return Inertia::render('users/edited', [
             'title' => 'Chỉnh sửa người dùng',
             'head' => [
@@ -104,6 +108,7 @@ class UserController extends Controller
      */
     public function update(string $id, UserRequest $request)
     {
+        $this->authorize('update-users');
         DB::beginTransaction();
         try {
             $this->service->updated($id, $request->validated());
@@ -127,6 +132,7 @@ class UserController extends Controller
      */
     public function destroy(string $id)
     {
+        $this->authorize('delete-users');
         $this->service->deleted($id);
         return redirect()->route('users.index');
     }

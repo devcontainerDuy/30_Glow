@@ -30,8 +30,8 @@ class PermissonRequest extends BaseRequest
     public function methodPut(): array
     {
         return [
-            'name' => 'required|string|max:255|unique:permissions,name,' . $this->route('permission'),
-            'guard_name' => 'required|string|max:255',
+            'name' => 'nullable|string|max:255|unique:permissions,name,' . $this->route('permission'),
+            'guard_name' => 'nullable|string|max:255',
         ];
     }
 }

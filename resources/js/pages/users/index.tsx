@@ -18,7 +18,7 @@ import { useInitials } from '@/hooks/use-initials';
 import AppLayout from '@/layouts/app-layout';
 import { formatDate } from '@/lib/format';
 import type { BreadcrumbItem, HeadProps, RoleProps, User } from '@/types';
-import { Head, Link } from '@inertiajs/react';
+import { Head, Link, usePage } from '@inertiajs/react';
 import type { ColumnDef } from '@tanstack/react-table';
 import axios from 'axios';
 import { ArrowUpDown, MoreHorizontal, Plus, Trash2 } from 'lucide-react';
@@ -62,7 +62,7 @@ const RoleCell = memo(
                     <SelectLabel>Danh sách vai trò</SelectLabel>
                     {roles.length > 0 ? (
                         roles.map((role) => (
-                            <SelectItem key={role.id} value={role.name}>
+                            <SelectItem key={role.id} value={String(role.name)}>
                                 {role.name}
                             </SelectItem>
                         ))
@@ -244,7 +244,8 @@ const Index: React.FC<{ title: string; head: HeadProps; data: User[]; roles: Rol
         ],
         [confirmDelete, onChangeRoleForUser, roles],
     );
-
+    console.log('data', usePage().props.auth);
+    
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title={title} />
