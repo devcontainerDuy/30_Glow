@@ -44,7 +44,7 @@ class UserController extends Controller
      */
     public function create()
     {
-        $this->authorize('create-users');
+        $this->authorize('real-users');
         return Inertia::render('users/created', [
             'title' => 'Tạo mới người dùng',
             'head' => [
@@ -59,7 +59,7 @@ class UserController extends Controller
      */
     public function store(UserRequest $request)
     {
-        $this->authorize('view-users');
+        $this->authorize('create-users');
         DB::beginTransaction();
         try {
             $this->service->created($request->validated());
