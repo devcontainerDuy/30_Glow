@@ -141,12 +141,7 @@ const ChangePassword: React.FC<{
                                             onClick() {
                                                 setData('password', '');
                                                 setData('password_confirmation', '');
-                                                toast.error('Đã hoàn tác tạo mật khẩu!', {
-                                                    action: {
-                                                        label: 'Ẩn',
-                                                        onClick() {},
-                                                    },
-                                                });
+                                                toast.error('Đã hoàn tác tạo mật khẩu!');
                                             },
                                         },
                                     });
