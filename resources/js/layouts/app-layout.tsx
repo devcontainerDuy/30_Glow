@@ -14,7 +14,7 @@ interface AppLayoutProps {
 const AppLayoutTemplate = React.lazy(() => import('@/layouts/app/app-sidebar-layout'));
 
 const Spinner = React.memo(() => (
-    <div className="fixed top-0 right-0 bottom-0 left-0 flex items-center justify-center" role="status">
+    <div className="fixed top-0 right-0 bottom-0 left-0 flex items-center justify-center">
         <svg
             aria-hidden="true"
             className="inline h-18 w-18 animate-spin fill-gray-600 text-gray-200 dark:fill-gray-300 dark:text-gray-600"
