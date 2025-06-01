@@ -78,6 +78,26 @@
     }
 }
 
+@layer utilities {
+    .floating {
+        animation: floating 3s ease-in-out infinite;
+    }
+
+    @keyframes floating {
+        0% {
+            transform: translateY(0px);
+        }
+
+        50% {
+            transform: translateY(-15px);
+        }
+
+        100% {
+            transform: translateY(0px);
+        }
+    }
+}
+
 :root {
     --background: oklch(1 0 0);
     --foreground: oklch(0.145 0 0);
@@ -165,14 +185,14 @@
 
 @keyframes pulse {
     0% {
-            scale: 100%;
-        }
-    
-        50% {
-            scale: 150%;
-        }
-    
-        100% {
-            scale: 100%;
-        }
+        scale: 100%;
+    }
+
+    50% {
+        scale: 150%;
+    }
+
+    100% {
+        scale: 100%;
+    }
 }
