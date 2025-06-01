@@ -45,6 +45,10 @@ export function AppSidebar() {
                     url: '/users',
                 }] : []),
                 {
+                    title: 'Khách hàng',
+                    url: '/customers',
+                },
+                {
                     title: 'Vai trò',
                     url: '/roles',
                 },

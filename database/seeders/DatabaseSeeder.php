@@ -7,7 +7,6 @@ use App\Models\User;
 use App\Traits\GeneratesUniqueId;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
-use Spatie\Permission\Models\Permission;
 use Spatie\Permission\Models\Role;
 
 class DatabaseSeeder extends Seeder
@@ -18,29 +17,21 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        // User::factory(10)->create();
+        $this->call(PermissionsSeeder::class);
+        $permissions = PermissionsSeeder::$valuePermissions;
 
-        // for ($i = 0; $i < 10; $i++) {
-        //     User::create([
-        //         'uid' => $this->generateUUIDv4(),
-        //         'name' => fake()->name(),
-        //         'email' => fake()->unique()->email(),
-        //         'password' => Hash::make('123456'),
-        //     ]);
-        // }
+        $role = Role::create(["name" => "super-admin", "guard_name" => "web"])->syncPermissions($permissions);
+        User::create([
+            'uid' => $this->generateUUIDv4(),
+            'name' => 'Admin',
+            'email' => '3Bc8o@example.com',
+            'password' => Hash::make('123456'),
+        ])->assignRole($role);
 
-        // for ($i = 0; $i < 10; $i++) {
-        //     Role::create([
-        //         'name' => fake()->unique()->name(),
-        //         'guard_name' => 'web',
-        //     ]);
-        // }
+        $this->call([
+            UsersSeeder::class,
+            RolesSeeder::class,
+        ]);
 
-        // for ($i = 0; $i < 10; $i++) {
-        //     Permission::create([
-        //         'name' => fake()->unique()->word(),
-        //         'guard_name' => 'web',
-        //     ]);
-        // }
     }
 }

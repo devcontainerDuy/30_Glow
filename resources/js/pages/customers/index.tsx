@@ -1,0 +1,286 @@
+import AlertDialogDelete from '@/components/alert-dialog-delete';
+import { DataTable } from '@/components/data-table';
+import Heading from '@/components/heading';
+import { Avatar, AvatarFallback } from '@/components/ui/avatar';
+import { Button } from '@/components/ui/button';
+import { Checkbox } from '@/components/ui/checkbox';
+import {
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuLabel,
+    DropdownMenuSeparator,
+    DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
+import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { useDelete } from '@/hooks/use-delete';
+import { useInitials } from '@/hooks/use-initials';
+import AppLayout from '@/layouts/app-layout';
+import { formatDate } from '@/lib/format';
+import type { BreadcrumbItem, HeadProps, RoleProps, User } from '@/types';
+import { Head, Link } from '@inertiajs/react';
+import type { ColumnDef } from '@tanstack/react-table';
+import axios from 'axios';
+import { ArrowUpDown, MoreHorizontal, Plus, Trash2 } from 'lucide-react';
+import React from 'react';
+import { toast } from 'sonner';
+
+const NameCell: React.FC<{ name: string }> = ({ name }) => {
+    const getInitials = useInitials();
+
+    return (
+        <div className="flex items-center gap-2 capitalize">
+            <Avatar className="flex h-8 w-8 overflow-hidden rounded-full">
+                {/* <AvatarImage src={row.original.avatar} alt={row.original.name} /> */}
+                <AvatarFallback className="rounded-lg bg-neutral-200 text-black dark:bg-neutral-700 dark:text-white">
+                    {getInitials(name)}
+                </AvatarFallback>
+            </Avatar>
+            <span className="truncate font-semibold">{name}</span>
+        </div>
+    );
+};
+
+const RoleCell = React.memo(
+    ({
+        item,
+        roles,
+        userId,
+        handle,
+    }: {
+        item: { name: string }[];
+        roles: RoleProps[];
+        userId: number;
+        handle: (userId: number, roleName: string) => void;
+    }) => (
+        <Select defaultValue={item[0]?.name} onValueChange={(e) => handle(userId, e)}>
+            <SelectTrigger>
+                <SelectValue placeholder="Chọn vai trò" />
+            </SelectTrigger>
+            <SelectContent>
+                <SelectGroup>
+                    <SelectLabel>Danh sách vai trò</SelectLabel>
+                    {roles.length > 0 ? (
+                        roles.map((role) => (
+                            <SelectItem key={role.id} value={String(role.name)}>
+                                {role.name}
+                            </SelectItem>
+                        ))
+                    ) : (
+                        <SelectItem value="N/A" disabled>
+                            Không có vai trò nào
+                        </SelectItem>
+                    )}
+                </SelectGroup>
+            </SelectContent>
+        </Select>
+    ),
+);
+
+const Index: React.FC<{ title: string; head: HeadProps; data: User[]; roles: RoleProps[] }> = ({ title, head, data, roles }) => {
+    const breadcrumbs: BreadcrumbItem[] = [
+        {
+            title: 'Tài khoản',
+            href: route('users.index'),
+        },
+        {
+            title: head.title,
+            href: route('users.index'),
+        },
+    ];
+    const { open, confirmDelete, handleDelete, handleCancel } = useDelete();
+    const onChangeRoleForUser = React.useCallback((userId: number, roleName: string) => {
+        axios
+            .put(route('users.update', userId), {
+                roles: [String(roleName)],
+            })
+            .then((response) => {
+                toast.success(response.data.message);
+            })
+            .catch((error) => {
+                if (error.response.status === 422) {
+                    toast.error(error.response.data.error);
+                } else toast.error(error.response.data.message);
+            });
+    }, []);
+
+    const columns = React.useMemo<ColumnDef<User>[]>(
+        () => [
+            {
+                id: 'select',
+                header: ({ table }) => (
+                    <Checkbox
+                        checked={table.getIsAllPageRowsSelected()}
+                        onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
+                        aria-label="Select all"
+                    />
+                ),
+                cell: ({ row }) => (
+                    <Checkbox checked={row.getIsSelected()} onCheckedChange={(value) => row.toggleSelected(!!value)} aria-label="Select row" />
+                ),
+                enableSorting: false,
+                enableHiding: false,
+            },
+            {
+                accessorKey: 'name',
+                header: ({ column }) => {
+                    return (
+                        <Button variant="ghost" onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}>
+                            Name
+                            <ArrowUpDown className="ml-2 h-4 w-4" />
+                        </Button>
+                    );
+                },
+                cell: ({ row }) => <NameCell name={row.getValue('name')} />,
+            },
+            {
+                accessorKey: 'email',
+                header: ({ column }) => {
+                    return (
+                        <Button variant="ghost" onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}>
+                            Email
+                            <ArrowUpDown className="ml-2 h-4 w-4" />
+                        </Button>
+                    );
+                },
+                cell: ({ row }) => <div className="lowercase">{row.getValue('email')}</div>,
+            },
+            {
+                accessorKey: 'phone',
+                header: ({ column }) => {
+                    return (
+                        <Button variant="ghost" onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}>
+                            Phone
+                            <ArrowUpDown className="ml-2 h-4 w-4" />
+                        </Button>
+                    );
+                },
+                cell: ({ row }) => <div>{row.getValue('phone') || 'N/A'}</div>,
+            },
+            {
+                accessorKey: 'address',
+                header: ({ column }) => {
+                    return (
+                        <Button variant="ghost" onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}>
+                            Address
+                            <ArrowUpDown className="ml-2 h-4 w-4" />
+                        </Button>
+                    );
+                },
+                cell: ({ row }) => {
+                    const address = row.getValue('address') || 'N/A';
+                    return (
+                        <div className="w-[200px] overflow-hidden text-ellipsis whitespace-nowrap" title={String(address)}>
+                            {String(address)}
+                        </div>
+                    );
+                },
+            },
+            {
+                accessorKey: 'status',
+                header: ({ column }) => {
+                    return (
+                        <Button variant="ghost" onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}>
+                            Status
+                            <ArrowUpDown className="ml-2 h-4 w-4" />
+                        </Button>
+                    );
+                },
+                cell: ({ row }) => <div>{row.getValue('status')}</div>,
+            },
+            {
+                accessorKey: 'roles',
+                header: ({ column }) => {
+                    return (
+                        <Button variant="ghost" onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}>
+                            Role
+                            <ArrowUpDown className="ml-2 h-4 w-4" />
+                        </Button>
+                    );
+                },
+                cell: ({ row }) => (
+                    <RoleCell
+                        item={row.getValue('roles') as { name: string }[]}
+                        roles={roles}
+                        userId={row.original.id}
+                        handle={onChangeRoleForUser}
+                    />
+                ),
+            },
+            {
+                accessorKey: 'created_at',
+                header: ({ column }) => {
+                    return (
+                        <Button variant="ghost" onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}>
+                            Created At
+                            <ArrowUpDown className="ml-2 h-4 w-4" />
+                        </Button>
+                    );
+                },
+                cell: ({ row }) => <div>{formatDate(row.getValue('created_at'))}</div>,
+            },
+            {
+                accessorKey: 'actions',
+                header: 'Actions',
+                cell: ({ row }) => (
+                    <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                            <Button variant="ghost" className="h-8 w-8 p-0" aria-label="Open menu">
+                                <span className="sr-only">Open menu</span>
+                                <MoreHorizontal className="h-4 w-4" />
+                            </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end">
+                            <DropdownMenuLabel>Hành động</DropdownMenuLabel>
+                            <DropdownMenuItem className="cursor-pointer" onClick={() => navigator.clipboard.writeText(row.original.uid)}>
+                                Sao chép UID
+                            </DropdownMenuItem>
+
+                            <DropdownMenuSeparator />
+
+                            <Link href={route('users.edit', row.original.uid)}>
+                                <DropdownMenuItem className="cursor-pointer">Sửa</DropdownMenuItem>
+                            </Link>
+                            <DropdownMenuItem className="cursor-pointer" onClick={() => confirmDelete(route('users.destroy', row.original.id))}>
+                                Xóa
+                            </DropdownMenuItem>
+                        </DropdownMenuContent>
+                    </DropdownMenu>
+                ),
+            },
+        ],
+        [confirmDelete, onChangeRoleForUser, roles],
+    );
+
+    return (
+        <AppLayout breadcrumbs={breadcrumbs}>
+            <Head title={title} />
+            <AlertDialogDelete open={open} cancel={handleCancel} handle={handleDelete} />
+
+            <div className="flex h-full flex-1 flex-col gap-4 rounded-xl px-4 py-6">
+                <div className="flex items-center justify-between">
+                    <Heading title={head.title} description={head?.description} />
+                    <div className="flex items-center gap-2">
+                        <Link href="/users/trash">
+                            <Button variant={'destructive'}>
+                                <Trash2 className="h-4 w-4" />
+                                <span>Thùng rác</span>
+                            </Button>
+                        </Link>
+                        <Link href={route('users.create')}>
+                            <Button>
+                                <Plus className="h-4 w-4" />
+                                <span>Tạo mới</span>
+                            </Button>
+                        </Link>
+                    </div>
+                </div>
+                <div className="border-sidebar-border/70 dark:border-sidebar-border relative overflow-hidden rounded-xl border">
+                    <DataTable columns={columns} data={data} searchKey="email" onRowClick={(row) => console.log('Row clicked:', row)} />
+                </div>
+            </div>
+        </AppLayout>
+    );
+};
+
+export default Index;

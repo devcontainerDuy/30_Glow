@@ -12,7 +12,7 @@ class UserPolicy
      */
     public function viewAny(User $user): bool
     {
-        return $user->can("real-users");
+        return $user->can("read-users");
     }
 
     /**
