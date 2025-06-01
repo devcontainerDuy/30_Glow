@@ -1,4 +1,3 @@
-import React from 'react';
 import AlertDialogDelete from '@/components/alert-dialog-delete';
 import { DataTable } from '@/components/data-table';
 import Heading from '@/components/heading';
@@ -23,6 +22,7 @@ import { Head, Link } from '@inertiajs/react';
 import type { ColumnDef } from '@tanstack/react-table';
 import axios from 'axios';
 import { ArrowUpDown, MoreHorizontal, Plus, Trash2 } from 'lucide-react';
+import React from 'react';
 import { toast } from 'sonner';
 
 const NameCell: React.FC<{ name: string }> = ({ name }) => {
@@ -167,7 +167,14 @@ const Index: React.FC<{ title: string; head: HeadProps; data: User[]; roles: Rol
                         </Button>
                     );
                 },
-                cell: ({ row }) => <div>{row.getValue('address') || 'N/A'}</div>,
+                cell: ({ row }) => {
+                    const address = row.getValue('address') || 'N/A';
+                    return (
+                        <div className="w-[200px] overflow-hidden text-ellipsis whitespace-nowrap" title={String(address)}>
+                            {String(address)}
+                        </div>
+                    );
+                },
             },
             {
                 accessorKey: 'status',
@@ -244,7 +251,7 @@ const Index: React.FC<{ title: string; head: HeadProps; data: User[]; roles: Rol
         ],
         [confirmDelete, onChangeRoleForUser, roles],
     );
-    
+
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title={title} />

@@ -27,7 +27,7 @@ class UserController extends Controller
      */
     public function index()
     {
-        $this->authorize('real-users');
+        $this->authorize('read-users');
         return Inertia::render('users/index', [
             'title' => 'Danh sách người dùng',
             'head' => [
@@ -44,7 +44,7 @@ class UserController extends Controller
      */
     public function create()
     {
-        $this->authorize('real-users');
+        $this->authorize('read-users');
         return Inertia::render('users/created', [
             'title' => 'Tạo mới người dùng',
             'head' => [

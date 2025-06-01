@@ -24,7 +24,7 @@ const Index: React.FC<{ title: string; head: HeadProps; data: Role[] }> = ({ tit
             href: route('roles.index'),
         },
     ];
-    
+
     const { open, confirmDelete, handleDelete, handleCancel } = useDelete();
     const columns = useMemo<ColumnDef<Role>[]>(
         () => [
@@ -79,7 +79,12 @@ const Index: React.FC<{ title: string; head: HeadProps; data: Role[] }> = ({ tit
                 },
                 cell: ({ row }) => {
                     const permissions = row.getValue('permissions') as { name: string }[];
-                    return <span className="text-sm font-medium">{permissions.map((permission) => permission.name).join(', ') || 'N/A'}</span>;
+                    const value = permissions.map((permission) => permission.name).join(', ') || 'N/A';
+                    return (
+                        <div className="w-[800px] overflow-hidden text-ellipsis whitespace-nowrap" title={value}>
+                            <span className="text-sm font-medium">{String(value)}</span>
+                        </div>
+                    );
                 },
             },
             {

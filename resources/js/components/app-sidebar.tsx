@@ -40,7 +40,7 @@ export function AppSidebar() {
             href: '/#',
             icon: User,
             items: [
-                ...(handlePolicy('real-users') ? [{
+                ...(handlePolicy('read-users') ? [{
                     title: 'Người dùng',
                     url: '/users',
                 }] : []),
