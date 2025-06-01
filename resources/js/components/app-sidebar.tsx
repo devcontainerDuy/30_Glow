@@ -2,12 +2,12 @@ import { NavFooter } from '@/components/nav-footer';
 import { NavMain } from '@/components/nav-main';
 import { NavUser } from '@/components/nav-user';
 import { Sidebar, SidebarContent, SidebarFooter, SidebarHeader, SidebarMenu, SidebarMenuButton, SidebarMenuItem } from '@/components/ui/sidebar';
+import { useAuthorization } from '@/contexts/authorization-context';
 import type { NavItem } from '@/types';
 import { Link } from '@inertiajs/react';
 import { BookOpen, Folder, LayoutGrid, User } from 'lucide-react';
-import AppLogo from './app-logo';
 import { useCallback } from 'react';
-import { useAuthorization } from '@/contexts/authorization-context';
+import AppLogo from './app-logo';
 
 const footerNavItems: NavItem[] = [
     {
@@ -24,10 +24,7 @@ const footerNavItems: NavItem[] = [
 
 export function AppSidebar() {
     const permissions = useAuthorization();
-
-    const handlePolicy = useCallback((params: string) => {
-        return permissions.filter((p) => p.name === params);
-    }, [permissions])
+    const handlePolicy = useCallback((params: string) => (permissions ?? []).some((permission) => permission === params), [permissions]);
 
     const mainNavItems: NavItem[] = [
         {
@@ -40,22 +37,34 @@ export function AppSidebar() {
             href: '/#',
             icon: User,
             items: [
-                ...(handlePolicy('read-users') ? [{
-                    title: 'Người dùng',
-                    url: '/users',
-                }] : []),
+                ...(handlePolicy('read-users')
+                    ? [
+                        {
+                            title: 'Người dùng',
+                            url: '/users',
+                        },
+                    ]
+                    : []),
                 {
                     title: 'Khách hàng',
                     url: '/customers',
                 },
-                {
-                    title: 'Vai trò',
-                    url: '/roles',
-                },
-                {
-                    title: 'Quyền hạn',
-                    url: '/permissions',
-                },
+                ...(handlePolicy('read-roles')
+                    ? [
+                        {
+                            title: 'Vai trò',
+                            url: '/roles',
+                        },
+                    ]
+                    : []),
+                ...(handlePolicy('read-permissions')
+                    ? [
+                        {
+                            title: 'Quyền hạn',
+                            url: '/permissions',
+                        },
+                    ]
+                    : []),
             ],
         },
     ];
