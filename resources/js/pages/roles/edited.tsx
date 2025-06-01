@@ -6,7 +6,7 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useUpdateForm } from '@/hooks/use-update-form';
 import AppLayout from '@/layouts/app-layout';
-import type { BreadcrumbItem, HeadProps, PermissionProps, Role, RoleForm } from '@/types';
+import type { BreadcrumbItem, HeadProps, PermissionProps, Role, RoleUpdateForm } from '@/types';
 import { Head, Link } from '@inertiajs/react';
 import { ArrowLeft, LoaderCircle } from 'lucide-react';
 import { useState, type FC } from 'react';
@@ -34,7 +34,7 @@ const Edited: FC<{ title: string; head: HeadProps; role: Role; permission: Permi
         },
     ];
 
-    const [values, setValues] = useState<Required<RoleForm>>({
+    const [values, setValues] = useState<Required<RoleUpdateForm>>({
         name: role.name,
         guard_name: role.guard_name,
         permissions: role.permissions,
@@ -46,7 +46,7 @@ const Edited: FC<{ title: string; head: HeadProps; role: Role; permission: Permi
         })),
     );
 
-    const { errors, processing, submit } = useUpdateForm<RoleForm>({
+    const { errors, processing, submit } = useUpdateForm<RoleUpdateForm>({
         url: route('roles.update', role.id),
         oldData: role,
         initialData: {
