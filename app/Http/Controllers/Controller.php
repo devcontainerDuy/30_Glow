@@ -25,9 +25,9 @@ abstract class Controller extends BaseController
      */
     protected $repository;
 
-    public function __construct($service, $repository)
-    {
-        $this->service = $service;
-        $this->repository = $repository;
-    }
+    // public function __construct($service, $repository)
+    // {
+    //     $this->service = $service;
+    //     $this->repository = $repository;
+    // }
 }

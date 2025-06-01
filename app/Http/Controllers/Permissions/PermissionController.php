@@ -13,7 +13,8 @@ class PermissionController extends Controller
 {
     public function __construct(PermissionServiceInterface $service,PermissionRepositoryInterface $repository)
     {
-        parent::__construct($service, $repository);
+        $this->service = $service;
+        $this->repository = $repository;
     }
 
     /**

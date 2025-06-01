@@ -15,7 +15,8 @@ class RoleController extends Controller
     protected PermissionRepositoryInterface $permissionRepository;
     public function __construct(RoleServiceInterface $service, RoleRepositoryInterface $repository, PermissionRepositoryInterface $permissionRepository)
     {
-        parent::__construct($service, $repository);
+        $this->service = $service;
+        $this->repository = $repository;
         $this->permissionRepository = $permissionRepository;
     }
 
