@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Users;
 
+use Illuminate\Http\JsonResponse;
 use Inertia\Inertia;
 use Illuminate\Support\Facades\DB;
 use App\Http\Controllers\Controller;
@@ -11,6 +12,8 @@ use App\Http\Resources\Users\UserResource;
 use App\Services\Users\UserServiceInterface;
 use App\Repository\Roles\RoleRepositoryInterface;
 use App\Repository\Users\UserRepositoryInterface;
+use Illuminate\Http\RedirectResponse;
+use Inertia\Response;
 
 class UserController extends Controller
 {
@@ -24,9 +27,9 @@ class UserController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(): Response
     {
-        $this->authorize('read-users');
+        $this->authorize('viewAny', auth()->user());
         return Inertia::render('users/index', [
             'title' => 'Danh sách người dùng',
             'head' => [
@@ -41,9 +44,9 @@ class UserController extends Controller
     /**
      * Show the form for creating a new resource.
      */
-    public function create()
+    public function create(): Response
     {
-        $this->authorize('read-users');
+        $this->authorize('create', auth()->user());
         return Inertia::render('users/created', [
             'title' => 'Tạo mới người dùng',
             'head' => [
@@ -56,9 +59,9 @@ class UserController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(UserRequest $request)
+    public function store(UserRequest $request): JsonResponse
     {
-        $this->authorize('create-users');
+        $this->authorize('create', auth()->user());
         DB::beginTransaction();
         try {
             $this->service->created($request->validated());
@@ -88,16 +91,17 @@ class UserController extends Controller
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit(string $id)
+    public function edit(string $id): Response
     {
-        $this->authorize('view-users');
+        $this->instance = $this->repository->with('roles')->firstBy(['uid' => $id]);
+        $this->authorize('view', $this->instance);
         return Inertia::render('users/edited', [
             'title' => 'Chỉnh sửa người dùng',
             'head' => [
                 'title' => 'Chỉnh sửa',
                 'description' => 'Cập nhật thông tin người dùng trong hệ thống',
             ],
-            'user' => $this->repository->with('roles')->firstBy(['uid' => $id]),
+            'user' => $this->instance,
             'role' => Cache::remember('roles.list', 60, fn() => $this->rolesRepository->select(['id', 'name'])->getAll()),
         ]);
     }
@@ -105,9 +109,9 @@ class UserController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(string $id, UserRequest $request)
+    public function update(string $id, UserRequest $request): JsonResponse
     {
-        $this->authorize('update-users');
+        $this->authorize('update', $this->repository->find($id));
         DB::beginTransaction();
         try {
             $this->service->updated($id, $request->validated());
@@ -129,9 +133,9 @@ class UserController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(string $id)
+    public function destroy(string $id): RedirectResponse
     {
-        $this->authorize('delete-users');
+        $this->authorize('delete', $this->repository->find($id));
         $this->service->deleted($id);
         return redirect()->route('users.index');
     }

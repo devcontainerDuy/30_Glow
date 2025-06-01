@@ -36,7 +36,7 @@ class CustomerController extends Controller
      */
     public function create()
     {
-        return Inertia::render('customers/create', [
+        return Inertia::render('customers/created', [
             'title' => 'Tạo mới khách hàng',
             'head' => [
                 'title' => 'Tạo mới',
@@ -81,7 +81,7 @@ class CustomerController extends Controller
      */
     public function edit(string $id)
     {
-        return Inertia::render('customers/edit', [
+        return Inertia::render('customers/edited', [
             'title' => 'Chỉnh sửa khách hàng',
             'head' => [
                 'title' => 'Chỉnh sửa',
