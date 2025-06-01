@@ -13,8 +13,7 @@ class PermissionController extends Controller
 {
     public function __construct(PermissionServiceInterface $service,PermissionRepositoryInterface $repository)
     {
-        $this->service = $service;
-        $this->repository = $repository;
+        parent::__construct($service, $repository);
     }
 
     /**
@@ -118,7 +117,7 @@ class PermissionController extends Controller
      */
     public function destroy(string $id)
     {
-        $this->service->delete($id);
+        $this->service->deleted($id);
         return redirect()->route('permissions.index');
     }
 }

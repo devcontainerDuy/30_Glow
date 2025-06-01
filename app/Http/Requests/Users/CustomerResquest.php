@@ -2,9 +2,9 @@
 
 namespace App\Http\Requests\Users;
 
-use Illuminate\Foundation\Http\FormRequest;
+use App\Http\Requests\BaseRequest;
 
-class CustomerResquest extends FormRequest
+class CustomerResquest extends BaseRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -19,10 +19,14 @@ class CustomerResquest extends FormRequest
      *
      * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array<mixed>|string>
      */
-    public function rules(): array
+    public function methodPost(): array
     {
         return [
-            //
+            'name' => ['required', 'string', 'max:255'],
+            'email' => ['required', 'string', 'email', 'max:255', 'unique:users,email'],
+            'phone' => ['nullable', 'string', 'min:10', 'max:11'],
+            'address' => ['nullable', 'string', 'max:255'],
+            'password' => ['required', 'string', 'min:8', 'confirmed'],
         ];
     }
 }

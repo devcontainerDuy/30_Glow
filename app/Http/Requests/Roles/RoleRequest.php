@@ -22,19 +22,19 @@ class RoleRequest extends BaseRequest
     public function methodPost(): array
     {
         return [
-            'name' => 'required|string|max:255',
-            'guard_name' => 'required|string|max:255',
+            'name' => ['required', 'string', 'max:255'],
+            'guard_name' => ['required', 'string', 'max:255'],
         ];
     }
 
     public function methodPut(): array
     {
         return [
-            'name' => 'nullable|string|max:255',
-            'guard_name' => 'nullable|string|max:255',
-            'permissions' => 'nullable|array',
-            'permissions.*.id' => 'numeric|distinct',
-            'permissions.*.name'=> 'string|max:255',
+            'name' => ['nullable', 'string', 'max:255'],
+            'guard_name' => ['nullable', 'string', 'max:255'],
+            'permissions' => ['nullable', 'array'],
+            'permissions.*.id' => ['numeric', 'distinct'],
+            'permissions.*.name'=> ['string', 'max:255'],
         ];
     }
 }

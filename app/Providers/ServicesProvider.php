@@ -17,6 +17,11 @@ class ServicesProvider extends ServiceProvider
         );
 
         $this->app->bind(
+            \App\Services\Customers\CustomerServiceInterface::class,
+            \App\Services\Customers\CustomerService::class
+        );
+
+        $this->app->bind(
             \App\Services\Roles\RoleServiceInterface::class,
             \App\Services\Roles\RoleService::class
         );

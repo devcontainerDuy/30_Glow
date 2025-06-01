@@ -24,4 +24,10 @@ abstract class Controller extends BaseController
      * The name of the repository to be used for the controller.
      */
     protected $repository;
+
+    public function __construct($service, $repository)
+    {
+        $this->service = $service;
+        $this->repository = $repository;
+    }
 }

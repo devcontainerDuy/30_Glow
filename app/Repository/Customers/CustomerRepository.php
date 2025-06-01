@@ -1,12 +1,10 @@
 <?php
 
-namespace App\Repository\Users;
+namespace App\Repository\Customers;
 
 use App\Repository\EloquentRepository;
 
-
-
-class CustomerRepository extends EloquentRepository implements CustomerRepositoryInterface 
+class CustomerRepository extends EloquentRepository implements CustomerRepositoryInterface
 {
     public function getModel(): string
     {

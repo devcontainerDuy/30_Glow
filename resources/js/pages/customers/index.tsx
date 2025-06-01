@@ -12,18 +12,15 @@ import {
     DropdownMenuSeparator,
     DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useDelete } from '@/hooks/use-delete';
 import { useInitials } from '@/hooks/use-initials';
 import AppLayout from '@/layouts/app-layout';
 import { formatDate } from '@/lib/format';
-import type { BreadcrumbItem, HeadProps, RoleProps, User } from '@/types';
+import type { BreadcrumbItem, HeadProps, User } from '@/types';
 import { Head, Link } from '@inertiajs/react';
 import type { ColumnDef } from '@tanstack/react-table';
-import axios from 'axios';
 import { ArrowUpDown, MoreHorizontal, Plus, Trash2 } from 'lucide-react';
 import React from 'react';
-import { toast } from 'sonner';
 
 const NameCell: React.FC<{ name: string }> = ({ name }) => {
     const getInitials = useInitials();
@@ -41,68 +38,18 @@ const NameCell: React.FC<{ name: string }> = ({ name }) => {
     );
 };
 
-const RoleCell = React.memo(
-    ({
-        item,
-        roles,
-        userId,
-        handle,
-    }: {
-        item: { name: string }[];
-        roles: RoleProps[];
-        userId: number;
-        handle: (userId: number, roleName: string) => void;
-    }) => (
-        <Select defaultValue={item[0]?.name} onValueChange={(e) => handle(userId, e)}>
-            <SelectTrigger>
-                <SelectValue placeholder="Chọn vai trò" />
-            </SelectTrigger>
-            <SelectContent>
-                <SelectGroup>
-                    <SelectLabel>Danh sách vai trò</SelectLabel>
-                    {roles.length > 0 ? (
-                        roles.map((role) => (
-                            <SelectItem key={role.id} value={String(role.name)}>
-                                {role.name}
-                            </SelectItem>
-                        ))
-                    ) : (
-                        <SelectItem value="N/A" disabled>
-                            Không có vai trò nào
-                        </SelectItem>
-                    )}
-                </SelectGroup>
-            </SelectContent>
-        </Select>
-    ),
-);
-
-const Index: React.FC<{ title: string; head: HeadProps; data: User[]; roles: RoleProps[] }> = ({ title, head, data, roles }) => {
+const Index: React.FC<{ title: string; head: HeadProps; data: User[] }> = ({ title, head, data }) => {
     const breadcrumbs: BreadcrumbItem[] = [
         {
             title: 'Tài khoản',
-            href: route('users.index'),
+            href: route('customers.index'),
         },
         {
             title: head.title,
-            href: route('users.index'),
+            href: route('customers.index'),
         },
     ];
     const { open, confirmDelete, handleDelete, handleCancel } = useDelete();
-    const onChangeRoleForUser = React.useCallback((userId: number, roleName: string) => {
-        axios
-            .put(route('users.update', userId), {
-                roles: [String(roleName)],
-            })
-            .then((response) => {
-                toast.success(response.data.message);
-            })
-            .catch((error) => {
-                if (error.response.status === 422) {
-                    toast.error(error.response.data.error);
-                } else toast.error(error.response.data.message);
-            });
-    }, []);
 
     const columns = React.useMemo<ColumnDef<User>[]>(
         () => [
@@ -189,25 +136,6 @@ const Index: React.FC<{ title: string; head: HeadProps; data: User[]; roles: Rol
                 cell: ({ row }) => <div>{row.getValue('status')}</div>,
             },
             {
-                accessorKey: 'roles',
-                header: ({ column }) => {
-                    return (
-                        <Button variant="ghost" onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}>
-                            Role
-                            <ArrowUpDown className="ml-2 h-4 w-4" />
-                        </Button>
-                    );
-                },
-                cell: ({ row }) => (
-                    <RoleCell
-                        item={row.getValue('roles') as { name: string }[]}
-                        roles={roles}
-                        userId={row.original.id}
-                        handle={onChangeRoleForUser}
-                    />
-                ),
-            },
-            {
                 accessorKey: 'created_at',
                 header: ({ column }) => {
                     return (
@@ -238,10 +166,10 @@ const Index: React.FC<{ title: string; head: HeadProps; data: User[]; roles: Rol
 
                             <DropdownMenuSeparator />
 
-                            <Link href={route('users.edit', row.original.uid)}>
+                            <Link href={route('customers.edit', row.original.uid)}>
                                 <DropdownMenuItem className="cursor-pointer">Sửa</DropdownMenuItem>
                             </Link>
-                            <DropdownMenuItem className="cursor-pointer" onClick={() => confirmDelete(route('users.destroy', row.original.id))}>
+                            <DropdownMenuItem className="cursor-pointer" onClick={() => confirmDelete(route('customers.destroy', row.original.id))}>
                                 Xóa
                             </DropdownMenuItem>
                         </DropdownMenuContent>
@@ -249,7 +177,7 @@ const Index: React.FC<{ title: string; head: HeadProps; data: User[]; roles: Rol
                 ),
             },
         ],
-        [confirmDelete, onChangeRoleForUser, roles],
+        [confirmDelete],
     );
 
     return (
@@ -261,13 +189,13 @@ const Index: React.FC<{ title: string; head: HeadProps; data: User[]; roles: Rol
                 <div className="flex items-center justify-between">
                     <Heading title={head.title} description={head?.description} />
                     <div className="flex items-center gap-2">
-                        <Link href="/users/trash">
+                        <Link href="/customers/trash">
                             <Button variant={'destructive'}>
                                 <Trash2 className="h-4 w-4" />
                                 <span>Thùng rác</span>
                             </Button>
                         </Link>
-                        <Link href={route('users.create')}>
+                        <Link href={route('customers.create')}>
                             <Button>
                                 <Plus className="h-4 w-4" />
                                 <span>Tạo mới</span>

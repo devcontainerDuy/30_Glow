@@ -13,6 +13,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     })->name('dashboard');
 
     Route::resource('users', App\Http\Controllers\Users\UserController::class);
+    Route::resource('customers', App\Http\Controllers\Customers\CustomerController::class);
     Route::resource('roles', App\Http\Controllers\Roles\RoleController::class);
     Route::resource('permissions', App\Http\Controllers\Permissions\PermissionController::class);
 });

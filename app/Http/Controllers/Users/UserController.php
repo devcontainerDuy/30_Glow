@@ -17,8 +17,7 @@ class UserController extends Controller
     private $rolesRepository;
     public function __construct(UserServiceInterface $service, UserRepositoryInterface $repository, RoleRepositoryInterface $rolesRepository)
     {
-        $this->service = $service;
-        $this->repository = $repository;
+        parent::__construct($service, $repository);
         $this->rolesRepository = $rolesRepository;
     }
 

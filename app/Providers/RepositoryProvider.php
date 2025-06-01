@@ -17,6 +17,11 @@ class RepositoryProvider extends ServiceProvider
         );
 
         $this->app->bind(
+            \App\Repository\Customers\CustomerRepositoryInterface::class,
+            \App\Repository\Customers\CustomerRepository::class
+        );
+
+        $this->app->bind(
             \App\Repository\Roles\RoleRepositoryInterface::class,
             \App\Repository\Roles\RoleRepository::class
         );

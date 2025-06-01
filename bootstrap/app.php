@@ -32,7 +32,7 @@ return Application::configure(basePath: dirname(__DIR__))
     
         $exceptions->respond(function (Response $response, Throwable $exception, Request $request) {
             if (
-                app()->environment(['local', 'testing'])
+                !app()->environment(['local', 'testing'])
                 && in_array($response->getStatusCode(), [500, 503, 404, 403, 401])
             ) {
                 return Inertia::render('errors/error-page', [
