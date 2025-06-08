@@ -18,11 +18,12 @@ return new class extends Migration
             $table->string('name');
             $table->string('email')->unique();
             $table->timestamp('email_verified_at')->nullable();
-            $table->string('phone')->nullable();
+            $table->string('phone')->unique()->nullable();
             $table->string('address')->nullable();
+            $table->string('avatar', 255)->nullable();
             $table->tinyInteger('status')->default(UserStatus::ACTIVE->value);
-            $table->timestamp('banned_at')->nullable(); // Thời điểm khóa
-            $table->string('ban_reason')->nullable();   // Lý do khóa
+            $table->timestamp('banned_at')->comment('Thời điểm khóa')->nullable();
+            $table->string('ban_reason')->comment('Lý do khóa')->nullable();
             $table->foreignId('banned_by')->nullable()->constrained('users');
             $table->string('password');
             $table->rememberToken();
@@ -53,9 +54,10 @@ return new class extends Migration
             $table->timestamp('email_verified_at')->nullable();
             $table->string('phone')->unique()->nullable();
             $table->string('address')->nullable();
+            $table->string('avatar', 255)->nullable();
             $table->tinyInteger('status')->default(UserStatus::ACTIVE->value);
-            $table->timestamp('banned_at')->nullable(); // Thời điểm khóa
-            $table->string('ban_reason')->nullable();   // Lý do khóa
+            $table->timestamp('banned_at')->comment('Thời điểm khóa')->nullable();
+            $table->string('ban_reason')->comment('Lý do khóa')->nullable();
             $table->foreignId('banned_by')->nullable()->constrained('users');
             $table->string('password');
             $table->string('social_id')->nullable();

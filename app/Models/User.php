@@ -26,6 +26,7 @@ use Spatie\Permission\Traits\HasRoles;
  * @property Carbon|null $email_verified_at
  * @property string|null $phone
  * @property string|null $address
+ * @property string|null $avatar
  * @property int $status
  * @property Carbon|null $banned_at
  * @property string|null $ban_reason
@@ -70,6 +71,7 @@ class User extends Authenticatable
 		'email_verified_at',
 		'phone',
 		'address',
+		'avatar',
 		'status',
 		'banned_at',
 		'ban_reason',

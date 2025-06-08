@@ -22,6 +22,7 @@ use Laravel\Sanctum\HasApiTokens;
  * @property Carbon|null $email_verified_at
  * @property string|null $phone
  * @property string|null $address
+ * @property string|null $avatar
  * @property int $status
  * @property Carbon|null $banned_at
  * @property string|null $ban_reason
@@ -70,6 +71,7 @@ class Customer extends Model
 		'email_verified_at',
 		'phone',
 		'address',
+		'avatar',
 		'status',
 		'banned_at',
 		'ban_reason',
