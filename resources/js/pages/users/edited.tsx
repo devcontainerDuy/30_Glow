@@ -35,6 +35,7 @@ const Edited: React.FC<{ title: string; head: HeadProps; user: User; role: RoleP
         email: user.email || '',
         phone: user.phone || '',
         address: user.address || '',
+        avatar: user.avatar || null,
         password_attributes: '',
         password: '',
         password_confirmation: '',
@@ -42,7 +43,6 @@ const Edited: React.FC<{ title: string; head: HeadProps; user: User; role: RoleP
         updated_at: new Date(user.updated_at || ''),
         roles: user.roles?.map((role) => role.name),
         status: user.status || '',
-        avatar: user.avatar || '',
     });
     const { errors, processing, submit } = useUpdateForm<UserUpdateForm>({
         url: route('users.update', user.id),
@@ -114,7 +114,10 @@ const Edited: React.FC<{ title: string; head: HeadProps; user: User; role: RoleP
 
                                     <div className="grid w-full gap-2 lg:w-1/2">
                                         <Label htmlFor="role">Vai trò</Label>
-                                        <Select onValueChange={(e) => setValues({ ...values, roles: [e] })} defaultValue={(values?.roles as string[])[0]}>
+                                        <Select
+                                            onValueChange={(e) => setValues({ ...values, roles: [e] })}
+                                            defaultValue={(values?.roles as string[])[0]}
+                                        >
                                             <SelectTrigger className="w-full">
                                                 <SelectValue placeholder="Chọn vai trò" />
                                             </SelectTrigger>

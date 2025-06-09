@@ -26,7 +26,7 @@ export interface User extends UserBase {
     id: number;
     uid: string;
     email_verified_at?: string | null;
-    avatar?: string;
+    avatar?: string | null;
     status?: string;
     banned_at?: string | null;
     ban_reason?: string | null;

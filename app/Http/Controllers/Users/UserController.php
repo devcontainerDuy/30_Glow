@@ -13,6 +13,7 @@ use App\Services\Users\UserServiceInterface;
 use App\Repository\Roles\RoleRepositoryInterface;
 use App\Repository\Users\UserRepositoryInterface;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Support\Facades\Auth;
 use Inertia\Response;
 
 class UserController extends Controller
@@ -30,7 +31,7 @@ class UserController extends Controller
      */
     public function index(): Response
     {
-        $this->authorize('viewAny', auth()->user());
+        $this->authorize('viewAny', Auth::user());
         return Inertia::render('users/index', [
             'title' => 'Danh sách người dùng',
             'head' => [
@@ -47,7 +48,7 @@ class UserController extends Controller
      */
     public function create(): Response
     {
-        $this->authorize('create', auth()->user());
+        $this->authorize('create', Auth::user());
         return Inertia::render('users/created', [
             'title' => 'Tạo mới người dùng',
             'head' => [
@@ -62,7 +63,7 @@ class UserController extends Controller
      */
     public function store(UserRequest $request): JsonResponse
     {
-        $this->authorize('create', auth()->user());
+        $this->authorize('create', Auth::user());
         DB::beginTransaction();
         try {
             $this->service->created($request->validated());

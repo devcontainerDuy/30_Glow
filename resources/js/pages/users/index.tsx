@@ -1,7 +1,7 @@
 import AlertDialogDelete from '@/components/alert-dialog-delete';
 import { DataTable } from '@/components/data-table';
 import Heading from '@/components/heading';
-import { Avatar, AvatarFallback } from '@/components/ui/avatar';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import {
@@ -25,21 +25,23 @@ import { ArrowUpDown, MoreHorizontal, Plus, Trash2 } from 'lucide-react';
 import React from 'react';
 import { toast } from 'sonner';
 
-const NameCell: React.FC<{ name: string }> = ({ name }) => {
+const AvatarCell: React.FC<{ row: { original: User } }> = React.memo(({ row }) => {
     const getInitials = useInitials();
-
     return (
         <div className="flex items-center gap-2 capitalize">
             <Avatar className="flex h-8 w-8 overflow-hidden rounded-full">
-                {/* <AvatarImage src={row.original.avatar} alt={row.original.name} /> */}
-                <AvatarFallback className="rounded-lg bg-neutral-200 text-black dark:bg-neutral-700 dark:text-white">
-                    {getInitials(name)}
-                </AvatarFallback>
+                {row.original.avatar !== null ? (
+                    <AvatarImage src={row.original.avatar} alt={row.original.name} />
+                ) : (
+                    <AvatarFallback className="rounded-lg bg-neutral-200 text-black dark:bg-neutral-700 dark:text-white">
+                        {getInitials(row.original.name)}
+                    </AvatarFallback>
+                )}
             </Avatar>
-            <span className="truncate font-semibold">{name}</span>
+            <span className="truncate font-semibold">{row.original.name}</span>
         </div>
     );
-};
+});
 
 const RoleCell = React.memo(
     ({
@@ -131,7 +133,7 @@ const Index: React.FC<{ title: string; head: HeadProps; data: User[]; roles: Rol
                         </Button>
                     );
                 },
-                cell: ({ row }) => <NameCell name={row.getValue('name')} />,
+                cell: ({ row }) => <AvatarCell row={row} />,
             },
             {
                 accessorKey: 'email',
