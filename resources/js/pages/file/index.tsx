@@ -13,14 +13,14 @@ import {
     FolderPlus,
     Grid3X3,
     List,
+    Move,
     Search,
+    Trash2,
     Type,
 } from 'lucide-react';
 import * as React from 'react';
-
 import { Breadcrumbs } from '@/components/breadcrumbs';
 import { Button } from '@/components/ui/button';
-import { Checkbox } from '@/components/ui/checkbox';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import {
     DropdownMenu,
@@ -45,10 +45,11 @@ import {
     SidebarMenuSub,
     SidebarRail,
 } from '@/components/ui/sidebar';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
+import TableList from '@/layouts/file/table-list';
 import { BreadcrumbItem } from '@/types';
 import { Head } from '@inertiajs/react';
+import { FileItem, viewMode } from '@/types/flie';
 
 // This is sample data.
 const data = {
@@ -92,7 +93,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
     );
 }
 
-function Tree({ item }: { item: string | string[] }) {
+const Tree = React.memo(({ item }: { item: string | string[] }) => {
     const [name, ...items] = Array.isArray(item) ? item : [item];
 
     if (!items.length) {
@@ -127,7 +128,7 @@ function Tree({ item }: { item: string | string[] }) {
             </Collapsible>
         </SidebarMenuItem>
     );
-}
+});
 
 export default function Page() {
     const breadcrumbs: BreadcrumbItem[] = [
@@ -145,17 +146,7 @@ export default function Page() {
         },
     ];
 
-    const [values, setValues] = React.useState<
-        Array<{
-            id: string;
-            name: string;
-            type: string;
-            size: string;
-            modified: string;
-            path: string;
-            url: string;
-        }>
-    >([
+    const [values, setValues] = React.useState<FileItem[]>([
         {
             id: '1',
             name: 'product-image-1.jpg',
@@ -229,6 +220,7 @@ export default function Page() {
             url: 'https://readdy.ai/api/search-image?query=Wide%20format%20promotional%20banner%20with%20vibrant%20colors%20announcing%20a%20special%20sale%2C%20modern%20digital%20design%20with%20eye-catching%20elements%2C%20professional%20marketing%20material%20with%20space%20for%20text%2C%20clean%20composition%2C%20e-commerce%20promotional%20graphic&width=1000&height=400&seq=6&orientation=landscape',
         },
     ]);
+    const [viewMode, setViewMode] = React.useState<viewMode>('list');
     return (
         <SidebarProvider>
             <Head title={'File Explorer'} />
@@ -267,13 +259,45 @@ export default function Page() {
                                         </Label>
                                     </Button>
                                 </div>
+                                <div className="relative">
+                                    <Input type="hidden" id="move" multiple accept="image/*" className="hidden" />
+                                    <Button variant="outline" className="h-8 cursor-pointer px-4 py-2 whitespace-nowrap">
+                                        <Move className="mr-2" />
+                                        <Label htmlFor="move" className="cursor-pointer">
+                                            Move
+                                        </Label>
+                                    </Button>
+                                </div>
+                                <div className="relative">
+                                    <Input type="hidden" id="delete" multiple accept="image/*" className="hidden" />
+                                    <Button variant="outline" className="h-8 cursor-pointer px-4 py-2 whitespace-nowrap">
+                                        <Trash2 className="mr-2 text-red-500" />
+                                        <Label htmlFor="delete" className="cursor-pointer">
+                                            Delete
+                                        </Label>
+                                    </Button>
+                                </div>
                             </div>
                             <div className="flex items-center space-x-2">
-                                <ToggleGroup variant="outline" type="single" defaultValue="list" className="flex overflow-hidden rounded-md border">
-                                    <ToggleGroupItem value="list" aria-label="Toggle list view">
+                                <ToggleGroup
+                                    variant="outline"
+                                    type="single"
+                                    onValueChange={(value: viewMode) => setViewMode(value)}
+                                    defaultValue="list"
+                                    className="flex overflow-hidden rounded-md border"
+                                >
+                                    <ToggleGroupItem
+                                        value="list"
+                                        aria-label="Toggle list view"
+                                        className="data-[state=on]:bg-primary data-[state=on]:text-primary-foreground"
+                                    >
                                         <List className="h-4 w-4" />
                                     </ToggleGroupItem>
-                                    <ToggleGroupItem value="grid" aria-label="Toggle grid view">
+                                    <ToggleGroupItem
+                                        value="grid"
+                                        aria-label="Toggle grid view"
+                                        className="data-[state=on]:bg-primary data-[state=on]:text-primary-foreground"
+                                    >
                                         <Grid3X3 className="h-4 w-4" />
                                     </ToggleGroupItem>
                                 </ToggleGroup>
@@ -318,49 +342,11 @@ export default function Page() {
                             </div>
                         </div>
                     </div>
-                    <ScrollArea className="bg-muted/50 min-h-[100vh] flex-1 rounded-xl p-4 md:min-h-min">
-                        <div className="*:placeholder:text-muted-foreground focus-visible:ring-primary border-sidebar-border/70 dark:border-sidebar-border/80 h-full w-full rounded-lg border">
-                            <Table className="relative w-full overflow-hidden rounded-lg border">
-                                <TableHeader className="">
-                                    <TableRow>
-                                        <TableHead className="col-span-1 flex items-center">
-                                            <Checkbox className="cursor-pointer" />
-                                        </TableHead>
-                                        <TableHead className="col-span-5">File Name</TableHead>
-                                        <TableHead className="col-span-1">Type</TableHead>
-                                        <TableHead className="col-span-1">Size</TableHead>
-                                        <TableHead className="col-span-1">Modified</TableHead>
-                                        <TableHead className="col-span-1">Action</TableHead>
-                                    </TableRow>
-                                </TableHeader>
-                                <TableBody>
-                                    <TableRow>
-                                        <TableCell className="col-span-1">
-                                            <Checkbox className="cursor-pointer" />
-                                        </TableCell>
-                                        <TableCell className="col-span-5 flex items-center gap-2">
-                                            <File className="text-muted-foreground" />
-                                            <span className="truncate">product-image-1.jpg</span>
-                                        </TableCell>
-                                        <TableCell className="col-span-1">image/jpeg</TableCell>
-                                        <TableCell className="col-span-1">1.2 MB</TableCell>
-                                        <TableCell className="col-span-1">2022-01-01</TableCell>
-                                        <TableCell className="col-span-1">
-                                            <Button variant="ghost" size="icon" className="h-8 w-8">
-                                                <FileText className="h-4 w-4" />
-                                            </Button>
-                                        </TableCell>
-                                        {/* <TableCell colSpan={6}>
-                                        <div className="py-12 text-center text-gray-500 flex flex-col items-center">
-                                            <FolderOpen className="mb-3 text-4xl" />
-                                            <p>No files found in this location</p>
-                                        </div>
-                                    </TableCell> */}
-                                    </TableRow>
-                                </TableBody>
-                            </Table>
-                        </div>
-                    </ScrollArea>
+                    <div className="bg-muted/50 relative flex-1 overflow-hidden rounded-xl">
+                        <ScrollArea className="h-[80svh] w-full p-4">
+                            <TableList viewMode={viewMode} dataTable={values} />
+                        </ScrollArea>
+                    </div>
                 </div>
             </SidebarInset>
         </SidebarProvider>

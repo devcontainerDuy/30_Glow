@@ -9,7 +9,7 @@ Route::get('/', function () {
 
 Route::get('/file', function () {
     return Inertia::render('file/index');
-})->name('file');
+})->name('file')->middleware(['auth', 'verified']);
 
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('dashboard', function () {

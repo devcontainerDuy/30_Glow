@@ -1,4 +1,5 @@
 import type { LucideIcon } from 'lucide-react';
+export * from './file';
 export * from './users';
 export * from './roles';
 export * from './permissions';
