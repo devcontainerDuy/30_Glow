@@ -21,7 +21,7 @@ import {
 import ActionButtons from '@/layouts/file/action-buttons';
 import TableList from '@/layouts/file/table-list';
 import { BreadcrumbItem } from '@/types';
-import { FileItem, viewMode } from '@/types/flie';
+import { FileItem, orderBy, sortBy, viewMode } from '@/types/flie';
 import { Head } from '@inertiajs/react';
 import { ChevronRight, File, Folder } from 'lucide-react';
 import * as React from 'react';
@@ -197,6 +197,28 @@ export default function Page() {
     ]);
     const [viewMode, setViewMode] = React.useState<viewMode>('list');
     const [isActionButtons, setIsActionButtons] = React.useState<boolean>(false);
+    const [selectedFiles, setSelectedFiles] = React.useState<string[]>([]);
+    const [sortBy, setSortBy] = React.useState<sortBy>('name');
+    const [orderBy, setOrderBy] = React.useState<orderBy>('asc');
+
+    const [searchQuery, setSearchQuery] = React.useState<string>('');
+    const sortedValues = React.useMemo(() => {
+        return values.sort((a, b) => {
+            if (sortBy === 'name') {
+                return orderBy === 'asc' ? a.name.localeCompare(b.name) : b.name.localeCompare(a.name);
+            } else if (sortBy === 'size') {
+                return orderBy === 'asc' ? parseFloat(a.size) - parseFloat(b.size) : parseFloat(b.size) - parseFloat(a.size);
+            } else if (sortBy === 'modified') {
+                return orderBy === 'asc' ? new Date(a.modified).getTime() - new Date(b.modified).getTime() : new Date(b.modified).getTime() - new Date(a.modified).getTime();
+            }
+            return orderBy === 'asc' ? a.name.localeCompare(b.name) : b.name.localeCompare(a.name);
+        });
+    }, [values, sortBy, orderBy]);
+
+    React.useEffect(() => {
+        setIsActionButtons(Boolean(selectedFiles.length > 0));
+    }, [selectedFiles]);
+    
     return (
         <SidebarProvider>
             <Head title={'File Explorer'} />
@@ -209,11 +231,27 @@ export default function Page() {
                 </header>
                 <div className="relative flex flex-1 flex-col gap-4 overflow-hidden p-4">
                     <div className="bg-muted/50 rounded-xl">
-                        <ActionButtons action={isActionButtons} setViewMode={setViewMode} />
+                        <ActionButtons
+                            action={isActionButtons}
+                            viewMode={viewMode}
+                            setViewMode={setViewMode}
+                            sort={sortBy}
+                            setSort={setSortBy}
+                            orderBy={orderBy}
+                            setOrderBy={setOrderBy}
+                            query={searchQuery}
+                            setQuery={setSearchQuery}
+                        />
                     </div>
                     <div className="bg-muted/50 relative flex-1 overflow-hidden rounded-xl">
                         <ScrollArea className="h-[80svh] w-full p-4">
-                            <TableList action={setIsActionButtons} viewMode={viewMode} dataTable={values} />
+                            <TableList
+                                selected={selectedFiles}
+                                setSelected={setSelectedFiles}
+                                query={searchQuery}
+                                viewMode={viewMode}
+                                dataTable={sortedValues}
+                            />
                         </ScrollArea>
                     </div>
                 </div>
@@ -221,3 +259,4 @@ export default function Page() {
         </SidebarProvider>
     );
 }
+

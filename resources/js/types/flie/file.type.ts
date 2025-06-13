@@ -1,4 +1,6 @@
 export type viewMode = 'list' | 'grid';
+export type sortBy = 'name' | 'size' | 'modified';
+export type orderBy = 'asc' | 'desc';
 
 export interface FileItem {
     id: string;
